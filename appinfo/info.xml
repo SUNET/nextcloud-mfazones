@@ -1,25 +1,30 @@
 <?xml version="1.0"?>
 <info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
-    <id>mfazone</id>
+    <!--
+    SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
+    SPDX-License-Identifier: CC0-1.0
+    -->
+    <id>mfaverifiedzone</id>
     <name>Mfa Verified Zone</name>
-    <summary>A plugin for changing access to file by verifying mfa </summary>
+    <summary>https://github.com/pondersource/mfa-verified-zone</summary>
     <description><![CDATA[A plugin for restrict access to file with mfa verified tag
 
-See the [README](https://github.com/pondersource/mfa-verified-zone/blob/main/README.md) for usage.]]>
-    </description>
-    <version>0.18.0</version>
-    <licence>mit</licence>
-    <author>pondersource</author>
-    <category>security</category>
+See the [README](https://github.com/pondersource/mfa-verified-zone/blob/main/README.md) for usage.]]></description>
+    <version>0.0.1</version>
+    <licence>agpl</licence>
+    <author mail="michiel@pondersource.com" homepage="https://github.com/pondersource/mfa-verified-zone">Pondersource</author>
+    <namespace>MfaVerifiedZone</namespace>
     <category>files</category>
-    <website>https://github.com/pondersource/mfa-verified-zone</website>
+    <category>security</category>
     <bugs>https://github.com/pondersource/mfa-verified-zone/issues</bugs>
-    <screenshot></screenshot>
     <dependencies>
-        <nextcloud min-version="18" max-version="26" />
+        <nextcloud min-version="24" max-version="24"/>
     </dependencies>
-    <settings>
-        <admin>OCA\MfaZone\Setting\MfaZoneSettings</admin>
-    </settings>
+    <navigations>
+        <navigation>
+            <name>Mfa Verified Zone</name>
+            <route>mfaverifiedzone.page.index</route>
+        </navigation>
+    </navigations>
 </info>
