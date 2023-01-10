@@ -36,7 +36,7 @@
         },
     });
 
-    OCAMfaZone = OCAMfaZone || {};
+    OCA.MfaVerifiedZone = OCA.MfaVerifiedZone || {};
 
-    OCAMfaZone.MfaZoneTabView = MfaZoneTabView;
+    OCA.MfaVerifiedZone.MfaZoneTabView = MfaZoneTabView;
 })();

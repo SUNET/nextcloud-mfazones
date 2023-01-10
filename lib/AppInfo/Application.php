@@ -18,9 +18,9 @@ class Application extends App {
         $eventDispatcher = $server->getEventDispatcher();
 
         $eventDispatcher->addListener('OCA\Files::loadAdditionalScripts', function() {
-            \OCP\Util::addStyle('mfazone', 'tabview' );
-            \OCP\Util::addScript('mfazone', 'tabview' );
-            \OCP\Util::addScript('mfazone', 'plugin' );
+            \OCP\Util::addStyle(self::APP_ID, 'tabview' );
+            \OCP\Util::addScript(self::APP_ID, 'tabview' );
+            \OCP\Util::addScript(self::APP_ID, 'plugin' );
 
             $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
             \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);

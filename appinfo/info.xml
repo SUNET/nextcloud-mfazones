@@ -21,10 +21,4 @@ See the [README](https://github.com/pondersource/mfa-verified-zone/blob/main/REA
     <dependencies>
         <nextcloud min-version="24" max-version="24"/>
     </dependencies>
-    <navigations>
-        <navigation>
-            <name>Mfa Verified Zone</name>
-            <route>mfaverifiedzone.page.index</route>
-        </navigation>
-    </navigations>
 </info>
