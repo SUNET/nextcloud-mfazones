@@ -11,7 +11,7 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
 use OCP\Util;
 
-class PageController extends Controller {
+class MfaVerifiedZoneController extends Controller {
 	public function __construct(IRequest $request) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -25,4 +25,24 @@ class PageController extends Controller {
 
 		return new TemplateResponse(Application::APP_ID, 'main');
 	}
+
+    /**
+     * @NoAdminRequired
+     */
+    public function get($source) {
+        //TODO Check for the owner and current status
+        try {
+            return true;
+
+        } catch (\Exception $e) {
+            \OC::$server->getLogger()->logException($e, ['app' => 'mfaverifiedzone']);
+
+            return new JSONResponse(
+                array(
+                    'response' => 'error',
+                    'msg' => $e->getMessage()
+                )
+            );
+        }
+    }
 }
