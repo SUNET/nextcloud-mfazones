@@ -62,17 +62,20 @@ class MfaVerifiedZoneController extends Controller {
     public function access($path) {
         //TODO Check for the owner and current status
         try {
-            error_log( print_r( $this->activityManager->getCurrentUserId(), true ) );
-            $userRoot = $this->rootFolder->getUserFolder($this->userId);
+            $id = $this->activityManager->getCurrentUserId();
+            error_log( $id ?? "Nothing");
+            $userRoot = $this->rootFolder->getUserFolder($id);
 
             try {
-                $node = $userRoot->get($path);
+               $node = $userRoot->get($path);
             } catch (\Exception $e) {
                 return new DataResponse([], Http::STATUS_BAD_REQUEST);
             }
             return new JSONResponse(
                 array(
-                    'access' => false
+                    'access' => true,
+                    'log' => $id,
+                    'node' => $node
                 )
             );
 

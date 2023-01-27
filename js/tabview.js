@@ -58,6 +58,7 @@
 				data: data,
 				async: true,
 				success: function (response) {
+					console.log(response);
 					if (response.access === false) {
 						_self.addHtml(_self, $htmlDisabled, data, false);
 					} else {
