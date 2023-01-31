@@ -11,6 +11,7 @@ use OCP\Util;
 use OCP\Files\IRootFolder;
 use OCP\Activity\IManager;
 use OCP\IUserManager;
+use OCP\IGroupManager;
 
 class MfaVerifiedZoneController extends Controller {
 	/** @var IUserManager */
@@ -19,17 +20,20 @@ class MfaVerifiedZoneController extends Controller {
 	private $rootFolder;
 	/** @var string */
 	private $userId;
-	/** @var IManager */
-	private $activityManager;
+
+	/** @var IGroupManager */
+	private $groupManager;
 
 	public function __construct(IRequest $request,
 								IUserManager $userManager,
 								IRootFolder $rootFolder,
-                                IManager $activityManager) {
+                                IGroupManager $groupManager,
+                                string $userId) {
 		parent::__construct(Application::APP_ID, $request);
 		$this->userManager = $userManager;
 		$this->rootFolder = $rootFolder;
-		$this->activityManager = $activityManager;
+        $this->userId = $userId;
+        $this->groupManager = $groupManager;
 	}
 
     /**
@@ -59,23 +63,20 @@ class MfaVerifiedZoneController extends Controller {
     /**
      * @NoAdminRequired
      */
-    public function access($path) {
-        //TODO Check for the owner and current status
+    public function access($source) {
         try {
-            $id = $this->activityManager->getCurrentUserId();
-            error_log( $id ?? "Nothing");
-            $userRoot = $this->rootFolder->getUserFolder($id);
+            $isAdmin = $this->groupManager->isAdmin($this->userId);
+            $userRoot = $this->rootFolder->getUserFolder($this->userId);
 
             try {
-               $node = $userRoot->get($path);
+               $node = $userRoot->get($source);
+               $hasAccess = $isAdmin || $node->getOwner()->getUID() === $this->useId;
             } catch (\Exception $e) {
                 return new DataResponse([], Http::STATUS_BAD_REQUEST);
             }
             return new JSONResponse(
                 array(
-                    'access' => true,
-                    'log' => $id,
-                    'node' => $node
+                    'access' => true
                 )
             );
 
