@@ -6,12 +6,19 @@ declare(strict_types=1);
 namespace OCA\MfaVerifiedZone\AppInfo;
 
 use OCP\AppFramework\App;
+use OCP\SystemTag\ISystemTag;
+use OCP\SystemTag\ISystemTagManager;
 
 class Application extends App {
 	public const APP_ID = 'mfaverifiedzone';
+	public const TAG_NAME = 'mfaresterictedzone';
 
-	public function __construct() {
+    protected ISystemTagManager $systemTagManager;
+
+	public function __construct(ISystemTagManager $systemTagManager) {
 		parent::__construct(self::APP_ID);
+
+        $this->systemTagManager = $systemTagManager;
 
         $container = $this->getContainer();
         $server = $container->getServer();
@@ -25,5 +32,14 @@ class Application extends App {
             $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
             \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
         });
+
+        $tags = $this->systemTagManager->getAllTags(
+			null,
+			self::TAG_NAME
+		);
+
+        if(count($tags) < 1){
+            $this->systemTagManager->createTag(self::TAG_NAME, false, false);
+        }
 	}
 }

@@ -24,27 +24,61 @@ class MfaVerifiedZoneController extends Controller {
 	/** @var IGroupManager */
 	private $groupManager;
 
+	/**
+	 * @var \OCP\ITags
+	 */
+	private $tagger;
+
+	/**
+	 * @var \OCP\ITagManager
+	 */
+	private $tagManager;
+
 	public function __construct(IRequest $request,
 								IUserManager $userManager,
 								IRootFolder $rootFolder,
                                 IGroupManager $groupManager,
+                                \OCP\ITagManager $tagManager,
                                 string $userId) {
 		parent::__construct(Application::APP_ID, $request);
 		$this->userManager = $userManager;
 		$this->rootFolder = $rootFolder;
         $this->userId = $userId;
         $this->groupManager = $groupManager;
+		$this->tagManager = $tagManager;
+		$this->tagger = null;
+	}
+
+    /**
+	 * Returns the tagger
+	 *
+	 * @return \OCP\ITags tagger
+	 */
+	private function getTagger() {
+		if (!$this->tagger) {
+			$this->tagger = $this->tagManager->load('files');
+		}
+		return $this->tagger;
 	}
 
     /**
      * @NoAdminRequired
      */
     public function get($source) {
-        //TODO Check for the owner and current status
         try {
+            $userRoot = $this->rootFolder->getUserFolder($this->userId);
+            $node = $userRoot->get($source);
+            $tags = $this->getTagger()->getTagsForObjects([$node->getId()]);
+            if ($tags === false) {
+				// the tags API returns false on error...
+				$result = false;
+			} else{
+                $result = in_array(Application::TAG_NAME, $tags);
+            }
+
             return new JSONResponse(
                 array(
-                    'status' => true
+                    'status' => $result
                 )
             );
 
@@ -70,7 +104,7 @@ class MfaVerifiedZoneController extends Controller {
 
             try {
                $node = $userRoot->get($source);
-               $hasAccess = $isAdmin || $node->getOwner()->getUID() === $this->useId;
+               $hasAccess = $isAdmin || $node->getOwner()->getUID() === $this->userId;
             } catch (\Exception $e) {
                 return new DataResponse([], Http::STATUS_BAD_REQUEST);
             }
