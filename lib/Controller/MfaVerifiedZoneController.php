@@ -4,6 +4,8 @@ namespace OCA\MfaVerifiedZone\Controller;
 
 use OCA\MfaVerifiedZone\AppInfo\Application;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
 use OCP\AppFramework\Http\JSONResponse;
@@ -61,6 +63,27 @@ class MfaVerifiedZoneController extends Controller {
 		return $this->tagger;
 	}
 
+    private function hasAccess($source){
+        try {
+            $isAdmin = $this->groupManager->isAdmin($this->userId);
+            $userRoot = $this->rootFolder->getUserFolder($this->userId);
+
+            try {
+               $node = $userRoot->get($source);
+               $hasAccess = $isAdmin || $node->getOwner()->getUID() === $this->userId;
+            } catch (\Exception $e) {
+                \OC::$server->getLogger()->logException($e, ['app' => 'mfaverifiedzone']);
+                $hasAccess = false;
+            }
+            return $hasAccess;
+
+        } catch (\Exception $e) {
+            \OC::$server->getLogger()->logException($e, ['app' => 'mfaverifiedzone']);
+
+            return false;
+        }
+    }
+
     /**
      * @NoAdminRequired
      */
@@ -97,32 +120,38 @@ class MfaVerifiedZoneController extends Controller {
     /**
      * @NoAdminRequired
      */
-    public function access($source) {
+    public function set($source, $protect) {
         try {
-            $isAdmin = $this->groupManager->isAdmin($this->userId);
-            $userRoot = $this->rootFolder->getUserFolder($this->userId);
-
-            try {
-               $node = $userRoot->get($source);
-               $hasAccess = $isAdmin || $node->getOwner()->getUID() === $this->userId;
-            } catch (\Exception $e) {
-                return new DataResponse([], Http::STATUS_BAD_REQUEST);
+            $hasAccess = $this->hasAccess($source);
+            if(!$hasAccess){
+                return new DataResponse([], Http::STATUS_FORBIDDEN);
             }
-            return new JSONResponse(
-                array(
-                    'access' => true
-                )
-            );
+            $userRoot = $this->rootFolder->getUserFolder($this->userId);
+            $node = $userRoot->get($source);
+
+            if($protect){
+                $this->getTagger()->tagAs($node->getId(), Application::TAG_NAME);
+            }else {
+                $this->getTagger()->unTag($node->getId(), Application::TAG_NAME);
+            }
+
+            return new DataResponse([], Http::STATUS_OK);
 
         } catch (\Exception $e) {
             \OC::$server->getLogger()->logException($e, ['app' => 'mfaverifiedzone']);
 
-            return new JSONResponse(
+            return new DataResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @NoAdminRequired
+     */
+    public function access($source) {
+       return new JSONResponse(
                 array(
-                    'response' => 'error',
-                    'msg' => $e->getMessage()
+                    'access' => $this->hasAccess($source)
                 )
             );
-        }
     }
 }

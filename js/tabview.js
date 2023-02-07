@@ -102,13 +102,32 @@
 		},
 		boxChecked: function () {
 			const checkBox = this;
-			if (checkBox.checked === true) {
-				self.document.getElementById('mfa-check-status')
-					.textContent = "Required";
-			} else {
-				self.document.getElementById('mfa-check-status')
-					.textContent = "Not required";
-			}
+			const setUrl = OC.generateUrl('/apps/mfaverifiedzone/set'),
+			data = {
+				source: fileInfo.getFullPath(),
+				protect: checkBox.checked
+			},
+			_self = self;
+			$.ajax({
+				type: 'POST',
+				url: setUrl,
+				dataType: 'json',
+				data: data,
+				async: true,
+				success: function (response) {
+					if (checkBox.checked === true) {
+						self.document.getElementById('mfa-check-status')
+							.textContent = "Protected";
+					} else {
+						self.document.getElementById('mfa-check-status')
+							.textContent = "Not Protected";
+					}
+				},
+				error: function (xhr, ajaxOptions, thrownError) {
+					console.log(xhr.status);
+					console.log(thrownError);
+				},
+			});
 		}
 	});
 	OCA.MfaVerifiedZone = OCA.MfaVerifiedZone || {};
