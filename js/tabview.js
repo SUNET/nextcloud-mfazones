@@ -16,6 +16,7 @@
 			}
 			const $html = `
             <div style="text-align:center; word-wrap:break-word;">
+				<span id="mfa-current-file-path" hidden></span>
                  <span class="checkbox-radio-switch checkbox-radio-switch-switch checkbox-radio-switch--checked" style="--icon-size:36px;">
                      <label for="checkbox-radio-switch-mfa" class="checkbox-radio-switch__label">
                          <input id="checkbox-radio-switch-mfa" type="checkbox" class="checkbox-radio-switch__input" value="">
@@ -32,6 +33,7 @@
                 `;
 			const $htmlDisabled = `
                 <div style="text-align:center; word-wrap:break-word;">
+					<span id="mfa-current-file-path" hidden></span>
                      <span class="checkbox-radio-switch checkbox-radio-switch-switch checkbox-radio-switch--checked" style="--icon-size:36px;">
                          <label for="checkbox-radio-switch-mfa" class="checkbox-radio-switch__label">
                              <input id="checkbox-radio-switch-mfa" type="checkbox" disabled class="checkbox-radio-switch__input" value="">
@@ -51,6 +53,7 @@
 					source: fileInfo.getFullPath()
 				},
 				_self = this;
+				_fullPath = fileInfo.getFullPath();
 			$.ajax({
 				type: 'GET',
 				url: accessUrl,
@@ -88,6 +91,8 @@
 							.click(context.boxChecked);
 					}
 					context.generateStatusText(response.status);
+					self.document.getElementById('mfa-current-file-path')
+					.textContent = _fullPath;
 				},
 				error: function (xhr, ajaxOptions, thrownError) {
 					console.log(xhr.status);
@@ -96,7 +101,7 @@
 			});
 		},
 		generateStatusText: function (value) {
-			const status = value === true ? "Required" : "Not required";
+			const status = value === true ? "Protected" : "Not protected";
 			this.$el.find('#mfa-check-status')
 				.text(status)
 		},
@@ -104,10 +109,10 @@
 			const checkBox = this;
 			const setUrl = OC.generateUrl('/apps/mfaverifiedzone/set'),
 			data = {
-				source: fileInfo.getFullPath(),
+				source: self.document.getElementById('mfa-current-file-path')
+				.textContent,
 				protect: checkBox.checked
-			},
-			_self = self;
+			};
 			$.ajax({
 				type: 'POST',
 				url: setUrl,

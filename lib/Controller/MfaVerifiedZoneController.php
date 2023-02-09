@@ -92,6 +92,7 @@ class MfaVerifiedZoneController extends Controller {
             $userRoot = $this->rootFolder->getUserFolder($this->userId);
             $node = $userRoot->get($source);
             $tags = $this->getTagger()->getTagsForObjects([$node->getId()]);
+            $tags = current($tags);
             if ($tags === false) {
 				// the tags API returns false on error...
 				$result = false;
@@ -129,7 +130,7 @@ class MfaVerifiedZoneController extends Controller {
             $userRoot = $this->rootFolder->getUserFolder($this->userId);
             $node = $userRoot->get($source);
 
-            if($protect){
+            if($protect === true){
                 $this->getTagger()->tagAs($node->getId(), Application::TAG_NAME);
             }else {
                 $this->getTagger()->unTag($node->getId(), Application::TAG_NAME);

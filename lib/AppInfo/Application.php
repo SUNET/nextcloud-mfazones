@@ -15,14 +15,14 @@ class Application extends App {
 
     protected ISystemTagManager $systemTagManager;
 
-	public function __construct(ISystemTagManager $systemTagManager) {
+	public function __construct() {
 		parent::__construct(self::APP_ID);
-
-        $this->systemTagManager = $systemTagManager;
 
         $container = $this->getContainer();
         $server = $container->getServer();
         $eventDispatcher = $server->getEventDispatcher();
+
+        $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);;
 
         $eventDispatcher->addListener('OCA\Files::loadAdditionalScripts', function() {
             \OCP\Util::addStyle(self::APP_ID, 'tabview' );
