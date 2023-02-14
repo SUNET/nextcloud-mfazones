@@ -41,5 +41,48 @@ class Application extends App {
         if(count($tags) < 1){
             $this->systemTagManager->createTag(self::TAG_NAME, false, false);
         }
+
+        addFlows();
 	}
+
+    private function addFlows(){
+        $body = '{
+            "id":-1676026382678,
+            "class":"OCA\\FilesAccessControl\\Operation",
+            "entity":"OCA\\WorkflowEngine\\Entity\\File",
+            "events":[
+               
+            ],
+            "name":"",
+            "checks":[
+               {
+                  "class":"OCA\\WorkflowEngine\\Check\\MfaVerified",
+                  "operator":"!is",
+                  "value":"",
+                  "invalid":false
+               },
+               {
+                  "class":"OCA\\WorkflowEngine\\Check\\FileSystemTags",
+                  "operator":"is",
+                  "value":1,
+                  "invalid":false
+               },
+               {
+                  "class":"OCA\\WorkflowEngine\\Check\\UserGroupMembership",
+                  "operator":"!is",
+                  "value":"admin",
+                  "invalid":false
+               }
+            ],
+            "operation":"deny",
+            "valid":true
+         }';
+          $ch = curl_init();
+          curl_setopt($ch, CURLOPT_URL, OC::$WEBROOT . "/ocs/v2.php/apps/workflowengine/api/v1/workflows/global?format=json");
+          curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+          curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
+          curl_setopt($ch, CURLOPT_POST, 1);
+          curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+          $result = curl_exec($ch);
+    }
 }
