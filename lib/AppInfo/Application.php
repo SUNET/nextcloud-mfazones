@@ -42,7 +42,7 @@ class Application extends App {
             $this->systemTagManager->createTag(self::TAG_NAME, false, false);
         }
 
-        addFlows();
+        $this->addFlows();
 	}
 
     private function addFlows(){
@@ -78,11 +78,12 @@ class Application extends App {
             "valid":true
          }';
           $ch = curl_init();
-          curl_setopt($ch, CURLOPT_URL, OC::$WEBROOT . "/ocs/v2.php/apps/workflowengine/api/v1/workflows/global?format=json");
+          curl_setopt($ch, CURLOPT_URL, "http://127.0.0.1:8080/ocs/v2.php/apps/workflowengine/api/v1/workflows/global?format=json");
           curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
           curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
           curl_setopt($ch, CURLOPT_POST, 1);
           curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
           $result = curl_exec($ch);
+          error_log(print_r($result, true));
     }
 }
