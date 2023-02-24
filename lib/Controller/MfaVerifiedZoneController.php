@@ -18,74 +18,80 @@ use OCP\SystemTag\ISystemTagManager;
 
 use OCP\SystemTag\ISystemTagObjectMapper;
 
-class MfaVerifiedZoneController extends Controller {
-	/** @var IUserManager */
-	private $userManager;
-	/** @var IRootFolder */
-	private $rootFolder;
-	/** @var string */
-	private $userId;
-    
+class MfaVerifiedZoneController extends Controller
+{
+    /** @var IUserManager */
+    private $userManager;
+    /** @var IRootFolder */
+    private $rootFolder;
+    /** @var string */
+    private $userId;
+
     /** @var ISystemTagManager */
     protected ISystemTagManager $systemTagManager;
 
-	/** @var IGroupManager */
-	private $groupManager;
-
-	/**
-	 * @var \OCP\ITags
-	 */
-	private $tagger;
-
-	/**
-	 * @var \OCP\ITagManager
-	 */
-	private $tagManager;
-
-	/**
-	 * @var ISystemTagObjectMapper
-	 */
-	private $tagMapper;
-
-	public function __construct(IRequest $request,
-								IUserManager $userManager,
-								IRootFolder $rootFolder,
-                                IGroupManager $groupManager,
-                                \OCP\ITagManager $tagManager,
-                                string $userId,
-                                ISystemTagObjectMapper $tagMapper,
-                                ISystemTagManager $systemTagManager) {
-		parent::__construct(Application::APP_ID, $request);
-		$this->userManager = $userManager;
-		$this->rootFolder = $rootFolder;
-        $this->userId = $userId;
-        $this->groupManager = $groupManager;
-		$this->tagManager = $tagManager;
-		$this->tagger = null;
-		$this->tagMapper = $tagMapper;
-        $this->systemTagManager = $systemTagManager;
-	}
+    /** @var IGroupManager */
+    private $groupManager;
 
     /**
-	 * Returns the tagger
-	 *
-	 * @return \OCP\ITags tagger
-	 */
-	private function getTagger() {
-		if (!$this->tagger) {
-			$this->tagger = $this->tagManager->load('files');
-		}
-		return $this->tagger;
-	}
+     * @var \OCP\ITags
+     */
+    private $tagger;
 
-    private function hasAccess($source){
+    /**
+     * @var \OCP\ITagManager
+     */
+    private $tagManager;
+
+    /**
+     * @var ISystemTagObjectMapper
+     */
+    private $tagMapper;
+
+    public function __construct(
+        IRequest $request,
+        IUserManager $userManager,
+        IRootFolder $rootFolder,
+        IGroupManager $groupManager,
+        \OCP\ITagManager $tagManager,
+        string $userId,
+        ISystemTagObjectMapper $tagMapper,
+        ISystemTagManager $systemTagManager
+    )
+    {
+        parent::__construct(Application::APP_ID, $request);
+        $this->userManager = $userManager;
+        $this->rootFolder = $rootFolder;
+        $this->userId = $userId;
+        $this->groupManager = $groupManager;
+        $this->tagManager = $tagManager;
+        $this->tagger = null;
+        $this->tagMapper = $tagMapper;
+        $this->systemTagManager = $systemTagManager;
+    }
+
+    /**
+     * Returns the tagger
+     *
+     * @return \OCP\ITags tagger
+     */
+    private function getTagger()
+    {
+        if (!$this->tagger) {
+            $this->tagger = $this->tagManager->load('files');
+        }
+        return $this->tagger;
+    }
+
+    private function hasAccess($source)
+    {
         try {
             $isAdmin = $this->groupManager->isAdmin($this->userId);
             $userRoot = $this->rootFolder->getUserFolder($this->userId);
 
             try {
-               $node = $userRoot->get($source);
-               $hasAccess = $isAdmin || $node->getOwner()->getUID() === $this->userId;
+                $node = $userRoot->get($source);
+                $hasAccess = $isAdmin || $node->getOwner()->getUID() === $this->userId;
             } catch (\Exception $e) {
                 \OC::$server->getLogger()->logException($e, ['app' => 'mfaverifiedzone']);
                 $hasAccess = false;
@@ -102,7 +108,8 @@ class MfaVerifiedZoneController extends Controller {
     /**
      * @NoAdminRequired
      */
-    public function get($source) {
+    public function get($source)
+    {
         try {
             $userRoot = $this->rootFolder->getUserFolder($this->userId);
             $node = $userRoot->get($source);
@@ -114,9 +121,8 @@ class MfaVerifiedZoneController extends Controller {
             );
             $tag = current($tags);
             $tagId = $tag->getId();
-            $type = $this->castObjectType($node->getType()) ;
+            $type = $this->castObjectType($node->getType());
             $result = $this->tagMapper->haveTag($node->getId(), $type, $tagId);
-            $id = $node->getId();
 
             return new JSONResponse(
                 array(
@@ -139,10 +145,11 @@ class MfaVerifiedZoneController extends Controller {
     /**
      * @NoAdminRequired
      */
-    public function set($source, $protect) {
+    public function set($source, $protect)
+    {
         try {
             $hasAccess = $this->hasAccess($source);
-            if(!$hasAccess){
+            if (!$hasAccess) {
                 return new DataResponse([], Http::STATUS_FORBIDDEN);
             }
             $userRoot = $this->rootFolder->getUserFolder($this->userId);
@@ -156,10 +163,10 @@ class MfaVerifiedZoneController extends Controller {
 
             $type = $this->castObjectType($node->getType());
 
-            if($protect=="true"){
+            if ($protect == "true") {
                 $this->getTagger()->tagAs($node->getId(), Application::TAG_NAME);
                 $this->tagMapper->assignTags($node->getId(), $type, $tagId);
-            }else {
+            } else {
                 $this->getTagger()->unTag($node->getId(), Application::TAG_NAME);
                 $this->tagMapper->unassignTags($node->getId(), $type, $tagId);
             }
@@ -176,19 +183,21 @@ class MfaVerifiedZoneController extends Controller {
     /**
      * @NoAdminRequired
      */
-    public function access($source) {
-       return new JSONResponse(
-                array(
-                    'access' => $this->hasAccess($source)
-                )
-            );
+    public function access($source)
+    {
+        return new JSONResponse(
+            array(
+                'access' => $this->hasAccess($source)
+            )
+        );
     }
 
-    private function castObjectType($type){
-        if($type == 'file'){
+    private function castObjectType($type)
+    {
+        if ($type == 'file') {
             return "files";
         }
-        if($type == "dir"){
+        if ($type == "dir") {
             return "files";
         }
         return $type;
