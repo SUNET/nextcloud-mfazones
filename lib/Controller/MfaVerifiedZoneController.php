@@ -130,7 +130,7 @@ class MfaVerifiedZoneController extends Controller {
             $userRoot = $this->rootFolder->getUserFolder($this->userId);
             $node = $userRoot->get($source);
 
-            if($protect === true){
+            if($protect == true){
                 $this->getTagger()->tagAs($node->getId(), Application::TAG_NAME);
             }else {
                 $this->getTagger()->unTag($node->getId(), Application::TAG_NAME);
