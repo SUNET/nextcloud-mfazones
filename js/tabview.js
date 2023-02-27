@@ -16,36 +16,148 @@
 			}
 			const $html = `
             <div style="text-align:center; word-wrap:break-word;">
-				<span id="mfa-current-file-path" hidden></span>
-                 <span class="checkbox-radio-switch checkbox-radio-switch-switch checkbox-radio-switch--checked" style="--icon-size:36px;">
-                     <label for="checkbox-radio-switch-mfa" class="checkbox-radio-switch__label">
-                         <input id="checkbox-radio-switch-mfa" type="checkbox" class="checkbox-radio-switch__input" value="">
-                         <span style="display:none;" aria-hidden="true" role="img" class="material-design-icon toggle-switch-icon checkbox-radio-switch__icon">
-                             <svg fill="currentColor" width="36" height="36" viewBox="0 0 24 24" class="material-design-icon__svg">
-                                 <path d="M17,7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7M17,15A3,3 0 0,1 14,12A3,3 0 0,1 17,9A3,3 0 0,1 20,12A3,3 0 0,1 17,15Z">
-                
-                                 </path>
-                             </svg>
-                         </span style="display: block; align-content: center;">Enforce MFA requirement<span id="mfa-check-status"></span>
-                     </label>
-                 </span>
-            </div>
+					<style>
+						.switch {
+							position: relative;
+							display: inline;
+						}
+						
+						.switch input { 
+							opacity: 0;
+							width: 0;
+							height: 0;
+						}
+						
+						.slider {
+							position: absolute;
+							cursor: pointer;
+							top: 0;
+							left: 0;
+							right: 0;
+							bottom: 0;
+							width: 30px;
+							height: 15px;
+							background-color: #ccc;
+							-webkit-transition: .4s;
+							transition: .4s;
+							margin-top: auto;
+						}
+						
+						.slider:before {
+							position: absolute;
+							content: "";
+							height: 9px;
+							width: 9px;
+							left: 3px;
+							bottom: 3px;
+							background-color: white;
+							-webkit-transition: .4s;
+							transition: .4s;
+						}
+						
+						input:checked + .slider {
+							background-color: #2196F3;
+						}
+						
+						input:focus + .slider {
+							box-shadow: 0 0 1px #2196F3;
+						}
+						
+						input:checked + .slider:before {
+							-webkit-transform: translateX(15px);
+							-ms-transform: translateX(15px);
+							transform: translateX(15px);
+						}
+						
+						/* Rounded sliders */
+						.slider.round {
+							border-radius: 15px;
+						}
+						 
+						.slider.round:before {
+							border-radius: 50%;
+						}
+					</style>
+					<span id="mfa-current-file-path" hidden></span>
+                     <span style="--icon-size:36px;">
+                         <label class="switch">
+                             <input id="checkbox-radio-switch-mfa" type="checkbox">
+							 <span class="slider round"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enforce MFA requirement
+                         </label>
+					 </span>
+                </div>
                 `;
 			const $htmlDisabled = `
                 <div style="text-align:center; word-wrap:break-word;">
+					<style>
+						.switch {
+							position: relative;
+							display: inline;
+						}
+						
+						.switch input { 
+							opacity: 0;
+							width: 0;
+							height: 0;
+						}
+						
+						.slider {
+							position: absolute;
+							cursor: pointer;
+							top: 0;
+							left: 0;
+							right: 0;
+							bottom: 0;
+							width: 30px;
+							height: 15px;
+							background-color: #ccc;
+							-webkit-transition: .4s;
+							transition: .4s;
+							margin-top: auto;
+						}
+						
+						.slider:before {
+							position: absolute;
+							content: "";
+							height: 9px;
+							width: 9px;
+							left: 3px;
+							bottom: 3px;
+							background-color: white;
+							-webkit-transition: .4s;
+							transition: .4s;
+						}
+						
+						input:checked + .slider {
+							background-color: #2196F3;
+						}
+						
+						input:focus + .slider {
+							box-shadow: 0 0 1px #2196F3;
+						}
+						
+						input:checked + .slider:before {
+							-webkit-transform: translateX(15px);
+							-ms-transform: translateX(15px);
+							transform: translateX(15px);
+						}
+						
+						/* Rounded sliders */
+						.slider.round {
+							border-radius: 15px;
+						}
+						
+						.slider.round:before {
+							border-radius: 50%;
+						}
+					</style>
 					<span id="mfa-current-file-path" hidden></span>
-                     <span class="checkbox-radio-switch checkbox-radio-switch-switch checkbox-radio-switch--checked" style="--icon-size:36px;">
-                         <label for="checkbox-radio-switch-mfa" class="checkbox-radio-switch__label">
-                             <input id="checkbox-radio-switch-mfa" type="checkbox" disabled class="checkbox-radio-switch__input" value="">
-                             <span style="display:none;" aria-hidden="true" role="img" class="material-design-icon toggle-switch-icon checkbox-radio-switch__icon">
-                                 <svg fill="currentColor" width="36" height="36" viewBox="0 0 24 24" class="material-design-icon__svg">
-                                     <path d="M17,7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7M17,15A3,3 0 0,1 14,12A3,3 0 0,1 17,9A3,3 0 0,1 20,12A3,3 0 0,1 17,15Z">
-                    
-                                     </path>
-                                 </svg>
-                             </span style="display: block; align-content: center;">Enforce MFA requirement<span id="mfa-check-status"></span>
+                     <span style="--icon-size:36px;">
+                         <label class="switch">
+                             <input id="checkbox-radio-switch-mfa" type="checkbox" disabled>
+							 <span class="slider round"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enforce MFA requirement
                          </label>
-                     </span>
+					 </span>
                 </div>
                     `;
 			const accessUrl = OC.generateUrl('/apps/mfaverifiedzone/access'),
