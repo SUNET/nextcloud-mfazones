@@ -3,7 +3,7 @@
 		id: 'mfazoneTabView',
 		className: 'tab mfazoneTabView',
 		getLabel: function () {
-			return 'MfaZone';
+			return 'MFA Zone';
 		},
 		getIcon: function () {
 			return 'icon-category-security';
@@ -26,7 +26,7 @@
                 
                                  </path>
                              </svg>
-                         </span style="display: block; align-content: center;"> <span id="mfa-check-status"></span>
+                         </span style="display: block; align-content: center;">Enforce MFA requirement<span id="mfa-check-status"></span>
                      </label>
                  </span>
             </div>
@@ -43,7 +43,7 @@
                     
                                      </path>
                                  </svg>
-                             </span style="display: block; align-content: center;"> <span id="mfa-check-status"></span>
+                             </span style="display: block; align-content: center;">Enforce MFA requirement<span id="mfa-check-status"></span>
                          </label>
                      </span>
                 </div>
@@ -90,7 +90,6 @@
 						context.$el.find('#checkbox-radio-switch-mfa')
 							.click(context.boxChecked);
 					}
-					context.generateStatusText(response.status);
 					self.document.getElementById('mfa-current-file-path')
 					.textContent = _fullPath;
 				},
@@ -99,11 +98,6 @@
 					console.log(thrownError);
 				},
 			});
-		},
-		generateStatusText: function (value) {
-			const status = value === true ? "Protected" : "Not protected";
-			this.$el.find('#mfa-check-status')
-				.text(status)
 		},
 		boxChecked: function () {
 			const checkBox = this;
@@ -121,11 +115,11 @@
 				async: true,
 				success: function (response) {
 					if (checkBox.checked === true) {
-						self.document.getElementById('mfa-check-status')
-							.textContent = "Protected";
+						// self.document.getElementById('mfa-check-status')
+						// 	.textContent = "Protected";
 					} else {
-						self.document.getElementById('mfa-check-status')
-							.textContent = "Not Protected";
+						// self.document.getElementById('mfa-check-status')
+						// 	.textContent = "Not Protected";
 					}
 				},
 				error: function (xhr, ajaxOptions, thrownError) {

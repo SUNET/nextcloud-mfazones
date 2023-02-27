@@ -22,8 +22,10 @@ class MfaVerifiedZoneController extends Controller
 {
     /** @var IUserManager */
     private $userManager;
+
     /** @var IRootFolder */
     private $rootFolder;
+
     /** @var string */
     private $userId;
 
@@ -33,19 +35,14 @@ class MfaVerifiedZoneController extends Controller
     /** @var IGroupManager */
     private $groupManager;
 
-    /**
-     * @var \OCP\ITags
-     */
+    /** @var \OCP\ITags */
     private $tagger;
+    
 
-    /**
-     * @var \OCP\ITagManager
-     */
+    /** @var \OCP\ITagManager */
     private $tagManager;
 
-    /**
-     * @var ISystemTagObjectMapper
-     */
+    /** @var ISystemTagObjectMapper */
     private $tagMapper;
 
     public function __construct(
@@ -111,8 +108,6 @@ class MfaVerifiedZoneController extends Controller
     public function get($source)
     {
         try {
-            $userRoot = $this->rootFolder->getUserFolder($this->userId);
-            $node = $userRoot->get($source);
             $userRoot = $this->rootFolder->getUserFolder($this->userId);
             $node = $userRoot->get($source);
             $tags = $this->systemTagManager->getAllTags(
