@@ -1,57 +1,34 @@
-<!--
-SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
-SPDX-License-Identifier: CC0-1.0
--->
+# MFA required zone Nextcloud App
 
-# Mfa Verified Zone
-Place this app in **nextcloud/apps/**
+The MFA required zone app is a Nextcloud app that enables file owners and administrators to restrict access to files and folders based on whether or not a user has MFA (multi-factor authentication) verification.
 
-## Building the app
+## Requirements
 
-The app can be built by using the provided Makefile by running:
+- Nextcloud 20 or later
+- PHP 7.2 or later
+- `File Access Control` (Nextcloud app)
 
-    make
+## Installation
 
-This requires the following things to be present:
-* make
-* which
-* tar: for building the archive
-* curl: used if phpunit and composer are not installed to fetch them from the web
-* npm: for building and testing everything JS, only required if a package.json is placed inside the **js/** folder
+1. Download the MFA required zone app from the [Nextcloud app store](https://apps.nextcloud.com/apps/mfaverifiedzone).
+2. Extract the downloaded archive to your Nextcloud apps directory.
+3. Rename the extracted directory to mfaverifiedzone.
+4. Enable the app in the Nextcloud apps settings.
 
-The make command will install or update Composer dependencies if a composer.json is present and also **npm run build** if a package.json is present in the **js/** folder. The npm **build** script should use local paths for build systems and package managers, so people that simply want to build the app won't need to install npm libraries globally, e.g.:
+## Usage
 
-**package.json**:
-```json
-"scripts": {
-    "test": "node node_modules/gulp-cli/bin/gulp.js karma",
-    "prebuild": "npm install && node_modules/bower/bin/bower install && node_modules/bower/bin/bower update",
-    "build": "node node_modules/gulp-cli/bin/gulp.js"
-}
-```
+After installing and enabling the MFA required zone app, you can create MFA required zones for your files and folders. Here's how:
 
+1. Navigate to the file or folder you want to add an MFA required zone to.
+2. Click on the "MFA Zone" tab in the right-hand sidebar.
+3. Toggle the switch to enable or disable the MFA required zone feature.
 
-## Publish to App Store
+Users who have not completed MFA verification will not be able to access files or folders within an MFA required zone.
 
-First get an account for the [App Store](http://apps.nextcloud.com/) then run:
+## Contributing
 
-    make && make appstore
+Contributions to the MFA required zone app are welcome! If you encounter a bug, have a feature request, or would like to contribute code, please open an issue or pull request on the [GitHub repository](https://github.com/pondersource/mfaverifiedzone).
 
-The archive is located in build/artifacts/appstore and can then be uploaded to the App Store.
+## License
 
-## Running tests
-You can use the provided Makefile to run all tests by using:
-
-    make test
-
-This will run the PHP unit and integration tests and if a package.json is present in the **js/** folder will execute **npm run test**
-
-Of course you can also install [PHPUnit](http://phpunit.de/getting-started.html) and use the configurations directly:
-
-    phpunit -c phpunit.xml
-
-or:
-
-    phpunit -c phpunit.integration.xml
-
-for integration tests
+The MFA required zone app is licensed under the [GNU Affero General Public License version 3](https://www.gnu.org/licenses/agpl-3.0.html). See the [LICENSE](LICENSE) file for more information.
