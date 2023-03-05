@@ -35,10 +35,6 @@ class MfaVerifiedZoneController extends Controller
     /** @var IGroupManager */
     private $groupManager;
 
-    /** @var \OCP\ITags */
-    private $tagger;
-    
-
     /** @var \OCP\ITagManager */
     private $tagManager;
 
@@ -62,22 +58,8 @@ class MfaVerifiedZoneController extends Controller
         $this->userId = $userId;
         $this->groupManager = $groupManager;
         $this->tagManager = $tagManager;
-        $this->tagger = null;
         $this->tagMapper = $tagMapper;
         $this->systemTagManager = $systemTagManager;
-    }
-
-    /**
-     * Returns the tagger
-     *
-     * @return \OCP\ITags tagger
-     */
-    private function getTagger()
-    {
-        if (!$this->tagger) {
-            $this->tagger = $this->tagManager->load('files');
-        }
-        return $this->tagger;
     }
 
     private function hasAccess($source)
@@ -159,10 +141,8 @@ class MfaVerifiedZoneController extends Controller
             $type = $this->castObjectType($node->getType());
 
             if ($protect == "true") {
-                $this->getTagger()->tagAs($node->getId(), Application::TAG_NAME);
                 $this->tagMapper->assignTags($node->getId(), $type, $tagId);
             } else {
-                $this->getTagger()->unTag($node->getId(), Application::TAG_NAME);
                 $this->tagMapper->unassignTags($node->getId(), $type, $tagId);
             }
 
