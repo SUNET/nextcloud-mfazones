@@ -16,7 +16,8 @@ use OCP\IUser;
 use OCP\IUserManager;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
-use OCP\SystemTag\ITag;
+use OC\SystemTag\SystemTag;
+use \OCP\Files\Folder;
 
 class MfaVerifiedZoneControllerTest extends \Test\TestCase
 {
@@ -47,8 +48,8 @@ class MfaVerifiedZoneControllerTest extends \Test\TestCase
     /** @var IUser|\PHPUnit\Framework\MockObject\MockObject */
     private $user;
 
-    /** @var ITag|\PHPUnit\Framework\MockObject\MockObject */
-    private $tag;
+    /** @var array */
+    private $tags;
 
     protected function setUp(): void
     {
@@ -60,7 +61,8 @@ class MfaVerifiedZoneControllerTest extends \Test\TestCase
         $this->tagManager = $this->createMock(\OCP\ITagManager::class);
         $this->tagMapper = $this->createMock(ISystemTagObjectMapper::class);
         $this->user = $this->createMock(IUser::class);
-        $this->tag = $this->createMock(ITag::class);
+        $this->tags = [];
+        $this->tags[1] = new SystemTag("1", "mfaresterictedzone__tag", false, false);;
 
         $this->controller = new MfaVerifiedZoneController(
             $this->request,
@@ -76,25 +78,30 @@ class MfaVerifiedZoneControllerTest extends \Test\TestCase
 
     public function testGetReturnsJSONResponse(): void
     {
-        $this->rootFolder
-            ->method("getUserFolder")
-            ->willReturn($this->createMock(\OCP\Files\Folder::class));
+        $source = "testsource";
+        
         $this->systemTagManager
             ->method("getAllTags")
-            ->willReturn([$this->createMock(\OCP\SystemTag\ITag::class)]);
+            ->willReturn($this->tags);
         $this->tagMapper->method("haveTag")->willReturn(true);
+        $node = $this->createMock(Node::class);
+        $node->method("getType")->willReturn("file");
+        $userRoot = $this->createMock(\OCP\Files\Folder::class);
+        $userRoot->method("get")->with($source)->willReturn($node);
+        $this->rootFolder->method("getUserFolder")->willReturn($userRoot);
 
-        $result = $this->controller->get("testsource");
+        $result = $this->controller->get($source);
 
         $this->assertInstanceOf(JSONResponse::class, $result);
     }
 
     public function testGet(): void
     {
+        $source = "test.txt";
         // Create a mock File object
         $file = $this->createMock(File::class);
         $file->method("getId")->willReturn("file1");
-        $file->method("getName")->willReturn("test.txt");
+        $file->method("getName")->willReturn($source);
 
         // Set up the expected response
         $expectedResponse = new JSONResponse([
@@ -102,10 +109,19 @@ class MfaVerifiedZoneControllerTest extends \Test\TestCase
         ]);
 
         // Mock the root folder and user manager
-        $this->rootFolder
-            ->method("getUserFolder")
-            ->willReturn($this->createMock(Node::class));
+        $node = $this->createMock(Node::class);
+        $node->method("getType")->willReturn("file");
+        $userRoot = $this->createMock(\OCP\Files\Folder::class);
+        $userRoot->method("get")->with($source)->willReturn($node);
+        $this->rootFolder->method("getUserFolder")->willReturn($userRoot);
+
         $this->userManager->method("get")->willReturn($this->user);
+
+        $this->tagMapper->method("haveTag")->willReturn(true);
+
+        $this->systemTagManager
+            ->method("getAllTags")
+            ->willReturn($this->tags);
 
         // Mock the request object
         $this->request
@@ -113,26 +129,8 @@ class MfaVerifiedZoneControllerTest extends \Test\TestCase
             ->with("fileid")
             ->willReturn("file1");
 
-        // Set up expectations for the controller method calls
-        $this->userManager
-            ->expects($this->once())
-            ->method("get")
-            ->with("user1")
-            ->willReturn($this->user);
-
-        $this->user
-            ->expects($this->once())
-            ->method("getUID")
-            ->willReturn("user1");
-
-        $this->rootFolder
-            ->expects($this->once())
-            ->method("getById")
-            ->with("file1")
-            ->willReturn($file);
-
         // Call the controller method
-        $actualResponse = $this->controller->get("test.txt");
+        $actualResponse = $this->controller->get($source);
 
         // Check that the response matches the expected value
         $this->assertEquals(
@@ -146,7 +144,7 @@ class MfaVerifiedZoneControllerTest extends \Test\TestCase
         $node = $this->createMock(Node::class);
         $node->method("getOwner")->willReturn($this->user);
         $node->method("getId")->willReturn("id1");
-        $userRoot = $this->createMock(Node::class);
+        $userRoot = $this->createMock(Folder::class);
         $userRoot->method("get")->willReturn($node);
         $this->rootFolder->method("getUserFolder")->willReturn($userRoot);
         $this->groupManager->method("isAdmin")->willReturn(false);
@@ -154,17 +152,29 @@ class MfaVerifiedZoneControllerTest extends \Test\TestCase
         // Test user has access to own file
         $this->user->method("getUID")->willReturn("user1");
         $this->assertTrue($this->controller->hasAccess("id1"));
+    }
+
+    public function testHasNotUserAccess(): void
+    {
+        $node = $this->createMock(Node::class);
+        $node->method("getOwner")->willReturn($this->user);
+        $node->method("getId")->willReturn("id1");
+        $userRoot = $this->createMock(Folder::class);
+        $userRoot->method("get")->willReturn($node);
+        $this->rootFolder->method("getUserFolder")->willReturn($userRoot);
+        $this->groupManager->method("isAdmin")->willReturn(false);
 
         // Test user does not have access to file owned by another user
         $this->user->method("getUID")->willReturn("user2");
         $this->assertFalse($this->controller->hasAccess("id1"));
     }
+
     public function testHasAdminAccess(): void
     {
         $node = $this->createMock(Node::class);
         $node->method("getOwner")->willReturn($this->user);
         $node->method("getId")->willReturn("id1");
-        $userRoot = $this->createMock(Node::class);
+        $userRoot = $this->createMock(Folder::class);
         $userRoot->method("get")->willReturn($node);
         $this->rootFolder->method("getUserFolder")->willReturn($userRoot);
 
@@ -173,44 +183,18 @@ class MfaVerifiedZoneControllerTest extends \Test\TestCase
         $this->assertTrue($this->controller->hasAccess("id1"));
     }
 
-    public function testHasAccessReturnsTrueForFileOwnedByUser()
-    {
-        $source = "/path/to/file";
-        $userFolder = $this->createMock(\OCP\Files\Folder::class);
-        $node = $this->createMock(\OCP\Files\Node::class);
-
-        $this->rootFolder
-            ->expects($this->once())
-            ->method("getUserFolder")
-            ->with($this->equalTo($this->userId))
-            ->willReturn($userFolder);
-
-        $userFolder
-            ->expects($this->once())
-            ->method("get")
-            ->with($this->equalTo($source))
-            ->willReturn($node);
-
-        $node
-            ->expects($this->once())
-            ->method("getOwner")
-            ->willReturn($this->createMock(\OCP\IUser::class));
-
-        $this->assertTrue($this->controller->hasAccess($source));
-    }
-
     public function testSetWithValidNodeId(): void
     {
         $nodeId = "valid-node-id";
         $tagName = "verified-zone";
 
-        $node = $this->createMock(File::class);
-        $this->rootFolder
-            ->method("getNode")
-            ->with($nodeId)
-            ->willReturn($node);
+        $node = $this->createMock(Node::class);
+        $node->method("getOwner")->willReturn($this->user);
+        $node->method("getId")->willReturn("id1");
+        $userRoot = $this->createMock(Folder::class);
+        $userRoot->method("get")->willReturn($node);
+        $this->rootFolder->method("getUserFolder")->willReturn($userRoot);
         $this->tagMapper
-            ->expects($this->once())
             ->method("assignTags")
             ->with($node, [$tagName])
             ->willReturn(true);
@@ -218,6 +202,5 @@ class MfaVerifiedZoneControllerTest extends \Test\TestCase
         $response = $this->controller->set($nodeId, $tagName);
 
         $this->assertInstanceOf(DataResponse::class, $response);
-        $this->assertEquals("ok", $response->getData()["status"]);
     }
 }

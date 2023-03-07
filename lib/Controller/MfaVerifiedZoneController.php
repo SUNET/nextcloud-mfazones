@@ -62,7 +62,7 @@ class MfaVerifiedZoneController extends Controller
         $this->systemTagManager = $systemTagManager;
     }
 
-    private function hasAccess($source)
+    public function hasAccess($source)
     {
         try {
             $isAdmin = $this->groupManager->isAdmin($this->userId);
