@@ -1,8 +1,8 @@
 <?php
 
-namespace OCA\MfaVerifiedZone\Controller\Tests;
+namespace OCA\mfazones\Controller\Tests;
 
-use OCA\MfaVerifiedZone\Controller\MfaVerifiedZoneController;
+use OCA\mfazones\Controller\mfazonesController;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -19,9 +19,9 @@ use OCP\SystemTag\ISystemTagObjectMapper;
 use OC\SystemTag\SystemTag;
 use \OCP\Files\Folder;
 
-class MfaVerifiedZoneControllerTest extends \Test\TestCase
+class mfazonesControllerTest extends \Test\TestCase
 {
-    /** @var MfaVerifiedZoneController */
+    /** @var mfazonesController */
     private $controller;
 
     /** @var IRequest|\PHPUnit\Framework\MockObject\MockObject */
@@ -64,7 +64,7 @@ class MfaVerifiedZoneControllerTest extends \Test\TestCase
         $this->tags = [];
         $this->tags[1] = new SystemTag("1", "mfaresterictedzone__tag", false, false);;
 
-        $this->controller = new MfaVerifiedZoneController(
+        $this->controller = new mfazonesController(
             $this->request,
             $this->userManager,
             $this->rootFolder,

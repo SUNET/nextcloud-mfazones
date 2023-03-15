@@ -5,7 +5,7 @@
     SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
     SPDX-License-Identifier: CC0-1.0
     -->
-    <id>mfaverifiedzone</id>
+    <id>mfazones</id>
     <name>Mfa Verified Zone</name>
     <summary>https://github.com/pondersource/mfa-verified-zone</summary>
     <description><![CDATA[A plugin for restrict access to file with mfa verified tag

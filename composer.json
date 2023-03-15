@@ -1,5 +1,5 @@
 {
-	"name": "nextcloud/mfaverifiedzone",
+	"name": "nextcloud/mfazones",
 	"description": "https://github.com/pondersource/mfa-verified-zone",
 	"type": "project",
 	"license": "AGPL-3.0-or-later",

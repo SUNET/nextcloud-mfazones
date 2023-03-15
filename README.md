@@ -12,7 +12,7 @@ This is a Nextcloud app that enables file owners and administrators to restrict 
 
 1. Download the MFA Zones app from the [Nextcloud app store](https://apps.nextcloud.com/apps/mfazones) (FIXME: for now you can download it from this GitHub repo).
 2. Extract the downloaded archive to your Nextcloud apps directory.
-3. Rename the extracted directory to mfaverifiedzone.
+3. Rename the extracted directory to mfazones.
 4. Enable the app in the Nextcloud apps settings.
 
 ## Usage

@@ -1,8 +1,8 @@
 <?php
 return [
 	'routes' => [
-		['name' => 'mfaVerifiedZone#get', 'url' => '/get', 'verb' => 'GET'],
-		['name' => 'mfaVerifiedZone#access', 'url' => '/access', 'verb' => 'GET'],
-		['name' => 'mfaVerifiedZone#set', 'url' => '/set', 'verb' => 'POST'],
+		['name' => 'mfazones#get', 'url' => '/get', 'verb' => 'GET'],
+		['name' => 'mfazones#access', 'url' => '/access', 'verb' => 'GET'],
+		['name' => 'mfazones#set', 'url' => '/set', 'verb' => 'POST'],
 	]
 ];

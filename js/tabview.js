@@ -160,7 +160,7 @@
 					 </span>
                 </div>
                     `;
-			const accessUrl = OC.generateUrl('/apps/mfaverifiedzone/access'),
+			const accessUrl = OC.generateUrl('/apps/mfazones/access'),
 				data = {
 					source: fileInfo.getFullPath()
 				},
@@ -188,7 +188,7 @@
 		},
 		addHtml: function (context, html, data, enabled) {
 			context.$el.html(html);
-			const statusUrl = OC.generateUrl('/apps/mfaverifiedzone/get');
+			const statusUrl = OC.generateUrl('/apps/mfazones/get');
 			$.ajax({
 				type: 'GET',
 				url: statusUrl,
@@ -213,7 +213,7 @@
 		},
 		boxChecked: function () {
 			const checkBox = this;
-			const setUrl = OC.generateUrl('/apps/mfaverifiedzone/set'),
+			const setUrl = OC.generateUrl('/apps/mfazones/set'),
 			data = {
 				source: self.document.getElementById('mfa-current-file-path')
 				.textContent,
@@ -241,6 +241,6 @@
 			});
 		}
 	});
-	OCA.MfaVerifiedZone = OCA.MfaVerifiedZone || {};
-	OCA.MfaVerifiedZone.MfaZoneTabView = MfaZoneTabView;
+	OCA.mfazones = OCA.mfazones || {};
+	OCA.mfazones.MfaZoneTabView = MfaZoneTabView;
 })();

@@ -9,7 +9,7 @@ use OCP\Settings\ISettings;
 
 class MfaZoneSettings implements ISettings {
     public function getForm(): TemplateResponse {
-        return new TemplateResponse('mfaverifiedzone', 'mfazone');
+        return new TemplateResponse('mfazones', 'mfazone');
     }
 
     public function getSection(): string {

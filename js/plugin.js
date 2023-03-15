@@ -4,7 +4,7 @@ var mfazoneFileListPlugin = {
       //   return;
       // }
 
-      fileList.registerTabView(new OCA.MfaVerifiedZone.MfaZoneTabView());
+      fileList.registerTabView(new OCA.mfazones.MfaZoneTabView());
     }
 };
 OC.Plugins.register('OCA.Files.FileList', mfazoneFileListPlugin);

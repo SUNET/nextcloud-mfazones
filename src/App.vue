@@ -3,18 +3,18 @@
     SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
     SPDX-License-Identifier: AGPL-3.0-or-later
     -->
-	<div id="content" class="app-mfaverifiedzone">
+	<div id="content" class="app-mfazones">
 		<AppNavigation>
 			<AppNavigationNew v-if="!loading"
-				:text="t('mfaverifiedzone', 'New note')"
+				:text="t('mfazones', 'New note')"
 				:disabled="false"
-				button-id="new-mfaverifiedzone-button"
+				button-id="new-mfazones-button"
 				button-class="icon-add"
 				@click="newNote" />
 			<ul>
 				<AppNavigationItem v-for="note in notes"
 					:key="note.id"
-					:title="note.title ? note.title : t('mfaverifiedzone', 'New note')"
+					:title="note.title ? note.title : t('mfazones', 'New note')"
 					:class="{active: currentNoteId === note.id}"
 					@click="openNote(note)">
 					<template slot="actions">
@@ -22,13 +22,13 @@
 							icon="icon-close"
 							@click="cancelNewNote(note)">
 							{{
-							t('mfaverifiedzone', 'Cancel note creation') }}
+							t('mfazones', 'Cancel note creation') }}
 						</ActionButton>
 						<ActionButton v-else
 							icon="icon-delete"
 							@click="deleteNote(note)">
 							{{
-							 t('mfaverifiedzone', 'Delete note') }}
+							 t('mfazones', 'Delete note') }}
 						</ActionButton>
 					</template>
 				</AppNavigationItem>
@@ -43,14 +43,14 @@
 				<textarea ref="content" v-model="currentNote.content" :disabled="updating" />
 				<input type="button"
 					class="primary"
-					:value="t('mfaverifiedzone', 'Save')"
+					:value="t('mfazones', 'Save')"
 					:disabled="updating || !savePossible"
 					@click="saveNote">
 			</div>
 			<div v-else id="emptycontent">
 				<div class="icon-file" />
 				<h2>{{
-				 t('mfaverifiedzone', 'Create a note to get started') }}</h2>
+				 t('mfazones', 'Create a note to get started') }}</h2>
 			</div>
 		</AppContent>
 	</div>
@@ -110,7 +110,7 @@ export default {
 	 */
 	async mounted() {
 		try {
-			const response = await axios.get(generateUrl('/apps/mfaverifiedzone/notes'))
+			const response = await axios.get(generateUrl('/apps/mfazones/notes'))
 			this.notes = response.data
 		} catch (e) {
 			console.error(e)
@@ -176,7 +176,7 @@ export default {
 		async createNote(note) {
 			this.updating = true
 			try {
-				const response = await axios.post(generateUrl('/apps/mfaverifiedzone/notes'), note)
+				const response = await axios.post(generateUrl('/apps/mfazones/notes'), note)
 				const index = this.notes.findIndex((match) => match.id === this.currentNoteId)
 				this.$set(this.notes, index, response.data)
 				this.currentNoteId = response.data.id
@@ -193,7 +193,7 @@ export default {
 		async updateNote(note) {
 			this.updating = true
 			try {
-				await axios.put(generateUrl(`/apps/mfaverifiedzone/notes/${note.id}`), note)
+				await axios.put(generateUrl(`/apps/mfazones/notes/${note.id}`), note)
 			} catch (e) {
 				console.error(e)
 				showError(t('notestutorial', 'Could not update the note'))
@@ -206,15 +206,15 @@ export default {
 		 */
 		async deleteNote(note) {
 			try {
-				await axios.delete(generateUrl(`/apps/mfaverifiedzone/notes/${note.id}`))
+				await axios.delete(generateUrl(`/apps/mfazones/notes/${note.id}`))
 				this.notes.splice(this.notes.indexOf(note), 1)
 				if (this.currentNoteId === note.id) {
 					this.currentNoteId = null
 				}
-				showSuccess(t('mfaverifiedzone', 'Note deleted'))
+				showSuccess(t('mfazones', 'Note deleted'))
 			} catch (e) {
 				console.error(e)
-				showError(t('mfaverifiedzone', 'Could not delete the note'))
+				showError(t('mfazones', 'Could not delete the note'))
 			}
 		},
 	},

@@ -1,8 +1,8 @@
 <?php
 
-namespace OCA\MfaVerifiedZone\Controller;
+namespace OCA\mfazones\Controller;
 
-use OCA\MfaVerifiedZone\AppInfo\Application;
+use OCA\mfazones\AppInfo\Application;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
@@ -18,7 +18,7 @@ use OCP\SystemTag\ISystemTagManager;
 
 use OCP\SystemTag\ISystemTagObjectMapper;
 
-class MfaVerifiedZoneController extends Controller
+class mfazonesController extends Controller
 {
     /** @var IUserManager */
     private $userManager;
@@ -72,13 +72,13 @@ class MfaVerifiedZoneController extends Controller
                 $node = $userRoot->get($source);
                 $hasAccess = $isAdmin || $node->getOwner()->getUID() === $this->userId;
             } catch (\Exception $e) {
-                \OC::$server->getLogger()->logException($e, ['app' => 'mfaverifiedzone']);
+                \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
                 $hasAccess = false;
             }
             return $hasAccess;
 
         } catch (\Exception $e) {
-            \OC::$server->getLogger()->logException($e, ['app' => 'mfaverifiedzone']);
+            \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
 
             return false;
         }
@@ -108,7 +108,7 @@ class MfaVerifiedZoneController extends Controller
             );
 
         } catch (\Exception $e) {
-            \OC::$server->getLogger()->logException($e, ['app' => 'mfaverifiedzone']);
+            \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
 
             return new JSONResponse(
                 array(
@@ -149,7 +149,7 @@ class MfaVerifiedZoneController extends Controller
             return new DataResponse([], Http::STATUS_OK);
 
         } catch (\Exception $e) {
-            \OC::$server->getLogger()->logException($e, ['app' => 'mfaverifiedzone']);
+            \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
 
             return new DataResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
