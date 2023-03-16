@@ -6,9 +6,9 @@
     SPDX-License-Identifier: CC0-1.0
     -->
     <id>mfazones</id>
-    <name>Mfa Verified Zone</name>
-    <summary>https://github.com/pondersource/mfa-verified-zone</summary>
-    <description><![CDATA[A plugin for restrict access to file with mfa verified tag
+    <name>MFA Zones</name>
+    <summary>https://github.com/pondersource/mfazones</summary>
+    <description><![CDATA[A plugin to restrict access to files with mfazone tag
 
 See the [README](https://github.com/pondersource/mfazones/blob/main/README.md) for usage.]]></description>
     <version>0.0.1</version>
