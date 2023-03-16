@@ -113,12 +113,12 @@ class Application extends App {
                          "value" => $tagId, 
                          "invalid" => false 
                       ], 
-                [
-                            "class" => "OCA\WorkflowEngine\Check\UserGroupMembership", 
-                            "operator" => "!is", 
-                            "value" => "admin", 
-                            "invalid" => false 
-                         ] 
+                // [
+                //             "class" => "OCA\WorkflowEngine\Check\UserGroupMembership",
+                //             "operator" => "!is",
+                //             "value" => "admin",
+                //             "invalid" => false
+                //          ]
                 ];
             $operation = "deny";
             $entity = "OCA\\WorkflowEngine\\Entity\\File";
