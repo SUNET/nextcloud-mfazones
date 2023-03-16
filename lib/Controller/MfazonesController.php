@@ -18,7 +18,7 @@ use OCP\SystemTag\ISystemTagManager;
 
 use OCP\SystemTag\ISystemTagObjectMapper;
 
-class mfazonesController extends Controller
+class MfazonesController extends Controller
 {
     /** @var IUserManager */
     private $userManager;
