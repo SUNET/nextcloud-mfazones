@@ -1,0 +1,29 @@
+#mfazoneTabView table {
+    margin-left: .5em;
+}
+
+#mfazoneTabView tr:hover {
+    background-color: transparent;
+}
+
+#mfazoneTabView td {
+    border: none;
+    padding: 0;
+}
+
+#mfazoneTabView .key {
+    color: #999;
+    padding-right: .5em;
+    vertical-align: top;
+}
+
+#mfazoneTabView .value {
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 1px;
+}
+
+#mfazoneTabView .value:hover {
+    white-space: pre-wrap;
+}
