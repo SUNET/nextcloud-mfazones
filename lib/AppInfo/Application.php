@@ -112,7 +112,9 @@ class Application extends App {
                          "operator" => "is", 
                          "value" => $tagId, 
                          "invalid" => false 
-                      ], 
+                      ]
+                // uncomment this code to re-activate admin bypass,
+                // see https://github.com/pondersource/nextcloud-mfa-awareness/issues/53
                 // [
                 //             "class" => "OCA\WorkflowEngine\Check\UserGroupMembership",
                 //             "operator" => "!is",
