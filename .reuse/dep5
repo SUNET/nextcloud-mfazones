@@ -1,5 +1,5 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: Mfa Verified Zone
+Upstream-Name: MFA Zones
 Upstream-Contact: Pondersource <michiel@pondersource.com>
 Source: https://github.com/nextcloud/profiler
 
