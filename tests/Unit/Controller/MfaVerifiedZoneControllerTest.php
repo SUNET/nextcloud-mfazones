@@ -62,7 +62,7 @@ class mfazonesControllerTest extends \Test\TestCase
         $this->tagMapper = $this->createMock(ISystemTagObjectMapper::class);
         $this->user = $this->createMock(IUser::class);
         $this->tags = [];
-        $this->tags[1] = new SystemTag("1", "mfarestrictedzone__tag", false, false);;
+        $this->tags[1] = new SystemTag("1", "mfazone", false, false);;
 
         $this->controller = new mfazonesController(
             $this->request,

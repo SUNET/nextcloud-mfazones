@@ -17,7 +17,7 @@ use OCP\IDBConnection;
 
 class Application extends App {
 	public const APP_ID = 'mfazones';
-	public const TAG_NAME = 'mfarestrictedzone__tag';
+	public const TAG_NAME = 'mfazone';
     
     /** @var ISystemTagManager */
     protected ISystemTagManager $systemTagManager;
