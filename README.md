@@ -2,11 +2,15 @@
 
 This is a Nextcloud app that enables file owners and administrators to restrict access to files and folders based on whether or not a logged-in user has passed MFA (multi-factor authentication) verification.
 
+## Caveat
+This app relies on a [PR that has not yet been merged](https://github.com/nextcloud/server/pull/37195) into the nextcloud/server master branch, see [our research repo](https://github.com/pondersource/nextcloud-mfa-awareness#nextcloud-mfa-awareness) for a full list of dependencies..
+
 ## Requirements
 
-- Nextcloud 20 or later
+- Nextcloud 20 or later, plus the patch from https://github.com/nextcloud/server/pull/37195
 - PHP 7.2 or later
 - `File Access Control` (Nextcloud app)
+- More [optional external dependencies](https://github.com/pondersource/nextcloud-mfa-awareness#nextcloud-mfa-awareness), depending on your deployment (using SAML? using Global Site Selector?)
 
 ## Installation
 
