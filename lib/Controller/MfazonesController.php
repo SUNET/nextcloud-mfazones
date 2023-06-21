@@ -187,10 +187,10 @@ class MfazonesController extends Controller
 
     private function castObjectType($type)
     {
-        if ($type == 'file') {
+        if ($type === 'file') {
             return "files";
         }
-        if ($type == "dir") {
+        if ($type === "dir") {
             return "files";
         }
         return $type;
