@@ -14,6 +14,10 @@ use Doctrine\DBAL\Exception;
 use OCA\WorkflowEngine\Helper\ScopeContext;
 use OCP\WorkflowEngine\IManager;
 use OCP\IDBConnection;
+use OCP\EventDispatcher\IEventDispatcher;
+use OCP\User\Events\BeforeUserLoggedInEvent;
+use OCP\IUserManager;
+use OC\Authentication\TwoFactorAuth\Manager as TwoFactorManager;
 
 class Application extends App {
 	public const APP_ID = 'mfazones';
@@ -40,7 +44,22 @@ class Application extends App {
 
         $container = $this->getContainer();
         $server = $container->getServer();
-        $eventDispatcher = $server->getEventDispatcher();
+        $eventDispatcher = $container->get(IEventDispatcher::class);
+
+        $eventDispatcher->addListener(
+            BeforeUserLoggedInEvent::class,
+            function ($event) {
+                // Check if the user has MFA enabled
+                $twoFactorManager = \OC::$server->get(TwoFactorManager::class);
+                $userManager = \OC::$server->get(IUserManager::class);
+                $user = $userManager->get($event->getUsername());
+                $hasMfaEnabled = $twoFactorManager->isTwoFactorAuthenticated($user);
+                // Redirect users to enable MFA if not already enabled
+                if (!$hasMfaEnabled) {
+                    $twoFactorManager->prepareTwoFactorLogin($user, false);
+                }
+            }
+        );
 
         $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
         $this->manager = $this->getContainer()->get(Manager::class);
