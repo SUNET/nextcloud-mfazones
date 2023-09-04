@@ -10,6 +10,7 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Util;
+use OCP\ISession;
 use OCP\Files\IRootFolder;
 use OCP\Activity\IManager;
 use OCP\IUserManager;
@@ -29,6 +30,9 @@ class MfazonesController extends Controller
     /** @var string */
     private $userId;
 
+	/** @var ISession */
+	protected $session;
+
     /** @var ISystemTagManager */
     protected ISystemTagManager $systemTagManager;
 
@@ -47,7 +51,7 @@ class MfazonesController extends Controller
         IRootFolder $rootFolder,
         IGroupManager $groupManager,
         \OCP\ITagManager $tagManager,
-        string $userId,
+        string $userId, ISession $session,
         ISystemTagObjectMapper $tagMapper,
         ISystemTagManager $systemTagManager
     )
@@ -59,18 +63,32 @@ class MfazonesController extends Controller
         $this->groupManager = $groupManager;
         $this->tagManager = $tagManager;
         $this->tagMapper = $tagMapper;
+		$this->session = $session;
         $this->systemTagManager = $systemTagManager;
     }
 
     public function hasAccess($source)
     {
         try {
+            $mfaVerified = '0';
+            if (!empty($this->session->get('globalScale.userData'))) {
+                $attr = $this->session->get('globalScale.userData')["userData"];
+                $mfaVerified = $attr["mfaVerified"];
+            }
+            if (!empty($this->session->get('user_saml.samlUserData'))) {
+                $attr = $this->session->get('user_saml.samlUserData');
+                $mfaVerified = $attr["mfa_verified"][0];
+            }
+            if (!empty($this->session->get("two_factor_auth_passed"))){
+                $mfaVerified = '1';
+            }
+
             $isAdmin = $this->groupManager->isAdmin($this->userId);
             $userRoot = $this->rootFolder->getUserFolder($this->userId);
 
             try {
                 $node = $userRoot->get($source);
-                $hasAccess = $isAdmin || $node->getOwner()->getUID() === $this->userId;
+                $hasAccess = $isAdmin || ($node->getOwner()->getUID() === $this->userId && $mfaVerified === '1');
             } catch (\Exception $e) {
                 \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
                 $hasAccess = false;
@@ -140,7 +158,7 @@ class MfazonesController extends Controller
 
             $type = $this->castObjectType($node->getType());
 
-            if ($protect == "true") {
+            if ($protect === "true") {
                 $this->tagMapper->assignTags($node->getId(), $type, $tagId);
             } else {
                 $this->tagMapper->unassignTags($node->getId(), $type, $tagId);
@@ -169,10 +187,10 @@ class MfazonesController extends Controller
 
     private function castObjectType($type)
     {
-        if ($type == 'file') {
+        if ($type === 'file') {
             return "files";
         }
-        if ($type == "dir") {
+        if ($type === "dir") {
             return "files";
         }
         return $type;
