@@ -85,6 +85,13 @@
 							 <span class="slider round"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enforce MFA requirement
                          </label>
 					 </span>
+					 <br/>
+					 <br/>
+					 <br/>
+                     <div id="need-mfa" style="--icon-size:36px;">
+                         <label for="Enable2FAButton">You need to login with two factor authentication to use this feature.</label><br><br>
+                         <button id="Enable2FAButton" type="button">Enable 2FA</button>
+					 </div>
                 </div>
                 `;
 			const $htmlDisabled = `
