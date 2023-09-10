@@ -12,6 +12,8 @@ use OCA\WorkflowEngine\Manager;
 use Psr\Log\LoggerInterface;
 use Doctrine\DBAL\Exception;
 use OCA\WorkflowEngine\Helper\ScopeContext;
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\WorkflowEngine\IManager;
 use OCP\IDBConnection;
 
@@ -40,14 +42,14 @@ class Application extends App {
 
         $container = $this->getContainer();
         $server = $container->getServer();
-        $eventDispatcher = $server->getEventDispatcher();
+        $eventDispatcher = $this->getContainer()->get(IEventDispatcher::class);
 
         $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
         $this->manager = $this->getContainer()->get(Manager::class);
         $this->logger = $this->getContainer()->get(LoggerInterface::class);
         $this->connection = $this->getContainer()->get(IDBConnection::class);
 
-        $eventDispatcher->addListener('OCA\Files::loadAdditionalScripts', function() {
+        $eventDispatcher->addListener(LoadAdditionalScriptsEvent::class, function() {
             \OCP\Util::addStyle(self::APP_ID, 'tabview' );
             \OCP\Util::addScript(self::APP_ID, 'tabview' );
             \OCP\Util::addScript(self::APP_ID, 'plugin' );

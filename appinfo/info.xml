@@ -19,7 +19,7 @@ See the [README](https://github.com/pondersource/mfazones/blob/main/README.md) f
     <category>security</category>
     <bugs>https://github.com/pondersource/mfazones/issues</bugs>
     <dependencies>
-        <nextcloud min-version="24" max-version="27"/>
+        <nextcloud min-version="24" max-version="28"/>
         <dependency>files_accesscontrol</dependency>
     </dependencies>
 </info>
