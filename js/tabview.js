@@ -89,8 +89,8 @@
 					 <br/>
 					 <br/>
                      <div id="need-mfa" style="--icon-size:36px;">
-                         <label for="Enable2FAButton">You need to login with two factor authentication to use this feature.</label><br><br>
-                         <button id="Enable2FAButton" type="button">Enable 2FA</button>
+                         <label for="enable-2fa-button">You need to login with two factor authentication to use this feature.</label><br><br>
+                         <button id="enable-2fa-button">Enable 2FA</button>
 					 </div>
                 </div>
                 `;
@@ -205,6 +205,13 @@
 				success: function (response) {
 					self.document.getElementById('checkbox-radio-switch-mfa')
 						.checked = response.status;
+					if (response.mfa_passed){
+						context.$el.find('#need-mfa')
+						.hide();
+					} else {
+						context.$el.find('#enable-2fa-button')
+							.click(context.showDialog);
+					}
 					if (enabled) {
 						context.$el.find('#checkbox-radio-switch-mfa')
 							.click(context.boxChecked);
@@ -217,6 +224,11 @@
 					console.log(thrownError);
 				},
 			});
+		},
+		showDialog: function () {
+			if (confirm('You must enable two factor authentication to use MFAZone app. do you want to enable 2FA?')) {
+				window.location.href = '../../settings/user/security';
+			}
 		},
 		boxChecked: function () {
 			const checkBox = this;
