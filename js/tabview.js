@@ -226,7 +226,7 @@
 			});
 		},
 		showDialog: function () {
-			if (confirm('You must enable two factor authentication to use MFAZone app. do you want to enable 2FA?')) {
+			if (confirm('You must enable two factor authentication to use MFAZone app. Do you want to enable 2FA?')) {
 				window.location.href = '../../settings/user/security';
 			}
 		},
