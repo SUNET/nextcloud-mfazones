@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com> -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # MFA Zones Nextcloud App
 
 This is a Nextcloud app that enables file owners and administrators to restrict access to files and folders based on whether or not a logged-in user has passed MFA (multi-factor authentication) verification.

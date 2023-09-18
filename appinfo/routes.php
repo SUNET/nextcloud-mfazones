@@ -1,4 +1,8 @@
 <?php
+
+// SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 return [
 	'routes' => [
 		['name' => 'mfazones#get', 'url' => '/get', 'verb' => 'GET'],
