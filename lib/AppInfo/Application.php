@@ -12,6 +12,8 @@ use OCA\WorkflowEngine\Manager;
 use Psr\Log\LoggerInterface;
 use Doctrine\DBAL\Exception;
 use OCA\WorkflowEngine\Helper\ScopeContext;
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\WorkflowEngine\IManager;
 use OCP\IDBConnection;
 
@@ -40,14 +42,32 @@ class Application extends App {
 
         $container = $this->getContainer();
         $server = $container->getServer();
-        $eventDispatcher = $server->getEventDispatcher();
+        $eventDispatcher = $this->getContainer()->get(IEventDispatcher::class);
+        
+        $eventDispatcher->addListener(
+            BeforeUserLoggedInEvent::class,
+            function ($event) {
+                // Check if the user has MFA verified
+                $twoFactorManager = \OC::$server->get(TwoFactorManager::class);
+                $userManager = \OC::$server->get(IUserManager::class);
+                $user = $userManager->get($event->getUsername());
+                $hasMfaEnabled = $twoFactorManager->isTwoFactorAuthenticated($user);
+                // Redirect users to enable MFA if not already enabled and have 2FA provider
+                if (!$hasMfaEnabled) {
+                    $providerSet = $twoFactorManager->getProviderSet($user);
+                    if(!empty($loginProviders) && !$providerSet->isProviderMissing()){
+                        $twoFactorManager->prepareTwoFactorLogin($user, false);
+                    }
+                }
+            }
+        );
 
         $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
         $this->manager = $this->getContainer()->get(Manager::class);
         $this->logger = $this->getContainer()->get(LoggerInterface::class);
         $this->connection = $this->getContainer()->get(IDBConnection::class);
 
-        $eventDispatcher->addListener('OCA\Files::loadAdditionalScripts', function() {
+        $eventDispatcher->addListener(LoadAdditionalScriptsEvent::class, function() {
             \OCP\Util::addStyle(self::APP_ID, 'tabview' );
             \OCP\Util::addScript(self::APP_ID, 'tabview' );
             \OCP\Util::addScript(self::APP_ID, 'plugin' );

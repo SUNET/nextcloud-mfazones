@@ -1,8 +1,11 @@
 <?php
 
+// SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace OCA\mfazones\Controller\Tests;
 
-use OCA\mfazones\Controller\mfazonesController;
+use OCA\mfazones\Controller\MfazonesController;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -14,6 +17,7 @@ use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\IUser;
 use OCP\IUserManager;
+use OCP\ISession;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
 use OC\SystemTag\SystemTag;
@@ -48,6 +52,9 @@ class mfazonesControllerTest extends \Test\TestCase
     /** @var IUser|\PHPUnit\Framework\MockObject\MockObject */
     private $user;
 
+    /** @var IUser|\PHPUnit\Framework\MockObject\MockObject */
+    private $session;
+
     /** @var array */
     private $tags;
 
@@ -61,16 +68,18 @@ class mfazonesControllerTest extends \Test\TestCase
         $this->tagManager = $this->createMock(\OCP\ITagManager::class);
         $this->tagMapper = $this->createMock(ISystemTagObjectMapper::class);
         $this->user = $this->createMock(IUser::class);
+        $this->session = $this->createMock(ISession::class);
         $this->tags = [];
         $this->tags[1] = new SystemTag("1", "mfazone", false, false);;
 
-        $this->controller = new mfazonesController(
+        $this->controller = new MfazonesController(
             $this->request,
             $this->userManager,
             $this->rootFolder,
             $this->groupManager,
             $this->tagManager,
             "user1",
+            $this->session,
             $this->tagMapper,
             $this->systemTagManager
         );
@@ -105,7 +114,8 @@ class mfazonesControllerTest extends \Test\TestCase
 
         // Set up the expected response
         $expectedResponse = new JSONResponse([
-            "status" => true
+            "status" => true,
+            "mfa_passed" => false
         ]);
 
         // Mock the root folder and user manager
@@ -139,7 +149,7 @@ class mfazonesControllerTest extends \Test\TestCase
         );
     }
 
-    public function testHasUserAccess(): void
+    public function testUserHasNotAccess(): void
     {
         $node = $this->createMock(Node::class);
         $node->method("getOwner")->willReturn($this->user);
@@ -149,9 +159,10 @@ class mfazonesControllerTest extends \Test\TestCase
         $this->rootFolder->method("getUserFolder")->willReturn($userRoot);
         $this->groupManager->method("isAdmin")->willReturn(false);
 
+
         // Test user has access to own file
         $this->user->method("getUID")->willReturn("user1");
-        $this->assertTrue($this->controller->hasAccess("id1"));
+        $this->assertFalse($this->controller->hasAccess("id1"));
     }
 
     public function testHasNotUserAccess(): void

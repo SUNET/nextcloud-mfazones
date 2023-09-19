@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
 (function () {
 	const MfaZoneTabView = OCA.Files.DetailTabView.extend({
 		id: 'mfazoneTabView',
@@ -85,6 +87,13 @@
 							 <span class="slider round"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enforce MFA requirement
                          </label>
 					 </span>
+					 <br/>
+					 <br/>
+					 <br/>
+                     <div id="need-mfa" style="--icon-size:36px;">
+                         <label for="enable-2fa-button">You need to login with two factor authentication to use this feature.</label><br><br>
+                         <button id="enable-2fa-button">Enable 2FA</button>
+					 </div>
                 </div>
                 `;
 			const $htmlDisabled = `
@@ -158,6 +167,13 @@
 							 <span class="slider round"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enforce MFA requirement
                          </label>
 					 </span>
+					 <br/>
+					 <br/>
+					 <br/>
+                     <div id="need-mfa" style="--icon-size:36px;">
+                         <label for="enable-2fa-button">You need to login with two factor authentication to use this feature.</label><br><br>
+                         <button id="enable-2fa-button">Enable 2FA</button>
+					 </div>
                 </div>
                     `;
 			const accessUrl = OC.generateUrl('/apps/mfazones/access'),
@@ -198,6 +214,14 @@
 				success: function (response) {
 					self.document.getElementById('checkbox-radio-switch-mfa')
 						.checked = response.status;
+					console.log(response.mfa_passed);
+					if (!response.mfa_passed){
+						context.$el.find('#enable-2fa-button')
+							.click(context.showDialog);
+					} else {
+						context.$el.find('#need-mfa')
+						.hide();
+					}
 					if (enabled) {
 						context.$el.find('#checkbox-radio-switch-mfa')
 							.click(context.boxChecked);
@@ -210,6 +234,11 @@
 					console.log(thrownError);
 				},
 			});
+		},
+		showDialog: function () {
+			if (confirm('You must enable two factor authentication to use MFAZone app. Do you want to enable 2FA?')) {
+				window.location.href = '../../settings/user/security';
+			}
 		},
 		boxChecked: function () {
 			const checkBox = this;

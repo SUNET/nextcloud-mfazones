@@ -1,4 +1,6 @@
 <?php
+// SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 namespace OCA\mfazones\Controller;
 
@@ -67,28 +69,32 @@ class MfazonesController extends Controller
         $this->systemTagManager = $systemTagManager;
     }
 
+    private function isMfaVerified(){
+        $mfaVerified = '0';
+        if (!empty($this->session->get('globalScale.userData'))) {
+            $attr = $this->session->get('globalScale.userData')["userData"];
+            $mfaVerified = $attr["mfaVerified"];
+        }
+        if (!empty($this->session->get('user_saml.samlUserData'))) {
+            $attr = $this->session->get('user_saml.samlUserData');
+            $mfaVerified = $attr["mfa_verified"][0];
+        }
+        if (!empty($this->session->get("two_factor_auth_passed"))){
+            $mfaVerified = '1';
+        }
+        return $mfaVerified === '1';
+    }
+
     public function hasAccess($source)
     {
         try {
-            $mfaVerified = '0';
-            if (!empty($this->session->get('globalScale.userData'))) {
-                $attr = $this->session->get('globalScale.userData')["userData"];
-                $mfaVerified = $attr["mfaVerified"];
-            }
-            if (!empty($this->session->get('user_saml.samlUserData'))) {
-                $attr = $this->session->get('user_saml.samlUserData');
-                $mfaVerified = $attr["mfa_verified"][0];
-            }
-            if (!empty($this->session->get("two_factor_auth_passed"))){
-                $mfaVerified = '1';
-            }
-
+            $mfaVerified = $this->isMfaVerified();
             $isAdmin = $this->groupManager->isAdmin($this->userId);
             $userRoot = $this->rootFolder->getUserFolder($this->userId);
 
             try {
                 $node = $userRoot->get($source);
-                $hasAccess = $isAdmin || ($node->getOwner()->getUID() === $this->userId && $mfaVerified === '1');
+                $hasAccess = $isAdmin || ($node->getOwner()->getUID() === $this->userId && $mfaVerified);
             } catch (\Exception $e) {
                 \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
                 $hasAccess = false;
@@ -121,7 +127,8 @@ class MfazonesController extends Controller
 
             return new JSONResponse(
                 array(
-                    'status' => $result
+                    'status' => $result,
+                    'mfa_passed' => $this->isMfaVerified()
                 )
             );
 
