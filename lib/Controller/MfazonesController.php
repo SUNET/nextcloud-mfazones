@@ -94,7 +94,7 @@ class MfazonesController extends Controller
 
             try {
                 $node = $userRoot->get($source);
-                $hasAccess = $isAdmin || ($node->getOwner()->getUID() === $this->userId && $mfaVerified);
+                $hasAccess = ($isAdmin || $node->getOwner()->getUID() === $this->userId) && $mfaVerified;
             } catch (\Exception $e) {
                 \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
                 $hasAccess = false;
