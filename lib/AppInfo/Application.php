@@ -88,7 +88,7 @@ class Application extends App {
             );
 
             if(count($tags) < 1){
-                $this->systemTagManager->createTag(self::TAG_NAME, false, false);
+                $this->systemTagManager->createTag(self::TAG_NAME, true, false);
             }
         }catch (Exception $e) {
             $this->logger->error('Error when inserting tag on enabling mfazones app', ['exception' => $e]);
