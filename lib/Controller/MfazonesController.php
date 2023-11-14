@@ -121,6 +121,14 @@ class MfazonesController extends Controller
                 Application::TAG_NAME
             );
             $tag = current($tags);
+            if ($tag == false) {
+                error_log('A server admin should log in so the MFA Zone tag and flow can be created.');
+                return new JSONResponse(
+                    array(
+                        'error' => 'A server admin should log in so the MFA Zone tag and flow can be created'
+                    )
+                );
+            }
             $tagId = $tag->getId();
             $type = $this->castObjectType($node->getType());
             $result = $this->tagMapper->haveTag($node->getId(), $type, $tagId);
@@ -161,6 +169,14 @@ class MfazonesController extends Controller
                 Application::TAG_NAME
             );
             $tag = current($tags);
+            if ($tag == false) {
+                error_log('A server admin should log in so the MFA Zone tag and flow can be created.');
+                return new JSONResponse(
+                    array(
+                        'error' => 'A server admin should log in so the MFA Zone tag and flow can be created'
+                    )
+                );
+            }
             $tagId = $tag->getId();
 
             $type = $this->castObjectType($node->getType());

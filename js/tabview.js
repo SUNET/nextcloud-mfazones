@@ -212,15 +212,16 @@
 				data: data,
 				async: true,
 				success: function (response) {
+				    if (response.error){
+					    console.log(response.error);
+					    return;
+					}
 					self.document.getElementById('checkbox-radio-switch-mfa')
 						.checked = response.status;
 					console.log(response.mfa_passed);
-					if (!response.mfa_passed){
+					if (response.mfa_passed == false){
 						context.$el.find('#enable-2fa-button')
 							.click(context.showDialog);
-					} else {
-						context.$el.find('#need-mfa')
-						.hide();
 					}
 					if (enabled) {
 						context.$el.find('#checkbox-radio-switch-mfa')
@@ -229,8 +230,9 @@
 					self.document.getElementById('mfa-current-file-path')
 					.textContent = _fullPath;
 				},
-				error: function (xhr, ajaxOptions, thrownError) {
+				error: function (xhr, textStatus, thrownError) {
 					console.log(xhr.status);
+					console.log(textStatus);
 					console.log(thrownError);
 				},
 			});
