@@ -75,10 +75,15 @@ class Application extends App {
             $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
             \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
         });
-
-        $this->addTag();
-        $this->addFlows();
-	}
+        $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
+        $userSession = \OC::$server->get(\OCP\IUserSession::class);
+        $user = $userSession->getUser();
+        // The first time an admin logs in to the server, this will create the tag and flow
+        if ($groupManager->isAdmin($user->getUID())) {
+            $this->addTag();
+            $this->addFlows();
+        }
+    }
 
     private function addTag(){
         try{
@@ -88,7 +93,7 @@ class Application extends App {
             );
 
             if(count($tags) < 1){
-                $this->systemTagManager->createTag(self::TAG_NAME, true, false);
+                $this->systemTagManager->createTag(self::TAG_NAME, false, false);
             }
         }catch (Exception $e) {
             $this->logger->error('Error when inserting tag on enabling mfazones app', ['exception' => $e]);
