@@ -218,8 +218,9 @@
 					}
 					self.document.getElementById('checkbox-radio-switch-mfa')
 						.checked = response.status;
-					console.log(response.mfa_passed);
-					if (response.mfa_passed == false){
+					if (response.mfa_passed){
+						context.$el.find('#need-mfa').hide();
+					} else {
 						context.$el.find('#enable-2fa-button')
 							.click(context.showDialog);
 					}
