@@ -21,4 +21,12 @@ See the [README](https://github.com/pondersource/mfazones/blob/main/README.md) f
     <dependencies>
         <nextcloud min-version="24" max-version="28"/>
     </dependencies>
+    <types>
+        <dav/>
+    </types>
+    <sabre>
+        <plugins>
+            <plugin>OCA\mfazones\MFAPlugin</plugin>
+        </plugins>
+    </sabre>
 </info>

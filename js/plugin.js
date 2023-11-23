@@ -7,6 +7,15 @@ var mfazoneFileListPlugin = {
       // }
 
       fileList.registerTabView(new OCA.mfazones.MfaZoneTabView());
+
+      const originalSetFiles = fileList.setFiles;
+
+      fileList.setFiles = (
+        function(filesArray) {
+          console.log('FILES ARRAY 2>>>>>>', filesArray)
+          originalSetFiles.bind(fileList)(filesArray)
+        }
+      ).bind(fileList)
     }
 };
 OC.Plugins.register('OCA.Files.FileList', mfazoneFileListPlugin);
