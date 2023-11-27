@@ -34,6 +34,7 @@ class MFAPlugin extends ServerPlugin {
 
 	public function propFind(PropFind $propFind, INode $node) {
 		// TODO Add MFA status properties
+		// TODO Make sure that this property is requested https://github.com/nextcloud/server/blob/953382e937a4085c1099449b29c40c7aab02fc3e/apps/dav/lib/DAV/CustomPropertiesBackend.php#L186
 		$propFind->set('PonderSource', 'Awesome');
 		error_log($propFind->getPath().' is awesome!');
 	}
