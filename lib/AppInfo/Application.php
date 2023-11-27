@@ -79,7 +79,7 @@ class Application extends App {
         $userSession = \OC::$server->get(\OCP\IUserSession::class);
         $user = $userSession->getUser();
         // The first time an admin logs in to the server, this will create the tag and flow
-        if ($groupManager->isAdmin($user->getUID())) {
+        if ($user !== null && $groupManager->isAdmin($user->getUID())) {
             $this->addTag();
             $this->addFlows();
         }
