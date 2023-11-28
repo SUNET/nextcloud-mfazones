@@ -2,12 +2,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 var mfazoneFileListPlugin = {
     attach: function(fileList) {
+      console.log('FILELIST>>>>>>', fileList);
       // if (fileList.id === 'trashbin' || fileList.id === 'files.public') {
       //   return;
       // }
 
       fileList.registerTabView(new OCA.mfazones.MfaZoneTabView());
-
+      fileList.fileActions.registerAction({
+        name: 'mfa',
+        displayName: 'MFA Zone',
+        type: 1,
+        mime: 'all',
+        permissions: OC.PERMISSION_NONE,
+        iconClass: 'icon-category-security',
+        actionHandler: function(fileName, context) {
+          if (confirm('You must enable two factor authentication to use MFAZone app. Do you want to enable 2FA?')) {
+            window.location.href = OC.generateUrl('/settings/user/security');
+          }
+        },
+        filename: 'asdf'
+      });
       const originalSetFiles = fileList.setFiles;
 
       fileList.setFiles = (
