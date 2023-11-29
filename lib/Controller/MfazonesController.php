@@ -121,7 +121,7 @@ class MfazonesController extends Controller
                 Application::TAG_NAME
             );
             $tag = current($tags);
-            if ($tag == false) {
+            if ($tag === false) {
                 error_log('A server admin should log in so the MFA Zone tag and flow can be created.');
                 return new JSONResponse(
                     array(
@@ -136,6 +136,54 @@ class MfazonesController extends Controller
             return new JSONResponse(
                 array(
                     'status' => $result,
+                    'mfa_passed' => $this->isMfaVerified()
+                )
+            );
+
+        } catch (\Exception $e) {
+            \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
+
+            return new JSONResponse(
+                array(
+                    'response' => 'error',
+                    'msg' => $e->getMessage()
+                )
+            );
+        }
+    }
+
+
+    /**
+     * @NoAdminRequired
+     */
+    public function getList($nodeIds)
+    {
+        try {
+            $userRoot = $this->rootFolder->getUserFolder($this->userId);
+            $tags = $this->systemTagManager->getAllTags(
+                null,
+                Application::TAG_NAME
+            );
+            $tag = current($tags);
+            if ($tag === false) {
+                error_log('A server admin should log in so the MFA Zone tag and flow can be created.');
+                return new JSONResponse(
+                    array(
+                        'error' => 'A server admin should log in so the MFA Zone tag and flow can be created'
+                    )
+                );
+            }
+            $tagId = $tag->getId();
+            $results = [];
+            foreach($nodeIds as $nodeId) {
+                $node = $userRoot->getById($nodeId);
+                $type = $this->castObjectType($node->getType());
+                $results[$nodeId] = $this->tagMapper->haveTag($nodeId, $type, $tagId);
+            }
+
+            return new JSONResponse(
+                array(
+                    'zones' => $results,
                     'mfa_passed' => $this->isMfaVerified()
                 )
             );
@@ -169,7 +217,7 @@ class MfazonesController extends Controller
                 Application::TAG_NAME
             );
             $tag = current($tags);
-            if ($tag == false) {
+            if ($tag === false) {
                 error_log('A server admin should log in so the MFA Zone tag and flow can be created.');
                 return new JSONResponse(
                     array(
