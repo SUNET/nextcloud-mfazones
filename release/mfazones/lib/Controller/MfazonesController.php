@@ -140,7 +140,7 @@ class MfazonesController extends Controller
 
             $type = $this->castObjectType($node->getType());
 
-            if ($protect == "true") {
+            if ($protect === "true") {
                 $this->tagMapper->assignTags($node->getId(), $type, $tagId);
             } else {
                 $this->tagMapper->unassignTags($node->getId(), $type, $tagId);
@@ -169,10 +169,10 @@ class MfazonesController extends Controller
 
     private function castObjectType($type)
     {
-        if ($type == 'file') {
+        if ($type === 'file') {
             return "files";
         }
-        if ($type == "dir") {
+        if ($type === "dir") {
             return "files";
         }
         return $type;
