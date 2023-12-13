@@ -212,6 +212,9 @@ class MfazonesController extends Controller
             }
             $userRoot = $this->rootFolder->getUserFolder($this->userId);
             $node = $userRoot->get($source);
+            if ($node->getType() !== 'dir') {
+                return new DataResponse(['not a directory'], Http::STATUS_FORBIDDEN);
+            }
             $tags = $this->systemTagManager->getAllTags(
                 null,
                 Application::TAG_NAME
