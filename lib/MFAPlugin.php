@@ -19,7 +19,7 @@ use Sabre\HTTP\ResponseInterface;
 class MFAPlugin extends ServerPlugin {
 	private Server $server;
 
-	public const VERSION_LABEL = '{http://nextcloud.org/ns}version-label';
+	public const VERSION_LABEL = '{http://nextcloud.org/ns}requires-mfa';
 
 	public function __construct(
 		private IRequest $request,
