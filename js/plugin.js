@@ -46,6 +46,7 @@ var mfazoneFileListPlugin = {
             }
           });
           console.log('IDS>>>>>>', ids);
+          console.log('attributes of second tr element', document.getElementsByTagName('tr')[1].attributes);
           const statusUrl = OC.generateUrl('/apps/mfazones/getList');
           $.ajax({
             type: 'GET',
