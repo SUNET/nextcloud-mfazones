@@ -17,15 +17,15 @@ use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
 class MFAPlugin extends ServerPlugin {
-	private Server $server;
+    /** @var ISystemTagObjectMapper */
+    private $tagMapper;
 
-	public const VERSION_LABEL = '{http://nextcloud.org/ns}requires-mfa';
+	public const ATTR_NAME = '{http://nextcloud.org/ns}requires-mfa';
 
 	public function __construct(
-		private IRequest $request,
-		private IPreview $previewManager,
+        ISystemTagObjectMapper $tagMapper
 	) {
-		$this->request = $request;
+		$this->tagMapper = $tagMapper;
 	}
 
 	public function initialize(Server $server) {
@@ -34,7 +34,14 @@ class MFAPlugin extends ServerPlugin {
 	}
 
 	public function propFind(PropFind $propFind, INode $node): void {
-			$propFind->handle(self::VERSION_LABEL, fn() => 'ponder3source');
-			// $propFind->handle(FilesPlugin::HAS_PREVIEW_PROPERTYNAME, fn () => 'ponder2source');
+		$propFind->handle(self::ATTR_NAME, function() {
+			$tagId = Application::getOurTagId();
+            if ($tagId === false) {
+                return false;
+            }
+            $type = Application::castObjectType($node->getType());
+			// FIXME: check parents too
+            return $this->tagMapper->haveTag($node->getId(), $type, $tagId);
+		});
 	}
 }

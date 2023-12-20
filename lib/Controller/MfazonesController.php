@@ -116,11 +116,7 @@ class MfazonesController extends Controller
         try {
             $userRoot = $this->rootFolder->getUserFolder($this->userId);
             $node = $userRoot->get($source);
-            $tags = $this->systemTagManager->getAllTags(
-                null,
-                Application::TAG_NAME
-            );
-            $tag = current($tags);
+            $tag = Application::getOurTagId();
             if ($tag === false) {
                 error_log('A server admin should log in so the MFA Zone tag and flow can be created.');
                 return new JSONResponse(

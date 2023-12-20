@@ -80,12 +80,11 @@ class Application extends App {
         $user = $userSession->getUser();
         // The first time an admin logs in to the server, this will create the tag and flow
         if ($user !== null && $groupManager->isAdmin($user->getUID())) {
-            $this->addTag();
             $this->addFlows();
         }
     }
 
-    private function addTag(){
+    private static function getOurTagId(){
         try{
             $tags = $this->systemTagManager->getAllTags(
                 null,
@@ -93,11 +92,25 @@ class Application extends App {
             );
 
             if(count($tags) < 1){
-                $this->systemTagManager->createTag(self::TAG_NAME, false, false);
+                $tag = $this->systemTagManager->createTag(self::TAG_NAME, false, false);
+            } else {
+                $tag = current($tags);
             }
+            return $tag->getId();
         }catch (Exception $e) {
             $this->logger->error('Error when inserting tag on enabling mfazones app', ['exception' => $e]);
+            return false;
         }
+    }
+
+    public function nodeHasTag($node, $tagId){
+        $tags = $this->systemTagManager->getTagsForObjects([$node->getId()]);
+        foreach ($tags as $tag) {
+            if ($tag->getId() === $tagId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function addFlows(){
@@ -115,12 +128,7 @@ class Application extends App {
                 return;
             }
 
-            $tags = $this->systemTagManager->getAllTags(
-                null,
-                self::TAG_NAME
-            );
-            $tag = current($tags);
-            $tagId = $tag->getId();
+            $tagId = self::getOurTagId(); // will create the tag if necessary
 
             $scope = new ScopeContext(IManager::SCOPE_ADMIN);
             $class = "OCA\\FilesAccessControl\\Operation";
