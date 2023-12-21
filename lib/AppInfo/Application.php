@@ -84,6 +84,17 @@ class Application extends App {
         }
     }
 
+    private static function castObjectType($type)
+    {
+        if ($type === 'file') {
+            return "files";
+        }
+        if ($type === "dir") {
+            return "files";
+        }
+        return $type;
+    }
+
     private static function getOurTagId(){
         try{
             $tags = $this->systemTagManager->getAllTags(
