@@ -116,8 +116,8 @@ class MfazonesController extends Controller
         try {
             $userRoot = $this->rootFolder->getUserFolder($this->userId);
             $node = $userRoot->get($source);
-            $tag = Application::getOurTagId();
-            if ($tag === false) {
+            $tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager);
+            if ($tagId === false) {
                 error_log('A server admin should log in so the MFA Zone tag and flow can be created.');
                 return new JSONResponse(
                     array(
@@ -125,8 +125,7 @@ class MfazonesController extends Controller
                     )
                 );
             }
-            $tagId = $tag->getId();
-            $type = $this->castObjectType($node->getType());
+            $type = Application::castObjectType($node->getType());
             $result = $this->tagMapper->haveTag($node->getId(), $type, $tagId);
 
             return new JSONResponse(
@@ -173,7 +172,7 @@ class MfazonesController extends Controller
             $results = [];
             foreach($nodeIds as $nodeId) {
                 $node = $userRoot->getById($nodeId);
-                $type = $this->castObjectType($node->getType());
+                $type = Application::castObjectType($node->getType());
                 $results[$nodeId] = $this->tagMapper->haveTag($nodeId, $type, $tagId);
             }
 
@@ -211,12 +210,8 @@ class MfazonesController extends Controller
             if ($node->getType() !== 'dir') {
                 return new DataResponse(['not a directory'], Http::STATUS_FORBIDDEN);
             }
-            $tags = $this->systemTagManager->getAllTags(
-                null,
-                Application::TAG_NAME
-            );
-            $tag = current($tags);
-            if ($tag === false) {
+            $tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager);
+            if ($tagId === false) {
                 error_log('A server admin should log in so the MFA Zone tag and flow can be created.');
                 return new JSONResponse(
                     array(
@@ -224,9 +219,7 @@ class MfazonesController extends Controller
                     )
                 );
             }
-            $tagId = $tag->getId();
-
-            $type = $this->castObjectType($node->getType());
+            $type = Application::castObjectType($node->getType());
 
             if ($protect === "true") {
                 $this->tagMapper->assignTags($node->getId(), $type, $tagId);
@@ -253,16 +246,5 @@ class MfazonesController extends Controller
                 'access' => $this->hasAccess($source)
             )
         );
-    }
-
-    private function castObjectType($type)
-    {
-        if ($type === 'file') {
-            return "files";
-        }
-        if ($type === "dir") {
-            return "files";
-        }
-        return $type;
     }
 }

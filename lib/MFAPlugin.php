@@ -17,14 +17,19 @@ use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
 class MFAPlugin extends ServerPlugin {
+    /** @var ISystemTagManager */
+    private $sytemTagMapper;
+
     /** @var ISystemTagObjectMapper */
     private $tagMapper;
 
 	public const ATTR_NAME = '{http://nextcloud.org/ns}requires-mfa';
 
 	public function __construct(
+		ISystemTagManager $systemTagManager,
         ISystemTagObjectMapper $tagMapper
 	) {
+		$this->systemTagManager = $systemTagManager;
 		$this->tagMapper = $tagMapper;
 	}
 
@@ -35,7 +40,7 @@ class MFAPlugin extends ServerPlugin {
 
 	public function propFind(PropFind $propFind, INode $node): void {
 		$propFind->handle(self::ATTR_NAME, function() {
-			$tagId = Application::getOurTagId();
+			$tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager);
             if ($tagId === false) {
                 return false;
             }

@@ -95,15 +95,15 @@ class Application extends App {
         return $type;
     }
 
-    private static function getOurTagId(){
+    public static function getOurTagIdFromSystemTagManager($systemTagManager){
         try{
-            $tags = $this->systemTagManager->getAllTags(
+            $tags = $systemTagManager->getAllTags(
                 null,
                 self::TAG_NAME
             );
 
             if(count($tags) < 1){
-                $tag = $this->systemTagManager->createTag(self::TAG_NAME, false, false);
+                $tag = $systemTagManager->createTag(self::TAG_NAME, false, false);
             } else {
                 $tag = current($tags);
             }
