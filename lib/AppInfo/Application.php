@@ -97,7 +97,7 @@ class Application extends App {
         }
     }
 
-    private static function castObjectType($type)
+    public static function castObjectType($type)
     {
         if ($type === 'file') {
             return "files";

@@ -18,6 +18,7 @@ use Sabre\HTTP\ResponseInterface;
 use OCP\SystemTag\ISystemTag;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
+use OCA\mfazones\AppInfo\Application;
 
 class MFAPlugin extends ServerPlugin {
     /** @var ISystemTagManager */
@@ -47,6 +48,7 @@ class MFAPlugin extends ServerPlugin {
 
 	public function propFind(PropFind $propFind, INode $node): void {
 		$propFind->handle(self::ATTR_NAME, function() {
+			return true;
 			$tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager);
             if ($tagId === false) {
                 return false;
