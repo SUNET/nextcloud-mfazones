@@ -41,6 +41,12 @@ class Application extends App {
         // }
 
         $container = $this->getContainer();
+        $container->registerService('MFAPlugin', function($c) {
+            $systemTagManager = $c->query(ISystemTagManager::class);
+            $tagMapper = $c->query(ISystemTagObjectMapper::class);
+            return new MFAPlugin($systemTagManager, $tagMapper);
+        });
+
         $server = $container->getServer();
         $eventDispatcher = $this->getContainer()->get(IEventDispatcher::class);
         
