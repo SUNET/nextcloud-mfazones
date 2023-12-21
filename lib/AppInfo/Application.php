@@ -8,6 +8,7 @@ namespace OCA\mfazones\AppInfo;
 use OCP\AppFramework\App;
 use OCP\SystemTag\ISystemTag;
 use OCP\SystemTag\ISystemTagManager;
+use OCP\SystemTag\ISystemTagObjectMapper;
 use OCA\WorkflowEngine\Manager;
 use Psr\Log\LoggerInterface;
 use Doctrine\DBAL\Exception;
@@ -16,6 +17,7 @@ use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\WorkflowEngine\IManager;
 use OCP\IDBConnection;
+use OCA\mfazones\MFAPlugin;
 
 class Application extends App {
 	public const APP_ID = 'mfazones';
@@ -41,10 +43,15 @@ class Application extends App {
         // }
 
         $container = $this->getContainer();
-        $container->registerService('MFAPlugin', function($c) {
+        $container->registerService(MFAPlugin::class, function($c) {
+            error_log('constructing MFAPlugin ' . ISystemTagManager::class);
             $systemTagManager = $c->query(ISystemTagManager::class);
+            error_log('got systemTagManager');
             $tagMapper = $c->query(ISystemTagObjectMapper::class);
-            return new MFAPlugin($systemTagManager, $tagMapper);
+            error_log('got tagMapper');
+            $x = new MFAPlugin($systemTagManager, $tagMapper);
+            error_log('registering MFAPlugin');
+            return $x;
         });
 
         $server = $container->getServer();
