@@ -139,7 +139,7 @@ class Application extends App {
                 return;
             }
 
-            $tagId = self::getOurTagId(); // will create the tag if necessary
+            $tagId = self::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
 
             $scope = new ScopeContext(IManager::SCOPE_ADMIN);
             $class = "OCA\\FilesAccessControl\\Operation";

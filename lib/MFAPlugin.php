@@ -31,10 +31,14 @@ class MFAPlugin extends ServerPlugin {
 	) {
 		$this->systemTagManager = $systemTagManager;
 		$this->tagMapper = $tagMapper;
+        // $server = \OC\Server::getInstance();
+		// $container = $server->getContainer();
 	}
 
 	public function initialize(Server $server) {
 		$this->server = $server;
+        // $this->systemTagManager = $server::getInstance()->get(ISystemTagManager::class);
+		// $this->tagMapper = \OCP\Server::getInstance()->get(ITagMapper::class);
 		$server->on('propFind', [$this, 'propFind']);
 	}
 
