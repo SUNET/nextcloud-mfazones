@@ -47,8 +47,9 @@ class MFAPlugin extends ServerPlugin {
 	}
 
 	public function propFind(PropFind $propFind, INode $node): void {
-		$propFind->handle(self::ATTR_NAME, function() {
-			return true;
+		$propFind->handle(self::ATTR_NAME, function() use(&$node) {
+			// return true;
+			// error_log('in propFind callback - ' . var_export(typeof $node, true) );
 			$tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager);
             if ($tagId === false) {
                 return false;

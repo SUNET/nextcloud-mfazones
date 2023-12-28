@@ -47,38 +47,38 @@ var mfazoneFileListPlugin = {
           });
           console.log('IDS>>>>>>', ids);
           console.log('attributes of second tr element', document.getElementsByTagName('tr')[1].attributes);
-          const statusUrl = OC.generateUrl('/apps/mfazones/getList');
-          $.ajax({
-            type: 'GET',
-            url: statusUrl,
-            dataType: 'json',
-            data: JSON.stringify(ids),
-            async: true,
-            success: function (response) {
-                if (response.error){
-                  console.log(response.error);
-                  return;
-              }
-              console.log('RESPONSE>>>>>>', response);
-              document.getElementsByTagName('tr').forEach((tr) => {
-                if ((typeof tr.getAttribute('data-id') === 'string') && (typeof parseInt(tr.getAttribute('data-id')) === 'number')) {
-                  ids.push(tr.getAttribute('data-id'));
-                  const divs = tr.getElementsByClassName('action-mfa');
-                  if (divs.length === 1) {
-                    const icon = divs[0].getElementsByTagName('span')[0];
-                    const text = divs[0].getElementsByTagName('span')[1];
-                    icon.classList.remove('icon-category-security');
-                    text.innerText = tr.getAttribute('data-id');
-                  }
-                }
-              });
-            },
-            error: function (xhr, textStatus, thrownError) {
-              console.log(xhr.status);
-              console.log(textStatus);
-              console.log(thrownError);
-            },
-          });
+          // const statusUrl = OC.generateUrl('/apps/mfazones/getList');
+          // $.ajax({
+          //   type: 'GET',
+          //   url: statusUrl,
+          //   dataType: 'json',
+          //   data: JSON.stringify(ids),
+          //   async: true,
+          //   success: function (response) {
+          //       if (response.error){
+          //         console.log(response.error);
+          //         return;
+          //     }
+          //     console.log('RESPONSE>>>>>>', response);
+          //     document.getElementsByTagName('tr').forEach((tr) => {
+          //       if ((typeof tr.getAttribute('data-id') === 'string') && (typeof parseInt(tr.getAttribute('data-id')) === 'number')) {
+          //         ids.push(tr.getAttribute('data-id'));
+          //         const divs = tr.getElementsByClassName('action-mfa');
+          //         if (divs.length === 1) {
+          //           const icon = divs[0].getElementsByTagName('span')[0];
+          //           const text = divs[0].getElementsByTagName('span')[1];
+          //           icon.classList.remove('icon-category-security');
+          //           text.innerText = tr.getAttribute('data-id');
+          //         }
+          //       }
+          //     });
+          //   },
+          //   error: function (xhr, textStatus, thrownError) {
+          //     console.log(xhr.status);
+          //     console.log(textStatus);
+          //     console.log(thrownError);
+          //   },
+          // });
         }
       ).bind(fileList)
 
