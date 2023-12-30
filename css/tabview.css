@@ -30,9 +30,6 @@
     white-space: pre-wrap;
 }
 
-tr[data-requires-mfa="true"] {
-    background-color: #f03030;
-}
-tr[data-requires-mfa="false"] {
-    background-color: #30f030;
+tr[data-requires-mfa="false"] .fileactions a[data-action="mfa"] {
+    display: none;
 }

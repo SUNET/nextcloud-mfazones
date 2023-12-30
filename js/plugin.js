@@ -12,11 +12,11 @@ var mfazoneFileListPlugin = {
 
       fileList.fileActions.registerAction({
         name: 'mfa',
-        displayName: '',
+        displayName: 'MFA Zone',
         type: 1,
         mime: 'all',
         permissions: OC.PERMISSION_NONE,
-        // iconClass: 'icon-category-security',
+        iconClass: 'icon-category-security',
         actionHandler: function(fileName, context) {
           if (confirm('You must enable two factor authentication to use MFAZone app. Do you want to enable 2FA?')) {
             window.location.href = OC.generateUrl('/settings/user/security');
@@ -46,20 +46,20 @@ var mfazoneFileListPlugin = {
             }
           });
           // console.log('IDS>>>>>>', ids);
-          const trs = document.getElementsByTagName('tr');
-          for (let i=1; i<trs.length; i++) {
-            console.log('data-requires-mfa attribute of', trs[i].getAttribute('data-file'), trs[i].getAttribute('data-requires-mfa'));
-            if (trs[i].getAttribute('data-requires-mfa') === 'true') {
-              console.log('adding icon to', trs[i]);
-              const divs = trs[i].getElementsByClassName('action-mfa');
-              if (divs.length === 1) {
-                const icon = divs[0].getElementsByTagName('span')[0];
-                const text = divs[0].getElementsByTagName('span')[1];
-                icon.classList.add('icon-category-security');
-                text.innerText = 'MFA Zone';
-              }
-            }
-          }
+          // const trs = document.getElementsByTagName('tr');
+          // for (let i=1; i<trs.length; i++) {
+          //   console.log('data-requires-mfa attribute of', trs[i].getAttribute('data-file'), trs[i].getAttribute('data-requires-mfa'));
+          //   if (trs[i].getAttribute('data-requires-mfa') === 'true') {
+          //     console.log('adding icon to', trs[i]);
+          //     const divs = trs[i].getElementsByClassName('action-mfa');
+          //     if (divs.length === 1) {
+          //       const icon = divs[0].getElementsByTagName('span')[0];
+          //       const text = divs[0].getElementsByTagName('span')[1];
+          //       icon.classList.add('icon-category-security');
+          //       text.innerText = 'MFA Zone';
+          //     }
+          //   }
+          // }
           
           // const statusUrl = OC.generateUrl('/apps/mfazones/getList');
         }
