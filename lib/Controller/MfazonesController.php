@@ -111,6 +111,18 @@ class MfazonesController extends Controller
     /**
      * @NoAdminRequired
      */
+    public function getMfaStatus()
+    {
+        return new JSONResponse(
+            array(
+                'mfa_passed' => $this->isMfaVerified()
+            )
+        );
+    }
+    
+    /**
+     * @NoAdminRequired
+     */
     public function get($source)
     {
         try {

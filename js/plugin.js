@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 var mfazoneFileListPlugin = {
     attach: function(fileList) {
-      console.log('FILELIST>>>>>>', fileList);
+      // console.log('FILELIST>>>>>>', fileList);
       // if (fileList.id === 'trashbin' || fileList.id === 'files.public') {
       //   return;
       // }
@@ -18,9 +18,27 @@ var mfazoneFileListPlugin = {
         permissions: OC.PERMISSION_NONE,
         iconClass: 'icon-category-security',
         actionHandler: function(fileName, context) {
-          if (confirm('You must enable two factor authentication to use MFAZone app. Do you want to enable 2FA?')) {
-            window.location.href = OC.generateUrl('/settings/user/security');
-          }
+          const statusUrl = OC.generateUrl('/apps/mfazones/getMfaStatus');
+          $.ajax({
+            type: 'GET',
+            url: statusUrl,
+            dataType: 'json',
+            async: true,
+            success: function (response) {
+              if (response.error){
+                  console.log(response.error);
+                  return;
+              }
+              if (response.mfa_passed !== true) {
+                const choice = confirm('This folder requires Multi Factor Authentication. Do you want to enable it for your account?')
+                if (choice) {
+                  window.location.href = OC.generateUrl('/settings/user/security');
+                }
+              } else {
+                alert('You have already enabled Multi Factor Authentication for your account.');
+              }
+            }
+          });
         },
         // fileName: 'asdf',
       });
