@@ -12,11 +12,11 @@ var mfazoneFileListPlugin = {
 
       fileList.fileActions.registerAction({
         name: 'mfa',
-        displayName: 'MFA Zone',
+        displayName: '',
         type: 1,
         mime: 'all',
         permissions: OC.PERMISSION_NONE,
-        iconClass: 'icon-category-security',
+        // iconClass: 'icon-category-security',
         actionHandler: function(fileName, context) {
           if (confirm('You must enable two factor authentication to use MFAZone app. Do you want to enable 2FA?')) {
             window.location.href = OC.generateUrl('/settings/user/security');
@@ -29,7 +29,7 @@ var mfazoneFileListPlugin = {
       fileList.setFiles = (
         function(filesArray) {
           // You can find the setFiles function here: https://github.com/nextcloud/server/blob/master/apps/files/js/filelist.js
-          console.log('FILES ARRAY 2>>>>>>', filesArray)
+          // console.log('FILES ARRAY 2>>>>>>', filesArray)
           filesArray.forEach((file) => {
             console.log('seeing', file.name);
             if (file.name === 'asdf') {
@@ -45,9 +45,24 @@ var mfazoneFileListPlugin = {
               ids.push(tr.getAttribute('data-id'));
             }
           });
-          console.log('IDS>>>>>>', ids);
-          console.log('attributes of second tr element', document.getElementsByTagName('tr')[1].attributes);
+          // console.log('IDS>>>>>>', ids);
+          const trs = document.getElementsByTagName('tr');
+          for (let i=1; i<trs.length; i++) {
+            console.log('data-requires-mfa attribute of', trs[i].getAttribute('data-file'), trs[i].getAttribute('data-requires-mfa'));
+            if (trs[i].getAttribute('data-requires-mfa') === 'true') {
+              console.log('adding icon to', trs[i]);
+              const divs = trs[i].getElementsByClassName('action-mfa');
+              if (divs.length === 1) {
+                const icon = divs[0].getElementsByTagName('span')[0];
+                const text = divs[0].getElementsByTagName('span')[1];
+                icon.classList.add('icon-category-security');
+                text.innerText = 'MFA Zone';
+              }
+            }
+          }
+          
           // const statusUrl = OC.generateUrl('/apps/mfazones/getList');
+        }
           // $.ajax({
           //   type: 'GET',
           //   url: statusUrl,
@@ -62,7 +77,7 @@ var mfazoneFileListPlugin = {
           //     console.log('RESPONSE>>>>>>', response);
           //     document.getElementsByTagName('tr').forEach((tr) => {
           //       if ((typeof tr.getAttribute('data-id') === 'string') && (typeof parseInt(tr.getAttribute('data-id')) === 'number')) {
-          //         ids.push(tr.getAttribute('data-id'));
+          //         ids.push(tr.getAttribute('data-id'));2
           //         const divs = tr.getElementsByClassName('action-mfa');
           //         if (divs.length === 1) {
           //           const icon = divs[0].getElementsByTagName('span')[0];
@@ -79,7 +94,6 @@ var mfazoneFileListPlugin = {
           //     console.log(thrownError);
           //   },
           // });
-        }
       ).bind(fileList)
 
       fileList._getWebdavProperties = (function() {

@@ -49,14 +49,21 @@ class MFAPlugin extends ServerPlugin {
 	public function propFind(PropFind $propFind, INode $node): void {
 		$propFind->handle(self::ATTR_NAME, function() use(&$node) {
 			// return true;
-			// error_log('in propFind callback - ' . var_export(typeof $node, true) );
+			error_log('in propFind callback - node class ' . var_export(get_class($node), true) );
+			// error_log('in propFind callback - node name ' . var_export($node->getName(), true) );
+			// error_log('in propFind callback - node->node->path ' . var_export($node->getNode()->getPath(), true) );
+			// error_log('in propFind callback - node->node->internalPath ' . var_export($node->getNode()->getInternalPath(), true) );
+			error_log('in propFind callback - node->node->id ' . var_export($node->getNode()->getId(), true) );
+			// error_log('in propFind callback - node->node->internalFileId ' . var_export($node->getNode()->getInternalFileId(), true) );
+			// error_log('in propFind callback - node->node->fileId ' . var_export($node->getNode()->getFileId(), true) );
+			// error+
 			$tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager);
             if ($tagId === false) {
                 return false;
             }
-            $type = Application::castObjectType($node->getType());
+            // $type = Application::castObjectType($node->getType());
 			// FIXME: check parents too
-            return $this->tagMapper->haveTag($node->getId(), $type, $tagId);
+            return $this->tagMapper->haveTag($node->getId(), 'files', $tagId);
 		});
 	}
 }
