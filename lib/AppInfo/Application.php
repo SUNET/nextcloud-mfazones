@@ -8,6 +8,7 @@ namespace OCA\mfazones\AppInfo;
 use OCP\AppFramework\App;
 use OCP\SystemTag\ISystemTag;
 use OCP\SystemTag\ISystemTagManager;
+use OCP\SystemTag\ISystemTagObjectMapper;
 use OCA\WorkflowEngine\Manager;
 use Psr\Log\LoggerInterface;
 use Doctrine\DBAL\Exception;
@@ -16,6 +17,7 @@ use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\WorkflowEngine\IManager;
 use OCP\IDBConnection;
+use OCA\mfazones\MFAPlugin;
 
 class Application extends App {
 	public const APP_ID = 'mfazones';
@@ -41,6 +43,17 @@ class Application extends App {
         // }
 
         $container = $this->getContainer();
+        $container->registerService(MFAPlugin::class, function($c) {
+            error_log('constructing MFAPlugin ' . ISystemTagManager::class);
+            $systemTagManager = $c->query(ISystemTagManager::class);
+            error_log('got systemTagManager');
+            $tagMapper = $c->query(ISystemTagObjectMapper::class);
+            error_log('got tagMapper');
+            $x = new MFAPlugin($systemTagManager, $tagMapper);
+            error_log('registering MFAPlugin');
+            return $x;
+        });
+
         $server = $container->getServer();
         $eventDispatcher = $this->getContainer()->get(IEventDispatcher::class);
         
@@ -79,25 +92,49 @@ class Application extends App {
         $userSession = \OC::$server->get(\OCP\IUserSession::class);
         $user = $userSession->getUser();
         // The first time an admin logs in to the server, this will create the tag and flow
-        if ($groupManager->isAdmin($user->getUID())) {
-            $this->addTag();
+        if ($user !== null && $groupManager->isAdmin($user->getUID())) {
             $this->addFlows();
         }
     }
 
-    private function addTag(){
+    public static function castObjectType($type)
+    {
+        if ($type === 'file') {
+            return "files";
+        }
+        if ($type === "dir") {
+            return "files";
+        }
+        return $type;
+    }
+
+    public static function getOurTagIdFromSystemTagManager($systemTagManager){
         try{
-            $tags = $this->systemTagManager->getAllTags(
+            $tags = $systemTagManager->getAllTags(
                 null,
                 self::TAG_NAME
             );
 
             if(count($tags) < 1){
-                $this->systemTagManager->createTag(self::TAG_NAME, false, false);
+                $tag = $systemTagManager->createTag(self::TAG_NAME, false, false);
+            } else {
+                $tag = current($tags);
             }
+            return $tag->getId();
         }catch (Exception $e) {
             $this->logger->error('Error when inserting tag on enabling mfazones app', ['exception' => $e]);
+            return false;
         }
+    }
+
+    public function nodeHasTag($node, $tagId){
+        $tags = $this->systemTagManager->getTagsForObjects([$node->getId()]);
+        foreach ($tags as $tag) {
+            if ($tag->getId() === $tagId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function addFlows(){
@@ -115,12 +152,7 @@ class Application extends App {
                 return;
             }
 
-            $tags = $this->systemTagManager->getAllTags(
-                null,
-                self::TAG_NAME
-            );
-            $tag = current($tags);
-            $tagId = $tag->getId();
+            $tagId = self::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
 
             $scope = new ScopeContext(IManager::SCOPE_ADMIN);
             $class = "OCA\\FilesAccessControl\\Operation";

@@ -29,3 +29,7 @@
 #mfazoneTabView .value:hover {
     white-space: pre-wrap;
 }
+
+tr[data-requires-mfa="false"] .fileactions a[data-action="mfa"] {
+    display: none;
+}
