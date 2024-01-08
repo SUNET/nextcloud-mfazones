@@ -18,6 +18,8 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\WorkflowEngine\IManager;
 use OCP\IDBConnection;
 use OCA\mfazones\MFAPlugin;
+use OCP\WorkflowEngine\Events\RegisterChecksEvent;
+use OCA\mfazones\Check\MfaVerified;
 
 class Application extends App {
 	public const APP_ID = 'mfazones';
@@ -34,10 +36,19 @@ class Application extends App {
 
 	/** @var IDBConnection */
 	protected $connection;
-
-	public function __construct() {
+    
+	public function __construct(MfaVerified $mfaVerifiedCheck) {
 		parent::__construct(self::APP_ID);
 
+        /* @var IEventDispatcher $dispatcher */
+        $dispatcher = $this->getContainer()->query(IEventDispatcher::class);
+        $dispatcher->addListener(RegisterChecksEvent::class, function(RegisterChecksEvent $event) {
+            // copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/lib/Listener/RegisterChecksListener.php
+            if (!($event instanceof RegisterChecksEvent)) {
+                return;
+            }
+            $event->registerCheck($mfaVerifiedCheck);
+        });
         // if (!\OCP\App::isEnabled('files_accesscontrol')) {
         //     throw new Exception("MFA Zone needs files_accesscontrol app to be enabled before installation.");
         // }
