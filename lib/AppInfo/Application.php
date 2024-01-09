@@ -36,22 +36,18 @@ class Application extends App {
 
 	/** @var IDBConnection */
 	protected $connection;
-    
-	public function __construct(MfaVerified $mfaVerifiedCheck) {
-		parent::__construct(self::APP_ID);
 
-        /* @var IEventDispatcher $dispatcher */
-        $dispatcher = $this->getContainer()->query(IEventDispatcher::class);
-        $dispatcher->addListener(RegisterChecksEvent::class, function(RegisterChecksEvent $event) {
-            // copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/lib/Listener/RegisterChecksListener.php
-            if (!($event instanceof RegisterChecksEvent)) {
-                return;
-            }
-            $event->registerCheck($mfaVerifiedCheck);
-        });
-        // if (!\OCP\App::isEnabled('files_accesscontrol')) {
-        //     throw new Exception("MFA Zone needs files_accesscontrol app to be enabled before installation.");
-        // }
+    /** @var IL10N */
+    protected $l;
+
+    /** @var ISession */
+    protected $session;
+
+    /** @var MfaVerified */
+    protected $mfaVerifiedCheck;
+
+	public function __construct() {
+		parent::__construct(self::APP_ID);
 
         $container = $this->getContainer();
         $container->registerService(MFAPlugin::class, function($c) {
@@ -65,33 +61,26 @@ class Application extends App {
             return $x;
         });
 
-        $server = $container->getServer();
-        $eventDispatcher = $this->getContainer()->get(IEventDispatcher::class);
+        $this->l = $this->getContainer()->get(IL10N::class);
+        $this->session = $this->getContainer()->get(ISession::class);
+        $this->mfaVerifiedCheck = new MfaVerified($l, $session);
         
-        // $eventDispatcher->addListener(
-        //     BeforeUserLoggedInEvent::class,
-        //     function ($event) {
-        //         // Check if the user has MFA verified
-        //         $twoFactorManager = \OC::$server->get(TwoFactorManager::class);
-        //         $userManager = \OC::$server->get(IUserManager::class);
-        //         $user = $userManager->get($event->getUsername());
-        //         $hasMfaEnabled = $twoFactorManager->isTwoFactorAuthenticated($user);
-        //         // Redirect users to enable MFA if not already enabled and have 2FA provider
-        //         if (!$hasMfaEnabled) {
-        //             $providerSet = $twoFactorManager->getProviderSet($user);
-        //             if(!empty($loginProviders) && !$providerSet->isProviderMissing()){
-        //                 $twoFactorManager->prepareTwoFactorLogin($user, false);
-        //             }
-        //         }
-        //     }
-        // );
+        /* @var IEventDispatcher $dispatcher */
+        $dispatcher = $this->getContainer()->query(IEventDispatcher::class);
+        $dispatcher->addListener(RegisterChecksEvent::class, function(RegisterChecksEvent $event) {
+            // copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/lib/Listener/RegisterChecksListener.php
+            if (!($event instanceof RegisterChecksEvent)) {
+                return;
+            }
+            $event->registerCheck($this->mfaVerifiedCheck);
+        });
 
         $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
         $this->manager = $this->getContainer()->get(Manager::class);
         $this->logger = $this->getContainer()->get(LoggerInterface::class);
         $this->connection = $this->getContainer()->get(IDBConnection::class);
 
-        $eventDispatcher->addListener(LoadAdditionalScriptsEvent::class, function() {
+        $dispatcher->addListener(LoadAdditionalScriptsEvent::class, function() {
             \OCP\Util::addStyle(self::APP_ID, 'tabview' );
             \OCP\Util::addScript(self::APP_ID, 'tabview' );
             \OCP\Util::addScript(self::APP_ID, 'plugin' );
