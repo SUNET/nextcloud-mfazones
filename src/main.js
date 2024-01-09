@@ -91,14 +91,14 @@ var mfazoneFileListPlugin = {
           // You can find the setFiles function here: https://github.com/nextcloud/server/blob/master/apps/files/js/filelist.js
           // console.log('FILES ARRAY 2>>>>>>', filesArray)
           filesArray.forEach((file) => {
-            console.log('seeing', file.name);
+            console.log('hello seeing', file.name);
             if (file.name === 'asdf') {
               console.log('registering');
               }
             });
     
           originalSetFiles.bind(fileList)(filesArray);
-          console.log("gathering ids");
+          console.log("gathering ids hello");
           let ids = [];
           document.getElementsByTagName('tr').forEach((tr) => {
             if ((typeof tr.getAttribute('data-id') === 'string') && (typeof parseInt(tr.getAttribute('data-id')) === 'number')) {

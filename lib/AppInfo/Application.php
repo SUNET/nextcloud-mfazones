@@ -85,8 +85,7 @@ class Application extends App {
 
         $dispatcher->addListener(LoadAdditionalScriptsEvent::class, function() {
             \OCP\Util::addStyle(self::APP_ID, 'tabview' );
-            \OCP\Util::addScript(self::APP_ID, 'tabview' );
-            \OCP\Util::addScript(self::APP_ID, 'plugin' );
+            \OCP\Util::addScript(self::APP_ID, 'mfazones-main' );
 
             $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
             \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
