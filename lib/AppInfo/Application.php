@@ -84,7 +84,7 @@ class Application extends App implements IBootstrap {
         });
 
         $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
-        // $this->manager = $this->getContainer()->get(IManager::class);
+        $this->manager = $this->getContainer()->get(IManager::class);
         $this->logger = $this->getContainer()->get(LoggerInterface::class);
         $this->connection = $this->getContainer()->get(IDBConnection::class);
 
@@ -208,7 +208,7 @@ class Application extends App implements IBootstrap {
             $entity = "OCA\\WorkflowEngine\\Entity\\File";
             $events = [];
 
-            // $this->manager->addOperation($class, $name, $checks, $operation, $scope, $entity, $events);
+            $this->manager->addOperation($class, $name, $checks, $operation, $scope, $entity, $events);
         } catch (Exception $e) {
             $this->logger->error('Error when inserting flow on enabling mfazones app', ['exception' => $e]);
         }
