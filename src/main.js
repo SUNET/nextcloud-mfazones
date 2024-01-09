@@ -23,6 +23,8 @@
 
 import MfaVerifiedValue from './Checks/MfaVerifiedValue'
 
+console.log('mfazones js being executed!');
+
 const appId = 'mfazones'
 
 // copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/src/main.js#L27
