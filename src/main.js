@@ -1,3 +1,120 @@
+/**
+ * @copyright Copyright (c) 2024 Michiel de Jong <michiel@unhosted.org>
+ *
+ * @author Michiel de Jong <michiel@unhosted.org>
+ *
+ * @license GNU AGPL version 3 or any later version
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+
+import MfaVerifiedValue from './Checks/MfaVerifiedValue'
+
+const appId = 'mfazones'
+
+// copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/src/main.js#L27
+
+console.log('registering our MfaVerified check');
+window.OCA.WorkflowEngine.registerCheck({
+    class: 'OCA\\mfazones\\Check\\MfaVerified',
+    name: t(appId, 'multi-factor authentication'),
+    operators: [
+        { operator: 'is', name: t(appId, 'is verified') },
+        { operator: '!is', name: t(appId, 'is not verified') },
+    ],
+    component: MfaVerifiedValue,
+});
+
+ // SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+var mfazoneFileListPlugin = {
+    attach: function(fileList) {
+      // console.log('FILELIST>>>>>>', fileList);
+      // if (fileList.id === 'trashbin' || fileList.id === 'files.public') {
+      //   return;
+      // }
+      console.log("Attaching MFA Zone plugin to " + fileList.id);
+      console.log(fileList);
+      fileList.registerTabView(new OCA.mfazones.MfaZoneTabView());
+
+      fileList.fileActions.registerAction({
+        name: 'mfa',
+        displayName: 'MFA Zone',
+        type: 1,
+        mime: 'all',
+        permissions: OC.PERMISSION_NONE,
+        iconClass: 'icon-category-security',
+        actionHandler: function(fileName, context) {
+          const statusUrl = OC.generateUrl('/apps/mfazones/getMfaStatus');
+          $.ajax({
+            type: 'GET',
+            url: statusUrl,
+            dataType: 'json',
+            async: true,
+            success: function (response) {
+              if (response.error){
+                  console.log(response.error);
+                  return;
+              }
+              if (response.mfa_passed !== true) {
+                const choice = confirm('This folder requires Multi Factor Authentication. Do you want to enable it for your account?')
+                if (choice) {
+                  window.location.href = OC.generateUrl('/settings/user/security');
+                }
+              } else {
+                alert('You have already enabled Multi Factor Authentication for your account.');
+              }
+            }
+          });
+        },
+        // fileName: 'asdf',
+      });
+
+      const originalSetFiles = fileList.setFiles;
+      fileList.setFiles = (
+        function(filesArray) {
+          // You can find the setFiles function here: https://github.com/nextcloud/server/blob/master/apps/files/js/filelist.js
+          // console.log('FILES ARRAY 2>>>>>>', filesArray)
+          filesArray.forEach((file) => {
+            console.log('seeing', file.name);
+            if (file.name === 'asdf') {
+              console.log('registering');
+              }
+            });
+    
+          originalSetFiles.bind(fileList)(filesArray);
+          console.log("gathering ids");
+          let ids = [];
+          document.getElementsByTagName('tr').forEach((tr) => {
+            if ((typeof tr.getAttribute('data-id') === 'string') && (typeof parseInt(tr.getAttribute('data-id')) === 'number')) {
+              ids.push(tr.getAttribute('data-id'));
+            }
+          });
+        }
+      ).bind(fileList)
+
+      fileList._getWebdavProperties = (function() {
+        // TODO Figure this out! https://github.com/nextcloud/server/blob/371aa1bc5d1c5a5be55ac8e9e812817a68a0cc23/core/src/files/client.js#L505-L512
+        return ([].concat(this.filesClient.getPropfindProperties()))//.concat(['DAV:', 'PonderSource']);
+      }).bind(fileList)
+    }
+};
+OC.Plugins.register('OCA.Files.FileList', mfazoneFileListPlugin);
+
+
 // SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
 // SPDX-License-Identifier: AGPL-3.0-or-later
 (function () {
