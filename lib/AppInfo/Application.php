@@ -5,21 +5,23 @@ declare(strict_types=1);
 
 namespace OCA\mfazones\AppInfo;
 
+use Doctrine\DBAL\Exception;
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCA\mfazones\MFAPlugin;
+use OCA\mfazones\Check\MfaVerified;
+use OCA\WorkflowEngine\Manager;
+use OCA\WorkflowEngine\Helper\ScopeContext;
+use OCP\IDBConnection;
+use OCP\IL10N;
+use OCP\ISession;
 use OCP\AppFramework\App;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\SystemTag\ISystemTag;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
-use OCA\WorkflowEngine\Manager;
-use Psr\Log\LoggerInterface;
-use Doctrine\DBAL\Exception;
-use OCA\WorkflowEngine\Helper\ScopeContext;
-use OCA\Files\Event\LoadAdditionalScriptsEvent;
-use OCP\EventDispatcher\IEventDispatcher;
 use OCP\WorkflowEngine\IManager;
-use OCP\IDBConnection;
-use OCA\mfazones\MFAPlugin;
 use OCP\WorkflowEngine\Events\RegisterChecksEvent;
-use OCA\mfazones\Check\MfaVerified;
+use Psr\Log\LoggerInterface;
 
 class Application extends App {
 	public const APP_ID = 'mfazones';
@@ -63,7 +65,7 @@ class Application extends App {
 
         $this->l = $this->getContainer()->get(IL10N::class);
         $this->session = $this->getContainer()->get(ISession::class);
-        $this->mfaVerifiedCheck = new MfaVerified($l, $session);
+        $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session);
         
         /* @var IEventDispatcher $dispatcher */
         $dispatcher = $this->getContainer()->query(IEventDispatcher::class);
@@ -72,6 +74,7 @@ class Application extends App {
             if (!($event instanceof RegisterChecksEvent)) {
                 return;
             }
+            error_log("registering our check!");
             $event->registerCheck($this->mfaVerifiedCheck);
         });
 
@@ -139,7 +142,7 @@ class Application extends App {
 
     private function addFlows(){
         try {
-            $hash = md5('OCA\WorkflowEngine\Check\MfaVerified::!is::');
+            $hash = md5('OCA\mfazones\Check\MfaVerified::!is::');
 
             $query = $this->connection->getQueryBuilder();
             $query->select('id')
@@ -159,10 +162,10 @@ class Application extends App {
             $name = "";
             $checks =  [
                 [
-                      "class" => "OCA\WorkflowEngine\Check\MfaVerified", 
+                      "class" => "OCA\mfazones\Check\MfaVerified",
                       "operator" => "!is", 
                       "value" => "", 
-                      "invalid" => false 
+                      "invalid" => false
                    ], 
                 [
                          "class" => "OCA\WorkflowEngine\Check\FileSystemTags", 

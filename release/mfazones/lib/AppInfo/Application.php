@@ -77,7 +77,7 @@ class Application extends App {
 
     private function addFlows(){
         try {
-            $hash = md5('OCA\WorkflowEngine\Check\MfaVerified::!is::');
+            $hash = md5('OCA\mfazones\Check\MfaVerified::!is::');
 
             $query = $this->connection->getQueryBuilder();
             $query->select('id')
@@ -102,7 +102,7 @@ class Application extends App {
             $name = "";
             $checks =  [
                 [
-                      "class" => "OCA\WorkflowEngine\Check\MfaVerified", 
+                      "class" => "OCA\mfazones\Check\MfaVerified", 
                       "operator" => "!is", 
                       "value" => "", 
                       "invalid" => false 
