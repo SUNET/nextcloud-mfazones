@@ -22,6 +22,7 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\SystemTag\ISystemTag;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
+use OCP\Util;
 use OCP\WorkflowEngine\IManager;
 use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 use Psr\Log\LoggerInterface;
@@ -54,7 +55,7 @@ class Application extends App implements IBootstrap {
 
 	public function __construct() {
 		parent::__construct(self::APP_ID);
-		error_log('mfazones constructor');
+		error_log('mfazones constructor! 1');
 
         $container = $this->getContainer();
         $container->registerService(MFAPlugin::class, function($c) {
@@ -67,11 +68,13 @@ class Application extends App implements IBootstrap {
             error_log('registering MFAPlugin');
             return $x;
         });
+		error_log('mfazones constructor! 2');
 
         $this->l = $this->getContainer()->get(IL10N::class);
         $this->session = $this->getContainer()->get(ISession::class);
         $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session);
         
+		error_log('mfazones constructor! 3');
         /* @var IEventDispatcher $dispatcher */
         $dispatcher = $this->getContainer()->query(IEventDispatcher::class);
         $dispatcher->addListener(RegisterChecksEvent::class, function(RegisterChecksEvent $event) {
@@ -81,6 +84,8 @@ class Application extends App implements IBootstrap {
             }
             error_log("registering our check!");
             $event->registerCheck($this->mfaVerifiedCheck);
+            error_log("and adding our script!");
+            Util::addScript(Application::APP_ID, 'mfazones-main');
         });
 
         $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
@@ -98,20 +103,24 @@ class Application extends App implements IBootstrap {
             // $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
             // \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
         });
+		error_log('mfazones constructor! 4');
         $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
         $userSession = \OC::$server->get(\OCP\IUserSession::class);
         $user = $userSession->getUser();
         // The first time an admin logs in to the server, this will create the tag and flow
         if ($user !== null && $groupManager->isAdmin($user->getUID())) {
+            error_log('mfazones constructor! 4A');
             $this->addFlows();
+            error_log('mfazones constructor! 4B');
         }
+		error_log('mfazones constructor! 5');
     }
 
     /**
      * @inheritdoc
      */
     public function register(IRegistrationContext $context): void {
-		error_log('mfazones register');
+		error_log('mfazones register!');
         $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsHandler::class);
         
     }
@@ -163,6 +172,7 @@ class Application extends App implements IBootstrap {
     }
 
     private function addFlows(){
+        error_log("addFlows!");
         try {
             $hash = md5('OCA\mfazones\Check\MfaVerified::!is::');
 

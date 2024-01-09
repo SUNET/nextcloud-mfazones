@@ -45,6 +45,7 @@ class RegisterFlowOperationsListener implements IEventListener {
 		if (!$event instanceof RegisterOperationsEvent) {
 			return;
 		}
+		error_log("adding our script!");
 		Util::addScript(Application::APP_NAME, 'mfazones-main');
 	}
 }
