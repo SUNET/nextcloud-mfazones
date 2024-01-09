@@ -9,12 +9,15 @@ use Doctrine\DBAL\Exception;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\mfazones\MFAPlugin;
 use OCA\mfazones\Check\MfaVerified;
-use OCA\WorkflowEngine\Manager;
+// use OCA\WorkflowEngine\Manager;
 use OCA\WorkflowEngine\Helper\ScopeContext;
 use OCP\IDBConnection;
 use OCP\IL10N;
 use OCP\ISession;
 use OCP\AppFramework\App;
+use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\AppFramework\Bootstrap\IBootContext;
+use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\SystemTag\ISystemTag;
 use OCP\SystemTag\ISystemTagManager;
@@ -22,15 +25,16 @@ use OCP\SystemTag\ISystemTagObjectMapper;
 use OCP\WorkflowEngine\IManager;
 use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 use Psr\Log\LoggerInterface;
+use OCP\mfazones\Listener\RegisterFlowOperationsListener;
 
-class Application extends App {
+class Application extends App implements IBootstrap {
 	public const APP_ID = 'mfazones';
 	public const TAG_NAME = 'mfazone';
     
     /** @var ISystemTagManager */
     protected ISystemTagManager $systemTagManager;
 
-	/** @var Manager */
+	/** @var IManager */
 	protected $manager;
 
 	/** @var LoggerInterface */
@@ -50,6 +54,7 @@ class Application extends App {
 
 	public function __construct() {
 		parent::__construct(self::APP_ID);
+		error_log('mfazones constructor');
 
         $container = $this->getContainer();
         $container->registerService(MFAPlugin::class, function($c) {
@@ -79,16 +84,19 @@ class Application extends App {
         });
 
         $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
-        $this->manager = $this->getContainer()->get(Manager::class);
+        // $this->manager = $this->getContainer()->get(IManager::class);
         $this->logger = $this->getContainer()->get(LoggerInterface::class);
         $this->connection = $this->getContainer()->get(IDBConnection::class);
 
+        $dispatcher->addListener(RegisterOperationsEvent::class, function() {
+            \OCP\Util::addScript(self::APP_ID, 'mfazones-main' );
+        });
         $dispatcher->addListener(LoadAdditionalScriptsEvent::class, function() {
             \OCP\Util::addStyle(self::APP_ID, 'tabview' );
             \OCP\Util::addScript(self::APP_ID, 'mfazones-main' );
 
-            $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
-            \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
+            // $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
+            // \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
         });
         $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
         $userSession = \OC::$server->get(\OCP\IUserSession::class);
@@ -97,6 +105,21 @@ class Application extends App {
         if ($user !== null && $groupManager->isAdmin($user->getUID())) {
             $this->addFlows();
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function register(IRegistrationContext $context): void {
+		error_log('mfazones register');
+        $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsHandler::class);
+        
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function boot(IBootContext $context): void {
     }
 
     public static function castObjectType($type)
@@ -185,7 +208,7 @@ class Application extends App {
             $entity = "OCA\\WorkflowEngine\\Entity\\File";
             $events = [];
 
-            $this->manager->addOperation($class, $name, $checks, $operation, $scope, $entity, $events);
+            // $this->manager->addOperation($class, $name, $checks, $operation, $scope, $entity, $events);
         } catch (Exception $e) {
             $this->logger->error('Error when inserting flow on enabling mfazones app', ['exception' => $e]);
         }
