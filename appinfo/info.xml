@@ -30,9 +30,9 @@ See the [README](https://github.com/pondersource/mfazones/blob/main/README.md) f
     <types>
         <dav/>
     </types>
-    <sabre>
+    <!-- <sabre>
         <plugins>
             <plugin>OCA\mfazones\MFAPlugin</plugin>
         </plugins>
-    </sabre>
+    </sabre> -->
 </info>

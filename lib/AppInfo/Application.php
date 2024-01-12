@@ -55,20 +55,14 @@ class Application extends App implements IBootstrap {
 
 	public function __construct() {
 		parent::__construct(self::APP_ID);
-		error_log('mfazones constructor! 1');
 
         $container = $this->getContainer();
         $container->registerService(MFAPlugin::class, function($c) {
-            error_log('constructing MFAPlugin ' . ISystemTagManager::class);
             $systemTagManager = $c->query(ISystemTagManager::class);
-            error_log('got systemTagManager');
             $tagMapper = $c->query(ISystemTagObjectMapper::class);
-            error_log('got tagMapper');
             $x = new MFAPlugin($systemTagManager, $tagMapper);
-            error_log('registering MFAPlugin');
             return $x;
         });
-		error_log('mfazones constructor! 2');
 
         $this->l = $this->getContainer()->get(IL10N::class);
         $this->session = $this->getContainer()->get(ISession::class);
@@ -100,27 +94,22 @@ class Application extends App implements IBootstrap {
             \OCP\Util::addStyle(self::APP_ID, 'tabview' );
             \OCP\Util::addScript(self::APP_ID, 'mfazones-main' );
 
-            // $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
-            // \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
+            $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
+            \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
         });
-		error_log('mfazones constructor! 4');
         $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
         $userSession = \OC::$server->get(\OCP\IUserSession::class);
         $user = $userSession->getUser();
         // The first time an admin logs in to the server, this will create the tag and flow
         if ($user !== null && $groupManager->isAdmin($user->getUID())) {
-            error_log('mfazones constructor! 4A');
             $this->addFlows();
-            error_log('mfazones constructor! 4B');
         }
-		error_log('mfazones constructor! 5');
     }
 
     /**
      * @inheritdoc
      */
     public function register(IRegistrationContext $context): void {
-		error_log('mfazones register!');
         $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsHandler::class);
         
     }
@@ -172,7 +161,6 @@ class Application extends App implements IBootstrap {
     }
 
     private function addFlows(){
-        error_log("addFlows!");
         try {
             $hash = md5('OCA\mfazones\Check\MfaVerified::!is::');
 

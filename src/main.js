@@ -23,102 +23,62 @@
 
 import MfaVerifiedValue from './Checks/MfaVerifiedValue'
 
-console.log('mfazones js being executed!');
-
 const appId = 'mfazones'
 
 // copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/src/main.js#L27
-
-console.log('registering our MfaVerified check');
-window.OCA.WorkflowEngine.registerCheck({
-    class: 'OCA\\mfazones\\Check\\MfaVerified',
-    name: t(appId, 'multi-factor authentication'),
-    operators: [
-        { operator: 'is', name: t(appId, 'is verified') },
-        { operator: '!is', name: t(appId, 'is not verified') },
-    ],
-    component: MfaVerifiedValue,
-});
-
- // SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
-// SPDX-License-Identifier: AGPL-3.0-or-later
+if (typeof window.OCA.WorkflowEngine === 'undefined') {
+	window.OCA.WorkflowEngine.registerCheck({
+		class: 'OCA\\mfazones\\Check\\MfaVerified',
+		name: t(appId, 'multi-factor authentication'),
+		operators: [
+			{ operator: 'is', name: t(appId, 'is verified') },
+			{ operator: '!is', name: t(appId, 'is not verified') },
+		],
+		component: MfaVerifiedValue,
+	});
+}
 var mfazoneFileListPlugin = {
     attach: function(fileList) {
-      // console.log('FILELIST>>>>>>', fileList);
-      // if (fileList.id === 'trashbin' || fileList.id === 'files.public') {
-      //   return;
-      // }
-      console.log("Attaching MFA Zone plugin to " + fileList.id);
-      console.log(fileList);
-      fileList.registerTabView(new OCA.mfazones.MfaZoneTabView());
-
-      fileList.fileActions.registerAction({
-        name: 'mfa',
-        displayName: 'MFA Zone',
-        type: 1,
-        mime: 'all',
-        permissions: OC.PERMISSION_NONE,
-        iconClass: 'icon-category-security',
-        actionHandler: function(fileName, context) {
-          const statusUrl = OC.generateUrl('/apps/mfazones/getMfaStatus');
-          $.ajax({
-            type: 'GET',
-            url: statusUrl,
-            dataType: 'json',
-            async: true,
-            success: function (response) {
-              if (response.error){
-                  console.log(response.error);
-                  return;
-              }
-              if (response.mfa_passed !== true) {
-                const choice = confirm('This folder requires Multi Factor Authentication. Do you want to enable it for your account?')
-                if (choice) {
-                  window.location.href = OC.generateUrl('/settings/user/security');
-                }
-              } else {
-                alert('You have already enabled Multi Factor Authentication for your account.');
-              }
-            }
-          });
-        },
-        // fileName: 'asdf',
-      });
-
-      const originalSetFiles = fileList.setFiles;
-      fileList.setFiles = (
-        function(filesArray) {
-          // You can find the setFiles function here: https://github.com/nextcloud/server/blob/master/apps/files/js/filelist.js
-          // console.log('FILES ARRAY 2>>>>>>', filesArray)
-          filesArray.forEach((file) => {
-            console.log('hello seeing', file.name);
-            if (file.name === 'asdf') {
-              console.log('registering');
-              }
-            });
-    
-          originalSetFiles.bind(fileList)(filesArray);
-          console.log("gathering ids hello");
-          let ids = [];
-          document.getElementsByTagName('tr').forEach((tr) => {
-            if ((typeof tr.getAttribute('data-id') === 'string') && (typeof parseInt(tr.getAttribute('data-id')) === 'number')) {
-              ids.push(tr.getAttribute('data-id'));
-            }
-          });
-        }
-      ).bind(fileList)
-
-      fileList._getWebdavProperties = (function() {
-        // TODO Figure this out! https://github.com/nextcloud/server/blob/371aa1bc5d1c5a5be55ac8e9e812817a68a0cc23/core/src/files/client.js#L505-L512
-        return ([].concat(this.filesClient.getPropfindProperties()))//.concat(['DAV:', 'PonderSource']);
-      }).bind(fileList)
+        fileList.registerTabView(new OCA.mfazones.MfaZoneTabView());
+	    // Uncomment this to display an 'MFA Zone' label on MFA zones in the files list in the files app.
+		// You will also need to uncomment the DAV plugin in the appinfo/info.xml file, and apply the changes
+		// from https://github.com/pondersource/server/commits/white-list-mfa-zone-dav-attribute/
+		// to your server:
+		// fileList.fileActions.registerAction({
+		// 	name: 'mfa',
+		// 	displayName: 'MFA Zone',
+		// 	type: 1,
+		// 	mime: 'all',
+		// 	permissions: OC.PERMISSION_NONE,
+		// 	iconClass: 'icon-category-security',
+		// 	actionHandler: function(fileName, context) {
+		// 	const statusUrl = OC.generateUrl('/apps/mfazones/getMfaStatus');
+		// 	$.ajax({
+		// 		type: 'GET',
+		// 		url: statusUrl,
+		// 		dataType: 'json',
+		// 		async: true,
+		// 		success: function (response) {
+		// 		if (response.error){
+		// 			console.log(response.error);
+		// 			return;
+		// 		}
+		// 		if (response.mfa_passed !== true) {
+		// 			const choice = confirm('This folder requires Multi Factor Authentication. Do you want to enable it for your account?')
+		// 			if (choice) {
+		// 			window.location.href = OC.generateUrl('/settings/user/security');
+		// 			}
+		// 		} else {
+		// 			alert('You have already enabled Multi Factor Authentication for your account.');
+		// 		}
+		// 		}
+		// 	}); 
+        // },
+        // });
     }
 };
 OC.Plugins.register('OCA.Files.FileList', mfazoneFileListPlugin);
 
-
-// SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
-// SPDX-License-Identifier: AGPL-3.0-or-later
 (function () {
 	function renderHTML(enabled) {
 		return `
@@ -217,12 +177,11 @@ OC.Plugins.register('OCA.Files.FileList', mfazoneFileListPlugin);
 				console.error("File info not found!");
 				return;
 			}
-			console.log("Rendering MFA Zone tab for " + fileInfo.getFullPath());
-			// if (!fileInfo.isDirectory()) {
-			// 	this.$el.html(`<div>MFA Zones are currently disabled for files.</div>`);
-			// 	console.log("Not a directory, MFA zone detail tab disabled.");
-			// 	return;
-			// }
+			if (!fileInfo.isDirectory()) {
+				this.$el.html(`<div>MFA Zones are currently disabled for files.</div>`);
+				console.log("Not a directory, MFA zone detail tab disabled.");
+				return;
+			}
 			const accessUrl = OC.generateUrl('/apps/mfazones/access'),
 				data = {
 					source: fileInfo.getFullPath()
