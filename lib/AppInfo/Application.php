@@ -94,8 +94,8 @@ class Application extends App implements IBootstrap {
             \OCP\Util::addStyle(self::APP_ID, 'tabview' );
             \OCP\Util::addScript(self::APP_ID, 'mfazones-main' );
 
-            $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
-            \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
+            // $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
+            // \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
         });
         $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
         $userSession = \OC::$server->get(\OCP\IUserSession::class);

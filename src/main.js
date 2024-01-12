@@ -26,8 +26,9 @@ import MfaVerifiedValue from './Checks/MfaVerifiedValue'
 const appId = 'mfazones'
 
 // copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/src/main.js#L27
-if (typeof window.OCA.WorkflowEngine === 'undefined') {
-	window.OCA.WorkflowEngine.registerCheck({
+
+if ((typeof window.OCA !== 'undefined') && typeof window.OCA.WorkflowEngine !== 'undefined') {
+		window.OCA.WorkflowEngine.registerCheck({
 		class: 'OCA\\mfazones\\Check\\MfaVerified',
 		name: t(appId, 'multi-factor authentication'),
 		operators: [
