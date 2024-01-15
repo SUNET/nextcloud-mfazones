@@ -187,7 +187,7 @@ OC.Plugins.register('OCA.Files.FileList', mfazoneFileListPlugin);
 				data = {
 					source: fileInfo.getFullPath()
 				},
-				_self = this;
+				_self = this,
 				_fullPath = fileInfo.getFullPath();
 			$.ajax({
 				type: 'GET',
@@ -197,7 +197,7 @@ OC.Plugins.register('OCA.Files.FileList', mfazoneFileListPlugin);
 				async: true,
 				success: function (response) {
 					console.log(response);
-					_self.addHtml(_self, data, response.access);
+					_self.addHtml(_self, data, response.access, _fullPath);
 				},
 				error: function (xhr, ajaxOptions, thrownError) {
 					console.log(xhr.status);
@@ -205,7 +205,7 @@ OC.Plugins.register('OCA.Files.FileList', mfazoneFileListPlugin);
 				},
 			});
 		},
-		addHtml: function (context, data, enabled) {
+		addHtml: function (context, data, enabled, _fullPath) {
 			context.$el.html(renderHTML(enabled));
 			const statusUrl = OC.generateUrl('/apps/mfazones/get');
 			$.ajax({
