@@ -36,30 +36,69 @@
 #        "prebuild": "npm install && node_modules/bower/bin/bower install && node_modules/bower/bin/bower update",
 #        "build": "node node_modules/gulp-cli/bin/gulp.js"
 #    },
+app_name=mfazones
+cert_dir=$(HOME)/.nextcloud/certificates
+project_dir=$(CURDIR)/$(app_name)
+build_dir=$(project_dir)/build/artifacts
+build_tools_dir=$(project_dir)/build/tools
+sign_dir=$(build_dir)/sign
+version+=0.0.1
 
-app_name=$(notdir $(CURDIR))
-build_tools_directory=$(CURDIR)/build/tools
-source_build_directory=$(CURDIR)/build/artifacts/source
-source_package_name=$(source_build_directory)/$(app_name)
-appstore_build_directory=$(CURDIR)/build/artifacts/appstore
-appstore_package_name=$(appstore_build_directory)/$(app_name)
-npm=$(shell which npm 2> /dev/null)
-composer=$(shell which composer 2> /dev/null)
+all: appstore
+release: appstore
 
-all: build
+sign: package
+	docker run --rm --volume $(cert_dir):/certificates --detach --name nextcloud nextcloud:latest
+	sleep 5
+	docker cp $(build_dir)/$(app_name)-$(version).tar.gz nextcloud:/var/www/html/custom_apps
+	docker exec -u www-data nextcloud /bin/bash -c "cd /var/www/html/custom_apps && tar -xzf $(app_name)-$(version).tar.gz && rm $(app_name)-$(version).tar.gz"
+	docker exec -u www-data nextcloud /bin/bash -c "php /var/www/html/occ integrity:sign-app --certificate /certificates/$(app_name).crt --privateKey /certificates/$(app_name).key --path /var/www/html/custom_apps/$(app_name)"
+	docker exec -u www-data nextcloud /bin/bash -c "cd /var/www/html/custom_apps && tar pzcf $(app_name)-$(version).tar.gz $(app_name)"
+	docker cp nextcloud:/var/www/html/custom_apps/$(app_name)-$(version).tar.gz $(build_dir)/$(app_name)-$(version).tar.gz
+	sleep 3
+	docker kill nextcloud
+
+appstore: sign
+
+clean:
+	rm -rf $(build_dir)
+
+package: clean build
+	mkdir -p $(sign_dir)
+	rsync -a \
+	--exclude=/build \
+	--exclude=/docs \
+	--exclude=/translationfiles \
+	--exclude=.tx \
+	--exclude=/tests \
+	--exclude=.git \
+	--exclude=.github \
+	--exclude=/l10n/l10n.pl \
+	--exclude=/CONTRIBUTING.md \
+	--exclude=/issue_template.md \
+	--exclude=.gitattributes \
+	--exclude=.gitignore \
+	--exclude=.scrutinizer.yml \
+	--exclude=.travis.yml \
+	--exclude=/Makefile \
+	--exclude=.drone.yml \
+	$(project_dir)/ $(sign_dir)/$(app_name)
+	tar -czf $(build_dir)/$(app_name)-$(version).tar.gz \
+		-C $(sign_dir) $(app_name)
+
 
 # Fetches the PHP and JS dependencies and compiles the JS. If no composer.json
 # is present, the composer step is skipped, if no package.json or js/package.json
 # is present, the npm step is skipped
 .PHONY: build
 build:
-ifneq (,$(wildcard $(CURDIR)/composer.json))
+ifneq (,$(wildcard $(project_dir)/composer.json))
 	make composer
 endif
-ifneq (,$(wildcard $(CURDIR)/package.json))
+ifneq (,$(wildcard $(project_dir)/package.json))
 	make npm
 endif
-ifneq (,$(wildcard $(CURDIR)/js/package.json))
+ifneq (,$(wildcard $(project_dir)/js/package.json))
 	make npm
 endif
 
@@ -69,85 +108,28 @@ endif
 composer:
 ifeq (, $(composer))
 	@echo "No composer command available, downloading a copy from the web"
-	mkdir -p $(build_tools_directory)
+	mkdir -p $(build_tools_dir)
 	curl -sS https://getcomposer.org/installer | php
-	mv composer.phar $(build_tools_directory)
-	php $(build_tools_directory)/composer.phar install --prefer-dist
+	mv composer.phar $(build_tools_dir)
+	cd $(project_dir) && php $(build_tools_dir)/composer.phar install --prefer-dist
 else
-	composer install --prefer-dist
+	cd $(project_dir) && composer install --prefer-dist
 endif
 
 # Installs npm dependencies
 .PHONY: npm
 npm:
-ifeq (,$(wildcard $(CURDIR)/package.json))
-	cd js && $(npm) run build
-else
-	npm run build
-endif
-
-# Removes the appstore build
-.PHONY: clean
-clean:
-	rm -rf ./build
+	cd $(project_dir) && npm install
+	cd $(project_dir) && npm run build
 
 # Same as clean but also removes dependencies installed by composer, bower and
 # npm
 .PHONY: distclean
 distclean: clean
-	rm -rf vendor
-	rm -rf node_modules
-	rm -rf js/vendor
-	rm -rf js/node_modules
-
-# Builds the source and appstore package
-.PHONY: dist
-dist:
-	make source
-	make appstore
-
-# Builds the source package
-.PHONY: source
-source:
-	rm -rf $(source_build_directory)
-	mkdir -p $(source_build_directory)
-	tar cvzf $(source_package_name).tar.gz ../$(app_name) \
-	--exclude-vcs \
-	--exclude="../$(app_name)/build" \
-	--exclude="../$(app_name)/js/node_modules" \
-	--exclude="../$(app_name)/node_modules" \
-	--exclude="../$(app_name)/*.log" \
-	--exclude="../$(app_name)/js/*.log" \
-
-# Builds the source package for the app store, ignores php and js tests
-.PHONY: appstore
-appstore:
-	rm -rf $(appstore_build_directory)
-	mkdir -p $(appstore_build_directory)
-	tar cvzf $(appstore_package_name).tar.gz ../$(app_name) \
-	--exclude-vcs \
-	--exclude="../$(app_name)/build" \
-	--exclude="../$(app_name)/tests" \
-	--exclude="../$(app_name)/Makefile" \
-	--exclude="../$(app_name)/*.log" \
-	--exclude="../$(app_name)/phpunit*xml" \
-	--exclude="../$(app_name)/composer.*" \
-	--exclude="../$(app_name)/js/node_modules" \
-	--exclude="../$(app_name)/js/tests" \
-	--exclude="../$(app_name)/js/test" \
-	--exclude="../$(app_name)/js/*.log" \
-	--exclude="../$(app_name)/js/package.json" \
-	--exclude="../$(app_name)/js/bower.json" \
-	--exclude="../$(app_name)/js/karma.*" \
-	--exclude="../$(app_name)/js/protractor.*" \
-	--exclude="../$(app_name)/package.json" \
-	--exclude="../$(app_name)/bower.json" \
-	--exclude="../$(app_name)/karma.*" \
-	--exclude="../$(app_name)/protractor\.*" \
-	--exclude="../$(app_name)/.*" \
-	--exclude="../$(app_name)/js/.*" \
+	rm -rf $(project_dir)/vendor
+	rm -rf $(project_dir)/node_modules
 
 .PHONY: test
 test: composer
-	$(CURDIR)/vendor/phpunit/phpunit/phpunit -c phpunit.xml
-	$(CURDIR)/vendor/phpunit/phpunit/phpunit -c phpunit.integration.xml
+	$(project_dir)/vendor/phpunit/phpunit/phpunit -c $(project_dir)/phpunit.xml
+	$(project_dir)/vendor/phpunit/phpunit/phpunit -c $(project_dir)/phpunit.integration.xml
