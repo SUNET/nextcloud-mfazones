@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 // SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -28,187 +29,193 @@ use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 use Psr\Log\LoggerInterface;
 use OCP\mfazones\Listener\RegisterFlowOperationsListener;
 
-class Application extends App implements IBootstrap {
-	public const APP_ID = 'mfazones';
-	public const TAG_NAME = 'mfazone';
-    
-    /** @var ISystemTagManager */
-    protected ISystemTagManager $systemTagManager;
+class Application extends App implements IBootstrap
+{
+  public const APP_ID = 'mfazones';
+  public const TAG_NAME = 'mfazone';
 
-	/** @var IManager */
-	protected $manager;
+  /** @var ISystemTagManager */
+  protected ISystemTagManager $systemTagManager;
 
-	/** @var LoggerInterface */
-	private $logger;
+  /** @var IManager */
+  protected $manager;
 
-	/** @var IDBConnection */
-	protected $connection;
+  /** @var LoggerInterface */
+  private $logger;
 
-    /** @var IL10N */
-    protected $l;
+  /** @var IDBConnection */
+  protected $connection;
 
-    /** @var ISession */
-    protected $session;
+  /** @var IL10N */
+  protected $l;
 
-    /** @var MfaVerified */
-    protected $mfaVerifiedCheck;
+  /** @var ISession */
+  protected $session;
 
-	public function __construct() {
-		parent::__construct(self::APP_ID);
+  /** @var MfaVerified */
+  protected $mfaVerifiedCheck;
 
-        $container = $this->getContainer();
-        $container->registerService(MFAPlugin::class, function($c) {
-            $systemTagManager = $c->query(ISystemTagManager::class);
-            $tagMapper = $c->query(ISystemTagObjectMapper::class);
-            $x = new MFAPlugin($systemTagManager, $tagMapper);
-            return $x;
-        });
+  public function __construct()
+  {
+    parent::__construct(self::APP_ID);
 
-        $this->l = $this->getContainer()->get(IL10N::class);
-        $this->session = $this->getContainer()->get(ISession::class);
-        $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session);
-        
-		error_log('mfazones constructor! 3');
-        /* @var IEventDispatcher $dispatcher */
-        $dispatcher = $this->getContainer()->query(IEventDispatcher::class);
-        $dispatcher->addListener(RegisterChecksEvent::class, function(RegisterChecksEvent $event) {
-            // copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/lib/Listener/RegisterChecksListener.php
-            if (!($event instanceof RegisterChecksEvent)) {
-                return;
-            }
-            error_log("registering our check!");
-            $event->registerCheck($this->mfaVerifiedCheck);
-            error_log("and adding our script!");
-            Util::addScript(Application::APP_ID, 'mfazones-main');
-        });
+    $container = $this->getContainer();
+    $container->registerService(MFAPlugin::class, function ($c) {
+      $systemTagManager = $c->query(ISystemTagManager::class);
+      $tagMapper = $c->query(ISystemTagObjectMapper::class);
+      $x = new MFAPlugin($systemTagManager, $tagMapper);
+      return $x;
+    });
 
-        $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
-        $this->manager = $this->getContainer()->get(IManager::class);
-        $this->logger = $this->getContainer()->get(LoggerInterface::class);
-        $this->connection = $this->getContainer()->get(IDBConnection::class);
+    $this->l = $this->getContainer()->get(IL10N::class);
+    $this->session = $this->getContainer()->get(ISession::class);
+    $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session);
+    $this->logger = $this->getContainer()->get(LoggerInterface::class);
 
-        $dispatcher->addListener(RegisterOperationsEvent::class, function() {
-            \OCP\Util::addScript(self::APP_ID, 'mfazones-main' );
-        });
-        $dispatcher->addListener(LoadAdditionalScriptsEvent::class, function() {
-            \OCP\Util::addStyle(self::APP_ID, 'tabview' );
-            \OCP\Util::addScript(self::APP_ID, 'mfazones-main' );
+    $this->logger->error('mfazones constructor! 3');
+    /* @var IEventDispatcher $dispatcher */
+    $dispatcher = $this->getContainer()->query(IEventDispatcher::class);
+    $dispatcher->addListener(RegisterChecksEvent::class, function (RegisterChecksEvent $event) {
+      // copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/lib/Listener/RegisterChecksListener.php
+      if (!($event instanceof RegisterChecksEvent)) {
+        return;
+      }
+      $this->logger->error("registering our check!");
+      $event->registerCheck($this->mfaVerifiedCheck);
+      $this->logger->error("and adding our script!");
+      Util::addScript(Application::APP_ID, 'mfazones-main');
+    });
 
-            // $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
-            // \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
-        });
-        $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
-        $userSession = \OC::$server->get(\OCP\IUserSession::class);
-        $user = $userSession->getUser();
-        // The first time an admin logs in to the server, this will create the tag and flow
-        if ($user !== null && $groupManager->isAdmin($user->getUID())) {
-            $this->addFlows();
-        }
+    $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
+    $this->manager = $this->getContainer()->get(IManager::class);
+    $this->connection = $this->getContainer()->get(IDBConnection::class);
+
+    $dispatcher->addListener(RegisterOperationsEvent::class, function () {
+      \OCP\Util::addScript(self::APP_ID, 'mfazones-main');
+    });
+    $dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
+      \OCP\Util::addStyle(self::APP_ID, 'tabview');
+      \OCP\Util::addScript(self::APP_ID, 'mfazones-main');
+
+      // $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
+      // \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
+    });
+    $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
+    $userSession = \OC::$server->get(\OCP\IUserSession::class);
+    $user = $userSession->getUser();
+    // The first time an admin logs in to the server, this will create the tag and flow
+    if ($user !== null && $groupManager->isAdmin($user->getUID())) {
+      $this->addFlows();
     }
+  }
 
-    /**
-     * @inheritdoc
-     */
-    public function register(IRegistrationContext $context): void {
-        $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsHandler::class);
-        
+  /**
+   * @inheritdoc
+   */
+  public function register(IRegistrationContext $context): void
+  {
+    $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsHandler::class);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public function boot(IBootContext $context): void
+  {
+  }
+
+  public static function castObjectType($type)
+  {
+    if ($type === 'file') {
+      return "files";
     }
-
-    /**
-     * @inheritdoc
-     */
-    public function boot(IBootContext $context): void {
+    if ($type === "dir") {
+      return "files";
     }
+    return $type;
+  }
 
-    public static function castObjectType($type)
-    {
-        if ($type === 'file') {
-            return "files";
-        }
-        if ($type === "dir") {
-            return "files";
-        }
-        return $type;
+  public static function getOurTagIdFromSystemTagManager($systemTagManager)
+  {
+    try {
+      $tags = $systemTagManager->getAllTags(
+        null,
+        self::TAG_NAME
+      );
+
+      if (count($tags) < 1) {
+        $tag = $systemTagManager->createTag(self::TAG_NAME, false, false);
+      } else {
+        $tag = current($tags);
+      }
+      return $tag->getId();
+    } catch (Exception $e) {
+      $this->logger->error('Error when inserting tag on enabling mfazones app', ['exception' => $e]);
+      return false;
     }
+  }
 
-    public static function getOurTagIdFromSystemTagManager($systemTagManager){
-        try{
-            $tags = $systemTagManager->getAllTags(
-                null,
-                self::TAG_NAME
-            );
-
-            if(count($tags) < 1){
-                $tag = $systemTagManager->createTag(self::TAG_NAME, false, false);
-            } else {
-                $tag = current($tags);
-            }
-            return $tag->getId();
-        }catch (Exception $e) {
-            $this->logger->error('Error when inserting tag on enabling mfazones app', ['exception' => $e]);
-            return false;
-        }
+  public function nodeHasTag($node, $tagId)
+  {
+    $tags = $this->systemTagManager->getTagsForObjects([$node->getId()]);
+    foreach ($tags as $tag) {
+      if ($tag->getId() === $tagId) {
+        return true;
+      }
     }
+    return false;
+  }
 
-    public function nodeHasTag($node, $tagId){
-        $tags = $this->systemTagManager->getTagsForObjects([$node->getId()]);
-        foreach ($tags as $tag) {
-            if ($tag->getId() === $tagId) {
-                return true;
-            }
-        }
-        return false;
+  private function addFlows()
+  {
+    try {
+      $hash = md5('OCA\mfazones\Check\MfaVerified::!is::');
+
+      $query = $this->connection->getQueryBuilder();
+      $query->select('id')
+        ->from('flow_checks')
+        ->where($query->expr()->eq('hash', $query->createNamedParameter($hash)));
+      $result = $query->execute();
+
+      if ($row = $result->fetch()) {
+        $result->closeCursor();
+        return;
+      }
+
+      $tagId = self::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
+
+      $scope = new ScopeContext(IManager::SCOPE_ADMIN);
+      $class = "OCA\\FilesAccessControl\\Operation";
+      $name = "";
+      $checks =  [
+        [
+          "class" => "OCA\mfazones\Check\MfaVerified",
+          "operator" => "!is",
+          "value" => "",
+          "invalid" => false
+        ],
+        [
+          "class" => "OCA\WorkflowEngine\Check\FileSystemTags",
+          "operator" => "is",
+          "value" => $tagId,
+          "invalid" => false
+        ]
+        // uncomment this code to re-activate admin bypass,
+        // see https://github.com/pondersource/nextcloud-mfa-awareness/issues/53
+        // [
+        //             "class" => "OCA\WorkflowEngine\Check\UserGroupMembership",
+        //             "operator" => "!is",
+        //             "value" => "admin",
+        //             "invalid" => false
+        //          ]
+      ];
+      $operation = "deny";
+      $entity = "OCA\\WorkflowEngine\\Entity\\File";
+      $events = [];
+
+      $this->manager->addOperation($class, $name, $checks, $operation, $scope, $entity, $events);
+    } catch (Exception $e) {
+      $this->logger->error('Error when inserting flow on enabling mfazones app', ['exception' => $e]);
     }
-
-    private function addFlows(){
-        try {
-            $hash = md5('OCA\mfazones\Check\MfaVerified::!is::');
-
-            $query = $this->connection->getQueryBuilder();
-            $query->select('id')
-                ->from('flow_checks')
-                ->where($query->expr()->eq('hash', $query->createNamedParameter($hash)));
-            $result = $query->execute();
-
-            if ($row = $result->fetch()) {
-                $result->closeCursor();
-                return;
-            }
-
-            $tagId = self::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
-
-            $scope = new ScopeContext(IManager::SCOPE_ADMIN);
-            $class = "OCA\\FilesAccessControl\\Operation";
-            $name = "";
-            $checks =  [
-                [
-                      "class" => "OCA\mfazones\Check\MfaVerified",
-                      "operator" => "!is", 
-                      "value" => "", 
-                      "invalid" => false
-                   ], 
-                [
-                    "class" => "OCA\WorkflowEngine\Check\FileSystemTags", 
-                    "operator" => "is", 
-                    "value" => $tagId, 
-                    "invalid" => false 
-                ]
-                // uncomment this code to re-activate admin bypass,
-                // see https://github.com/pondersource/nextcloud-mfa-awareness/issues/53
-                // [
-                //             "class" => "OCA\WorkflowEngine\Check\UserGroupMembership",
-                //             "operator" => "!is",
-                //             "value" => "admin",
-                //             "invalid" => false
-                //          ]
-                ];
-            $operation = "deny";
-            $entity = "OCA\\WorkflowEngine\\Entity\\File";
-            $events = [];
-
-            $this->manager->addOperation($class, $name, $checks, $operation, $scope, $entity, $events);
-        } catch (Exception $e) {
-            $this->logger->error('Error when inserting flow on enabling mfazones app', ['exception' => $e]);
-        }
-    }
+  }
 }
