@@ -30,6 +30,7 @@ use Psr\Log\LoggerInterface;
 use OCP\mfazones\Listener\RegisterFlowOperationsListener;
 use OCA\mfazones\Listener\TwoFactorProviderChallengePassedListener;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
+use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
 
 class Application extends App implements IBootstrap
 {
@@ -74,7 +75,6 @@ class Application extends App implements IBootstrap
     $this->logger = $this->getContainer()->get(LoggerInterface::class);
     $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session, $this->logger);
 
-    $this->logger->error('mfazones constructor! 3');
     /* @var IEventDispatcher $dispatcher */
     $dispatcher = $this->getContainer()->query(IEventDispatcher::class);
     $dispatcher->addListener(RegisterChecksEvent::class, function (RegisterChecksEvent $event) {
@@ -82,9 +82,7 @@ class Application extends App implements IBootstrap
       if (!($event instanceof RegisterChecksEvent)) {
         return;
       }
-      $this->logger->error("registering our check!");
       $event->registerCheck($this->mfaVerifiedCheck);
-      $this->logger->error("and adding our script!");
       Util::addScript(Application::APP_ID, 'mfazones-main');
     });
 
@@ -116,12 +114,19 @@ class Application extends App implements IBootstrap
    */
   public function register(IRegistrationContext $context): void
   {
-    $this->logger->error("MFA: register challenge listner");
-    $context->registerEventListener(TwoFactorProviderChallengePassed::class, TwoFactorProviderChallengePassedListener::class);
-    // This used to be RegisterFlowOperationsHandler::class, but surely that was a mistake?
-    $this->logger->error("MFA: register operations listner");
+    // TODO: Remove this when we drop support for NC < 28
+    if (class_exists(TwoFactorProviderChallengePassed::class)) {
+      $twoFactorProvider = TwoFactorProviderChallengePassed::class;
+      $this->logger->debug("MFA: detection class is TwoFactorProviderChallengePassed");
+    } else {
+      $twoFactorProvider = TwoFactorProviderForUserEnabled::class;
+      $this->logger->warning("MFA: detection class is deprecated class TwoFactorProviderForUserEnabled");
+    }
+    $this->logger->debug("MFA: register challenge listner");
+    $context->registerEventListener($twoFactorProvider, TwoFactorProviderChallengePassedListener::class);
+    $this->logger->debug("MFA: register operations listner");
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsListener::class);
-    $this->logger->error("MFA: deone with listners");
+    $this->logger->debug("MFA: done with listners");
   }
 
   /**

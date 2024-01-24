@@ -29,6 +29,7 @@ namespace OCA\mfazones\Listener;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
+use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
 use OCP\ISession;
 use Psr\Log\LoggerInterface;
 
@@ -39,17 +40,18 @@ class TwoFactorProviderChallengePassedListener implements IEventListener
     private ISession $session,
     private LoggerInterface $logger
   ) {
-    $this->logger->error("MFA: challange listner constructor");
+    $this->logger->debug("MFA: challange listner constructor");
   }
 
   public function handle(Event $event): void
   {
-    if (!$event instanceof TwoFactorProviderChallengePassed) {
+    if ((!$event instanceof TwoFactorProviderChallengePassed) or
+       (!$event instanceof TwoFactorProviderForUserEnabled)) {
       return;
     }
     $user = $event->getUser();
     $session = $this->session;
-    $this->logger->error("MFA: setting session variable for user: " . $user->getUID() . ".");
+    $this->logger->debug("MFA: setting session variable for user: " . $user->getUID() . ".");
     $session->set('two_factor_event_passed', $user->getUID());
   }
 }
