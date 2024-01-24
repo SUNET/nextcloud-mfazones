@@ -6,34 +6,39 @@ declare(strict_types=1);
 
 namespace OCA\mfazones\AppInfo;
 
+
 use Doctrine\DBAL\Exception;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
-use OCA\mfazones\MFAPlugin;
-use OCA\mfazones\Check\MfaVerified;
-// use OCA\WorkflowEngine\Manager;
 use OCA\WorkflowEngine\Helper\ScopeContext;
+use OCA\WorkflowEngine\Manager;
+use OCA\mfazones\Check\MfaVerified;
+use OCA\mfazones\MFAPlugin;
+use OCP\AppFramework\App;
+use OCP\AppFramework\Bootstrap\IBootContext;
+use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IDBConnection;
 use OCP\IL10N;
 use OCP\ISession;
-use OCP\AppFramework\App;
-use OCP\AppFramework\Bootstrap\IBootstrap;
-use OCP\AppFramework\Bootstrap\IBootContext;
-use OCP\AppFramework\Bootstrap\IRegistrationContext;
-use OCP\EventDispatcher\IEventDispatcher;
-// use OCP\SystemTag\ISystemTag;
+use OCP\SystemTag\ISystemTag;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
 use OCP\Util;
 use OCP\WorkflowEngine\IManager;
-use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 use Psr\Log\LoggerInterface;
+// Our listeners
 use OCP\mfazones\Listeners\RegisterFlowOperationsListener;
 use OCA\mfazones\Listeners\TwoFactorProviderChallengePassedListener;
 use OCA\mfazones\Listeners\TwoFactorProviderForUserEnabledListener;
-use OCA\mfazones\Listeners\UserLoggedInListener;
+
+// Events we listen to
+use OCP\WorkflowEngine\Events\RegisterChecksEvent;
+use OCP\WorkflowEngine\Events\RegisterOperationsEvent;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
-use OCP\User\Events\UserLoggedInEvent;
+
+use Throwable;
 
 /**
  * Class Application
@@ -70,21 +75,16 @@ class Application extends App implements IBootstrap
   {
     parent::__construct(self::APP_ID);
 
-    $container = $this->getContainer();
-    $container->registerService(MFAPlugin::class, function ($c) {
-      $systemTagManager = $c->query(ISystemTagManager::class);
-      $tagMapper = $c->query(ISystemTagObjectMapper::class);
-      $x = new MFAPlugin($systemTagManager, $tagMapper);
-      return $x;
-    });
-
     $this->l = $this->getContainer()->get(IL10N::class);
     $this->session = $this->getContainer()->get(ISession::class);
     $this->logger = $this->getContainer()->get(LoggerInterface::class);
     $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session, $this->logger);
+    $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
+    $this->manager = $this->getContainer()->get(IManager::class);
+    $this->connection = $this->getContainer()->get(IDBConnection::class);
 
     /* @var IEventDispatcher $dispatcher */
-    $dispatcher = $this->getContainer()->query(IEventDispatcher::class);
+    $dispatcher = $this->getContainer()->get(IEventDispatcher::class);
     $dispatcher->addListener(RegisterChecksEvent::class, function (RegisterChecksEvent $event) {
       // copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/lib/Listener/RegisterChecksListener.php
       if (!($event instanceof RegisterChecksEvent)) {
@@ -94,19 +94,11 @@ class Application extends App implements IBootstrap
       Util::addScript(Application::APP_ID, 'mfazones-main');
     });
 
-    $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
-    $this->manager = $this->getContainer()->get(IManager::class);
-    $this->connection = $this->getContainer()->get(IDBConnection::class);
 
-    $dispatcher->addListener(RegisterOperationsEvent::class, function () {
-      \OCP\Util::addScript(self::APP_ID, 'mfazones-main');
-    });
     $dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
       \OCP\Util::addStyle(self::APP_ID, 'tabview');
       \OCP\Util::addScript(self::APP_ID, 'mfazones-main');
 
-      // $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
-      // \OC::$server->getContentSecurityPolicyManager()->addDefaultPolicy($policy);
     });
     $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
     $userSession = \OC::$server->get(\OCP\IUserSession::class);
@@ -122,6 +114,12 @@ class Application extends App implements IBootstrap
    */
   public function register(IRegistrationContext $context): void
   {
+    $context->registerService(MFAPlugin::class, function ($c) {
+      $systemTagManager = $c->query(ISystemTagManager::class);
+      $tagMapper = $c->query(ISystemTagObjectMapper::class);
+      $x = new MFAPlugin($systemTagManager, $tagMapper);
+      return $x;
+    });
     // TODO: Remove this when we drop support for NC < 28
     if (class_exists(TwoFactorProviderChallengePassed::class)) {
       $this->logger->debug("MFA: detection class is TwoFactorProviderChallengePassed");
@@ -129,6 +127,7 @@ class Application extends App implements IBootstrap
     } else {
       $this->logger->warning("MFA: detection class is deprecated class TwoFactorProviderForUserEnabled");
       $context->registerEventListener(TwoFactorProviderForUserEnabled::class, TwoFactorProviderForUserEnabledListener::class);
+          $context->registerEventListener(TwoFactorProviderForUserEnabled::class, TwoFactorProviderForUserEnabledListener::class);
     }
     $this->logger->debug("MFA: register operations listner");
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsListener::class);
@@ -136,7 +135,9 @@ class Application extends App implements IBootstrap
   }
 
   /**
-   * @inheritdoc
+   * @param IBootContext $context
+   *
+   * @throws Throwable
    */
   public function boot(IBootContext $context): void
   {
