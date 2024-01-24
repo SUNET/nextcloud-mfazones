@@ -30,6 +30,7 @@ use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\ISession;
+use OCP\IUser;
 use Psr\Log\LoggerInterface;
 
 class TwoFactorProviderChallengePassedListener implements IEventListener
@@ -39,7 +40,6 @@ class TwoFactorProviderChallengePassedListener implements IEventListener
     private ISession $session,
     private LoggerInterface $logger
   ) {
-    $this->logger->debug("MFA: challange listner constructor");
   }
 
   public function handle(Event $event): void
