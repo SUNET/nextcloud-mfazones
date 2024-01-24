@@ -28,7 +28,7 @@ namespace OCA\mfazones\Listener;
 
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
-use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
+use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
 use OCP\ISession;
 use Psr\Log\LoggerInterface;
 
@@ -44,8 +44,8 @@ class TwoFactorProviderChallengePassedListener implements IEventListener
 
   public function handle(Event $event): void
   {
-    if (!$event instanceof TwoFactorProviderChallengePassed) {
-      $this->logger->debug("MFA: TwoFactorProviderChallengePassed early return");
+    if (!$event instanceof TwoFactorProviderForUserEnabled) {
+      $this->logger->debug("MFA: TwoFactorProviderForUserEnabled early return;
       return;
     }
     $user = $event->getUser();

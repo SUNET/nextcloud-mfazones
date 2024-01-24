@@ -29,6 +29,7 @@ use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 use Psr\Log\LoggerInterface;
 use OCP\mfazones\Listener\RegisterFlowOperationsListener;
 use OCA\mfazones\Listener\TwoFactorProviderChallengePassedListener;
+use OCA\mfazones\Listener\TwoFactorProviderChallengeForUserEnabledListener;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
 
@@ -116,14 +117,12 @@ class Application extends App implements IBootstrap
   {
     // TODO: Remove this when we drop support for NC < 28
     if (class_exists(TwoFactorProviderChallengePassed::class)) {
-      $twoFactorProvider = TwoFactorProviderChallengePassed::class;
       $this->logger->debug("MFA: detection class is TwoFactorProviderChallengePassed");
+      $context->registerEventListener(TwoFactorProviderChallengePassed::class, TwoFactorProviderChallengePassedListener::class);
     } else {
-      $twoFactorProvider = TwoFactorProviderForUserEnabled::class;
       $this->logger->warning("MFA: detection class is deprecated class TwoFactorProviderForUserEnabled");
+      $context->registerEventListener(TwoFactorProviderForUserEnabled::class, TwoFactorProviderForUserEnabledListener::class);
     }
-    $this->logger->debug("MFA: register challenge listner");
-    $context->registerEventListener($twoFactorProvider, TwoFactorProviderChallengePassedListener::class);
     $this->logger->debug("MFA: register operations listner");
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsListener::class);
     $this->logger->debug("MFA: done with listners");
