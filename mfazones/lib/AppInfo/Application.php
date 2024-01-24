@@ -20,7 +20,7 @@ use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
-use OCP\SystemTag\ISystemTag;
+// use OCP\SystemTag\ISystemTag;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
 use OCP\Util;
@@ -28,6 +28,8 @@ use OCP\WorkflowEngine\IManager;
 use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 use Psr\Log\LoggerInterface;
 use OCP\mfazones\Listener\RegisterFlowOperationsListener;
+use OCA\mfazones\Listener\TwoFactorProviderChallengePassedListener;
+use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 
 class Application extends App implements IBootstrap
 {
@@ -69,8 +71,8 @@ class Application extends App implements IBootstrap
 
     $this->l = $this->getContainer()->get(IL10N::class);
     $this->session = $this->getContainer()->get(ISession::class);
-    $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session);
     $this->logger = $this->getContainer()->get(LoggerInterface::class);
+    $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session, $this->logger);
 
     $this->logger->error('mfazones constructor! 3');
     /* @var IEventDispatcher $dispatcher */
@@ -114,7 +116,9 @@ class Application extends App implements IBootstrap
    */
   public function register(IRegistrationContext $context): void
   {
-    $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsHandler::class);
+    $context->registerEventListener(TwoFactorProviderChallengePassed::class, TwoFactorProviderChallengePassedListener::class);
+    // This used to be RegisterFlowOperationsHandler::class, but surely that was a mistake?
+    $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsListener::class);
   }
 
   /**
