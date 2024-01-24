@@ -33,21 +33,31 @@ use OCP\ISession;
 use OCP\IUser;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Class TwoFactorProviderForUserEnabledListener
+ *
+ * @package OCA\mfazones\Listeners
+ */
 class TwoFactorProviderForUserEnabledListener implements IEventListener
 {
-
   public function __construct(
     private ISession $session,
     private LoggerInterface $logger
   ) {
   }
 
+  /**
+   * @param Event $event
+   */
   public function handle(Event $event): void
   {
     if (!$event instanceof TwoFactorProviderForUserEnabled) {
       $this->logger->debug("MFA: TwoFactorProviderForUserEnabled early return");
       return;
     }
+    /**
+     * @var IUser $user
+     */
     $user = $event->getUser();
     $session = $this->session;
     $this->logger->debug("MFA: setting session variable for user: " . (string) $user->getUID());

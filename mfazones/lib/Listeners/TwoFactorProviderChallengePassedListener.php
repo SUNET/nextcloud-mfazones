@@ -33,6 +33,12 @@ use OCP\ISession;
 use OCP\IUser;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Class TwoFactorProviderChallengePassedListener
+ *
+ * @package OCA\mfazones\Listeners
+ */
+
 class TwoFactorProviderChallengePassedListener implements IEventListener
 {
 
@@ -41,16 +47,21 @@ class TwoFactorProviderChallengePassedListener implements IEventListener
     private LoggerInterface $logger
   ) {
   }
-
+  /**
+   * @param Event $event
+   */
   public function handle(Event $event): void
   {
     if (!$event instanceof TwoFactorProviderChallengePassed) {
       $this->logger->debug("MFA: TwoFactorProviderChallengePassed early return");
       return;
     }
+    /**
+     * @var IUser $user
+     */
     $user = $event->getUser();
     $session = $this->session;
-    $this->logger->debug("MFA: setting session variable for user: " . (String) $user->getUID());
+    $this->logger->debug("MFA: setting session variable for user: " . (string) $user->getUID());
     $session->set('two_factor_event_passed', $user->getUID());
   }
 }
