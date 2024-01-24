@@ -30,6 +30,7 @@ use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Util;
 use OCP\WorkflowEngine\Events\RegisterOperationsEvent;
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
 
 class RegisterFlowOperationsListener implements IEventListener {
 
@@ -37,9 +38,12 @@ class RegisterFlowOperationsListener implements IEventListener {
 	}
 
 	public function handle(Event $event): void {
-		if (!$event instanceof RegisterOperationsEvent) {
-			return;
+		if ($event instanceof RegisterOperationsEvent) {
+      Util::addScript(Application::APP_ID, 'mfazones-main');
 		}
-		Util::addScript(Application::APP_ID, 'mfazones-main');
+    if ($event instanceof LoadAdditionalScriptsEvent) {
+      Util::addScript(Application::APP_ID, 'mfazones-main');
+      Util::addStyle(Application::APP_ID, 'tabview');
+    }
 	}
 }

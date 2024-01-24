@@ -8,7 +8,6 @@ namespace OCA\mfazones\AppInfo;
 
 
 use Doctrine\DBAL\Exception;
-use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\WorkflowEngine\Helper\ScopeContext;
 use OCA\WorkflowEngine\Manager;
 use OCA\mfazones\Check\MfaVerified;
@@ -33,10 +32,11 @@ use OCA\mfazones\Listeners\TwoFactorProviderChallengePassedListener;
 use OCA\mfazones\Listeners\TwoFactorProviderForUserEnabledListener;
 
 // Events we listen to
-use OCP\WorkflowEngine\Events\RegisterChecksEvent;
-use OCP\WorkflowEngine\Events\RegisterOperationsEvent;
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
+use OCP\WorkflowEngine\Events\RegisterChecksEvent;
+use OCP\WorkflowEngine\Events\RegisterOperationsEvent;
 
 use Throwable;
 
@@ -95,11 +95,6 @@ class Application extends App implements IBootstrap
     });
 
 
-    $dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
-      \OCP\Util::addStyle(self::APP_ID, 'tabview');
-      \OCP\Util::addScript(self::APP_ID, 'mfazones-main');
-
-    });
     $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
     $userSession = \OC::$server->get(\OCP\IUserSession::class);
     $user = $userSession->getUser();
@@ -114,6 +109,7 @@ class Application extends App implements IBootstrap
    */
   public function register(IRegistrationContext $context): void
   {
+    $this->logger->debug("MFA: regestering service");
     $context->registerService(MFAPlugin::class, function ($c) {
       $systemTagManager = $c->query(ISystemTagManager::class);
       $tagMapper = $c->query(ISystemTagObjectMapper::class);
@@ -131,6 +127,7 @@ class Application extends App implements IBootstrap
     }
     $this->logger->debug("MFA: register operations listner");
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsListener::class);
+    $context->registerEventListener(LoadAdditionalScriptsEvent::class, RegisterFlowOperationsListener::class);
     $this->logger->debug("MFA: done with listners");
   }
 
