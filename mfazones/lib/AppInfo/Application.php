@@ -29,7 +29,7 @@ use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 use Psr\Log\LoggerInterface;
 use OCP\mfazones\Listener\RegisterFlowOperationsListener;
 use OCA\mfazones\Listener\TwoFactorProviderChallengePassedListener;
-use OCA\mfazones\Listener\TwoFactorProviderChallengeForUserEnabledListener;
+use OCA\mfazones\Listener\TwoFactorProviderForUserEnabledListener;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
 

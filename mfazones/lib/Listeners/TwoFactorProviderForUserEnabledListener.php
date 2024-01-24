@@ -50,7 +50,7 @@ class TwoFactorProviderForUserEnabledListener implements IEventListener
     }
     $user = $event->getUser();
     $session = $this->session;
-    $this->logger->debug("MFA: setting session variable for user: " . $user->getUID() . ".");
+    $this->logger->debug("MFA: setting session variable for user: " . (string) $user->getUID());
     $session->set('two_factor_event_passed', $user->getUID());
   }
 }
