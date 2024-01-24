@@ -38,6 +38,8 @@ use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
 use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 use OCP\WorkflowEngine\Events\RegisterOperationsEvent;
 
+use OCA\mfazones\Utils\MFAZonesUtils;
+
 use Throwable;
 
 /**
@@ -140,35 +142,6 @@ class Application extends App implements IBootstrap
   {
   }
 
-  public static function castObjectType($type)
-  {
-    if ($type === 'file') {
-      return "files";
-    }
-    if ($type === "dir") {
-      return "files";
-    }
-    return $type;
-  }
-
-  public static function getOurTagIdFromSystemTagManager($systemTagManager)
-  {
-    try {
-      $tags = $systemTagManager->getAllTags(
-        null,
-        self::TAG_NAME
-      );
-
-      if (count($tags) < 1) {
-        $tag = $systemTagManager->createTag(self::TAG_NAME, false, false);
-      } else {
-        $tag = current($tags);
-      }
-      return $tag->getId();
-    } catch (Exception $e) {
-      return false;
-    }
-  }
 
   private function addFlows()
   {
@@ -186,7 +159,7 @@ class Application extends App implements IBootstrap
         return;
       }
 
-      $tagId = self::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
+      $tagId = MFAZonesUtils::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
 
       $scope = new ScopeContext(IManager::SCOPE_ADMIN);
       $class = "OCA\\FilesAccessControl\\Operation";
