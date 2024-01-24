@@ -26,25 +26,20 @@ declare(strict_types=1);
 namespace OCA\mfazones\Listener;
 
 use OCA\mfazones\AppInfo\Application;
-use OCA\mfazones\Workflow\ImportOperation;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Util;
 use OCP\WorkflowEngine\Events\RegisterOperationsEvent;
-use Psr\Container\ContainerInterface;
 
 class RegisterFlowOperationsListener implements IEventListener {
-	/** @var ContainerInterface */
-	private $container;
 
-	public function __construct(ContainerInterface $container) {
-		$this->container = $container;
+	public function __construct() {
 	}
 
 	public function handle(Event $event): void {
 		if (!$event instanceof RegisterOperationsEvent) {
 			return;
 		}
-		Util::addScript(Application::APP_NAME, 'mfazones-main');
+		Util::addScript(Application::APP_ID, 'mfazones-main');
 	}
 }
