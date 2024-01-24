@@ -23,6 +23,7 @@ declare(strict_types=1);
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 namespace OCA\mfazones\Listener;
 
 use OCP\EventDispatcher\Event;
@@ -31,20 +32,24 @@ use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\ISession;
 use Psr\Log\LoggerInterface;
 
-class TwoFactorProviderChallengePassedListener implements IEventListener {
+class TwoFactorProviderChallengePassedListener implements IEventListener
+{
 
   public function __construct(
     private ISession $session,
     private LoggerInterface $logger
   ) {
-	}
+    $this->logger->error("MFA: challange listner constructor");
+  }
 
-	public function handle(Event $event): void {
-		if (!$event instanceof TwoFactorProviderChallengePassed) {
-			return;
-		}
+  public function handle(Event $event): void
+  {
+    if (!$event instanceof TwoFactorProviderChallengePassed) {
+      return;
+    }
     $user = $event->getUser();
     $session = $this->session;
+    $this->logger->error("MFA: setting session variable for user: " . $user->getUID() . ".");
     $session->set('two_factor_event_passed', $user->getUID());
-	}
+  }
 }

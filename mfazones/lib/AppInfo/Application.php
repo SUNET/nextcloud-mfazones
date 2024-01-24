@@ -116,9 +116,12 @@ class Application extends App implements IBootstrap
    */
   public function register(IRegistrationContext $context): void
   {
+    $this->logger->error("MFA: register challenge listner");
     $context->registerEventListener(TwoFactorProviderChallengePassed::class, TwoFactorProviderChallengePassedListener::class);
     // This used to be RegisterFlowOperationsHandler::class, but surely that was a mistake?
+    $this->logger->error("MFA: register operations listner");
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsListener::class);
+    $this->logger->error("MFA: deone with listners");
   }
 
   /**
