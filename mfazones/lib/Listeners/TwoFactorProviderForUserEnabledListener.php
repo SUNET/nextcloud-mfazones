@@ -45,7 +45,7 @@ class TwoFactorProviderChallengePassedListener implements IEventListener
   public function handle(Event $event): void
   {
     if (!$event instanceof TwoFactorProviderForUserEnabled) {
-      $this->logger->debug("MFA: TwoFactorProviderForUserEnabled early return;
+      $this->logger->debug("MFA: TwoFactorProviderForUserEnabled early return");
       return;
     }
     $user = $event->getUser();

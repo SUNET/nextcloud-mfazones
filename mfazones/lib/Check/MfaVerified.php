@@ -71,8 +71,10 @@ class MfaVerified implements ICheck
       $uid = $this->session->get('user_id');
       $event_passed = $this->session->get('two_factor_event_passed');
       if (!empty($uid) && !empty($event_passed) && ($uid === $event_passed))  {
-        $this->logger->error("MFA: 2fa passed for user " . (String) $uid);
+        $this->logger->debug("MFA: 2fa passed for user " . (String) $uid);
         $mfaVerified = '1';
+      } else {
+        $this->logger->debug("MFA: 2fa not passed for user " . (String) $uid . " and event setting " . (String) $event_passed);
       }
     }
     if ($operator === 'is') {
