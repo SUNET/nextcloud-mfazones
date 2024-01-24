@@ -24,7 +24,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\mfazones\Listener;
+namespace OCA\mfazones\Listeners;
 
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
