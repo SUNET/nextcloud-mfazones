@@ -32,7 +32,7 @@ use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
 use OCP\ISession;
 use Psr\Log\LoggerInterface;
 
-class TwoFactorProviderChallengePassedListener implements IEventListener
+class TwoFactorProviderForUserEnabledListener implements IEventListener
 {
 
   public function __construct(
