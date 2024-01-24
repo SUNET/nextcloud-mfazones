@@ -35,6 +35,11 @@ use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
 use OCP\User\Events\UserLoggedInEvent;
 
+/**
+ * Class Application
+ *
+ * @package OCA\mfazones\AppInfo
+ */
 class Application extends App implements IBootstrap
 {
   public const APP_ID = 'mfazones';
@@ -117,8 +122,6 @@ class Application extends App implements IBootstrap
    */
   public function register(IRegistrationContext $context): void
   {
-    $this->logger->debug("MFA: register user logged in listner");
-    $context->registerEventListener(UserLoggedInEvent::class, UserLoggedInListener::class);
     // TODO: Remove this when we drop support for NC < 28
     if (class_exists(TwoFactorProviderChallengePassed::class)) {
       $this->logger->debug("MFA: detection class is TwoFactorProviderChallengePassed");
@@ -165,14 +168,13 @@ class Application extends App implements IBootstrap
       }
       return $tag->getId();
     } catch (Exception $e) {
-      $this->logger->error('Error when inserting tag on enabling mfazones app', ['exception' => $e]);
       return false;
     }
   }
 
   public function nodeHasTag($node, $tagId)
   {
-    $tags = $this->systemTagManager->getTagsForObjects([$node->getId()]);
+    $tags = $this->systemTagManager->getTagsByIds([$node->getId()]);
     foreach ($tags as $tag) {
       if ($tag->getId() === $tagId) {
         return true;
@@ -228,6 +230,7 @@ class Application extends App implements IBootstrap
       $entity = "OCA\\WorkflowEngine\\Entity\\File";
       $events = [];
 
+      // FIXME: There is no addOperation method in the manager, it is called registerOperation
       $this->manager->addOperation($class, $name, $checks, $operation, $scope, $entity, $events);
     } catch (Exception $e) {
       $this->logger->error('Error when inserting flow on enabling mfazones app', ['exception' => $e]);
