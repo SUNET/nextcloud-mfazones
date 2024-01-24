@@ -28,7 +28,7 @@ namespace OCA\mfazones\Listeners;
 
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
-use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
+use OCP\User\Events\UserLoggedInEvent;
 use OCP\ISession;
 use OCP\IUser;
 use Psr\Log\LoggerInterface;
@@ -38,7 +38,7 @@ use Psr\Log\LoggerInterface;
  *
  * @package OCA\mfazones\Listeners
  */
-class TwoFactorProviderForUserEnabledListener implements IEventListener
+class UserLoggedInListener implements IEventListener
 {
   public function __construct(
     private ISession $session,
@@ -51,8 +51,8 @@ class TwoFactorProviderForUserEnabledListener implements IEventListener
    */
   public function handle(Event $event): void
   {
-    if (!$event instanceof TwoFactorProviderForUserEnabled) {
-      $this->logger->debug("MFA: TwoFactorProviderForUserEnabled early return");
+    if (!$event instanceof UserLoggedInEvent) {
+      $this->logger->debug("MFA: UserLoggedInListener early return");
       return;
     }
     /**

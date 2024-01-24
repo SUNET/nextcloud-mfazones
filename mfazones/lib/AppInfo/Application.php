@@ -30,8 +30,10 @@ use Psr\Log\LoggerInterface;
 use OCP\mfazones\Listeners\RegisterFlowOperationsListener;
 use OCA\mfazones\Listeners\TwoFactorProviderChallengePassedListener;
 use OCA\mfazones\Listeners\TwoFactorProviderForUserEnabledListener;
+use OCA\mfazones\Listeners\UserLoggedInListener;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
+use OCP\User\Events\UserLoggedInEvent;
 
 class Application extends App implements IBootstrap
 {
@@ -115,6 +117,8 @@ class Application extends App implements IBootstrap
    */
   public function register(IRegistrationContext $context): void
   {
+    $this->logger->debug("MFA: register user logged in listner");
+    $context->registerEventListener(UserLoggedInEvent::class, UserLoggedInListener::class);
     // TODO: Remove this when we drop support for NC < 28
     if (class_exists(TwoFactorProviderChallengePassed::class)) {
       $this->logger->debug("MFA: detection class is TwoFactorProviderChallengePassed");
