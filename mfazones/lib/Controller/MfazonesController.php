@@ -22,8 +22,6 @@ use OCP\SystemTag\ISystemTagObjectMapper;
 use OCP\Util;
 use Psr\Log\LoggerInterface;
 
-use OCA\mfazones\Utils\MFAZonesUtils;
-
 class MfazonesController extends Controller
 {
   /** @var IUserManager */
@@ -136,7 +134,7 @@ class MfazonesController extends Controller
     try {
       $userRoot = $this->rootFolder->getUserFolder($this->userId);
       $node = $userRoot->get($source);
-      $tagId = MFAZonesUtils::getOurTagIdFromSystemTagManager($this->systemTagManager);
+      $tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager);
       if ($tagId === false) {
         $this->logger->error('A server admin should log in so the MFA Zone tag and flow can be created.');
         return new JSONResponse(
@@ -145,7 +143,7 @@ class MfazonesController extends Controller
           )
         );
       }
-      $type = MFAZonesUtils::castObjectType($node->getType());
+      $type = Application::castObjectType($node->getType());
       $result = $this->tagMapper->haveTag($node->getId(), $type, $tagId);
 
       return new JSONResponse(
@@ -191,7 +189,7 @@ class MfazonesController extends Controller
       $results = [];
       foreach ($nodeIds as $nodeId) {
         $node = $userRoot->getById($nodeId);
-        $type = MFAZonesUtils::castObjectType($node->getType());
+        $type = Application::castObjectType($node->getType());
         $results[$nodeId] = $this->tagMapper->haveTag($nodeId, $type, $tagId);
       }
 
@@ -228,7 +226,7 @@ class MfazonesController extends Controller
       if ($node->getType() !== 'dir') {
         return new DataResponse(['not a directory'], Http::STATUS_FORBIDDEN);
       }
-      $tagId = MFAZonesUtils::getOurTagIdFromSystemTagManager($this->systemTagManager);
+      $tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager);
       if ($tagId === false) {
         $this->logger->error('A server admin should log in so the MFA Zone tag and flow can be created.');
         return new JSONResponse(
@@ -237,7 +235,7 @@ class MfazonesController extends Controller
           )
         );
       }
-      $type = MFAZonesUtils::castObjectType($node->getType());
+      $type = Application::castObjectType($node->getType());
 
       if ($protect === "true") {
         $this->tagMapper->assignTags($node->getId(), $type, $tagId);

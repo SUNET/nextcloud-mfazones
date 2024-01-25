@@ -6,35 +6,30 @@ declare(strict_types=1);
 
 namespace OCA\mfazones\AppInfo;
 
-
 use Doctrine\DBAL\Exception;
-use OCA\WorkflowEngine\Helper\ScopeContext;
-use OCP\WorkflowEngine\IManager;
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\mfazones\MFAPlugin;
-use OCP\AppFramework\App;
-use OCP\AppFramework\Bootstrap\IBootContext;
-use OCP\AppFramework\Bootstrap\IBootstrap;
-use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCA\mfazones\Check\MfaVerified;
+use OCA\WorkflowEngine\Helper\ScopeContext;
 use OCP\IDBConnection;
+use OCP\IL10N;
+use OCP\ISession;
+use OCP\AppFramework\App;
+use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\AppFramework\Bootstrap\IBootContext;
+use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
+use OCP\Util;
+use OCP\WorkflowEngine\IManager;
+use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 use Psr\Log\LoggerInterface;
-
-// Our listeners
 use OCP\mfazones\Listeners\RegisterFlowOperationsListener;
 use OCA\mfazones\Listeners\TwoFactorProviderChallengePassedListener;
 use OCA\mfazones\Listeners\TwoFactorProviderForUserEnabledListener;
-use OCA\mfazones\Listeners\RegisterChecksEventListener;
-
-// Events we listen to
-use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
-use OCP\WorkflowEngine\Events\RegisterOperationsEvent;
-use OCP\WorkflowEngine\Events\RegisterChecksEvent;
-
-use OCA\mfazones\Utils\MFAZonesUtils;
-use Throwable;
 
 /**
  * Class Application
@@ -49,35 +44,63 @@ class Application extends App implements IBootstrap
   /** @var ISystemTagManager */
   protected ISystemTagManager $systemTagManager;
 
+  /** @var IManager */
+ // protected $manager;
+
   /** @var LoggerInterface */
   private $logger;
 
   /** @var IDBConnection */
   protected $connection;
 
+  /** @var IL10N */
+  protected $l;
 
-  /** @var IManager */
-  protected $manager;
+  /** @var ISession */
+  protected $session;
 
-  /** @var IUserSession */
-  protected $userSession;
+  /** @var MfaVerified */
+  protected $mfaVerifiedCheck;
 
   public function __construct()
   {
     parent::__construct(self::APP_ID);
 
-    $this->logger = $this->getContainer()->get(LoggerInterface::class);
-    /* @var ISystemTagManager */
-    $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
+    $container = $this->getContainer();
+    $container->registerService(MFAPlugin::class, function ($c) {
+      $systemTagManager = $c->query(ISystemTagManager::class);
+      $tagMapper = $c->query(ISystemTagObjectMapper::class);
+      $x = new MFAPlugin($systemTagManager, $tagMapper);
+      return $x;
+    });
 
-    /* @var Manager */
+    $this->l = $this->getContainer()->get(IL10N::class);
+    $this->session = $this->getContainer()->get(ISession::class);
+    $this->logger = $this->getContainer()->get(LoggerInterface::class);
+    $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session, $this->logger);
+
+    /* @var IEventDispatcher $dispatcher */
+    $dispatcher = $this->getContainer()->query(IEventDispatcher::class);
+    $dispatcher->addListener(RegisterChecksEvent::class, function (RegisterChecksEvent $event) {
+      // copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/lib/Listener/RegisterChecksListener.php
+      if (!($event instanceof RegisterChecksEvent)) {
+        return;
+      }
+      $event->registerCheck($this->mfaVerifiedCheck);
+      Util::addScript(Application::APP_ID, 'mfazones-main');
+    });
+
+    $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
+   // $this->manager = $this->getContainer()->get(IManager::class);
     $this->connection = $this->getContainer()->get(IDBConnection::class);
 
-
-    $this->userSession = $this->getContainer()->get(\OCP\IUserSession::class);
-
-    /* @var IManager */
-    $this->manager = $this->getContainer()->get(IManager::class);
+    $dispatcher->addListener(RegisterOperationsEvent::class, function () {
+      \OCP\Util::addScript(self::APP_ID, 'mfazones-main');
+    });
+    $dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
+      \OCP\Util::addStyle(self::APP_ID, 'tabview');
+      \OCP\Util::addScript(self::APP_ID, 'mfazones-main');
+    });
   }
 
   /**
@@ -85,13 +108,6 @@ class Application extends App implements IBootstrap
    */
   public function register(IRegistrationContext $context): void
   {
-    $this->logger->debug("MFA: registering service");
-    $context->registerService(MFAPlugin::class, function ($c) {
-      $systemTagManager = $c->get(ISystemTagManager::class);
-      $tagMapper = $c->get(ISystemTagObjectMapper::class);
-      $x = new MFAPlugin($systemTagManager, $tagMapper);
-      return $x;
-    });
     // TODO: Remove this when we drop support for NC < 28
     if (class_exists(TwoFactorProviderChallengePassed::class)) {
       $this->logger->debug("MFA: detection class is TwoFactorProviderChallengePassed");
@@ -102,79 +118,55 @@ class Application extends App implements IBootstrap
     }
     $this->logger->debug("MFA: register operations listner");
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsListener::class);
-    $context->registerEventListener(LoadAdditionalScriptsEvent::class, RegisterFlowOperationsListener::class);
-    $this->logger->debug("MFA: register check listner");
-    $context->registerEventListener(RegisterChecksEvent::class, RegisterChecksEventListener::class);
     $this->logger->debug("MFA: done with listners");
-
-    $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
-    $user = $this->userSession->getUser();
-    // The first time an admin logs in to the server, this will create the tag and flow
-    if ($user !== null && $groupManager->isAdmin($user->getUID())) {
-      $this->addFlows();
-    }
   }
 
   /**
-   * @param IBootContext $context
-   *
-   * @throws Throwable
+   * @inheritdoc
    */
   public function boot(IBootContext $context): void
   {
   }
 
+  public static function castObjectType($type)
+  {
+    if ($type === 'file') {
+      return "files";
+    }
+    if ($type === "dir") {
+      return "files";
+    }
+    return $type;
+  }
 
-  private function addFlows()
+  public static function getOurTagIdFromSystemTagManager($systemTagManager)
   {
     try {
-      $hash = md5('OCA\mfazones\Check\MfaVerified::!is::');
+      $tags = $systemTagManager->getAllTags(
+        null,
+        self::TAG_NAME
+      );
 
-      $query = $this->connection->getQueryBuilder();
-      $query->select('id')
-        ->from('flow_checks')
-        ->where($query->expr()->eq('hash', $query->createNamedParameter($hash)));
-      $result = $query->execute();
-
-      if ($row = $result->fetch()) {
-        $result->closeCursor();
-        return;
+      if (count($tags) < 1) {
+        $tag = $systemTagManager->createTag(self::TAG_NAME, false, false);
+      } else {
+        $tag = current($tags);
       }
-
-      $tagId = MFAZonesUtils::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
-
-      $scope = new ScopeContext(IManager::SCOPE_ADMIN);
-      $class = "OCA\\FilesAccessControl\\Operation";
-      $name = "";
-      $checks =  [
-        [
-          "class" => "OCA\mfazones\Check\MfaVerified",
-          "operator" => "!is",
-          "value" => "",
-          "invalid" => false
-        ],
-        [
-          "class" => "OCA\WorkflowEngine\Check\FileSystemTags",
-          "operator" => "is",
-          "value" => $tagId,
-          "invalid" => false
-        ]
-        // uncomment this code to re-activate admin bypass,
-        // see https://github.com/pondersource/nextcloud-mfa-awareness/issues/53
-        // [
-        //             "class" => "OCA\WorkflowEngine\Check\UserGroupMembership",
-        //             "operator" => "!is",
-        //             "value" => "admin",
-        //             "invalid" => false
-        //          ]
-      ];
-      $operation = "deny";
-      $entity = "OCA\\WorkflowEngine\\Entity\\File";
-      $events = [];
-
-      $this->manager->addOperation($class, $name, $checks, $operation, $scope, $entity, $events);
+      return $tag->getId();
     } catch (Exception $e) {
-      $this->logger->error('Error when inserting flow on enabling mfazones app', ['exception' => $e]);
+      return false;
     }
   }
+
+  public function nodeHasTag($node, $tagId)
+  {
+    $tags = $this->systemTagManager->getTagsByIds([$node->getId()]);
+    foreach ($tags as $tag) {
+      if ($tag->getId() === $tagId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 }

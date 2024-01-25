@@ -26,13 +26,11 @@ declare(strict_types=1);
 
 namespace OCA\mfazones\Listeners;
 
-use OCA\mfazones\Check\MfaVerified;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
-use OCP\IL10N;
+use OCP\User\Events\UserLoggedInEvent;
 use OCP\ISession;
-use OCP\Util;
-use OCP\WorkflowEngine\Events\RegisterChecksEvent;
+use OCP\IUser;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -40,15 +38,12 @@ use Psr\Log\LoggerInterface;
  *
  * @package OCA\mfazones\Listeners
  */
-class RegisterChecksEventListener implements IEventListener
+class UserLoggedInListener implements IEventListener
 {
-  private MfaVerified $mfaVerifiedCheck;
   public function __construct(
     private ISession $session,
-    private LoggerInterface $logger,
-    private IL10N $l
+    private LoggerInterface $logger
   ) {
-    $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session, $this->logger);
   }
 
   /**
@@ -56,11 +51,17 @@ class RegisterChecksEventListener implements IEventListener
    */
   public function handle(Event $event): void
   {
-    if (!($event instanceof RegisterChecksEvent)) {
+    if (!$event instanceof UserLoggedInEvent) {
+      $this->logger->debug("MFA: UserLoggedInListener early return");
       return;
     }
-    $event->registerCheck($this->mfaVerifiedCheck);
-    Util::addScript('mfazones', 'mfazones-main');
-    $this->logger->debug("MFA: registering check");
+    /**
+     * @var IUser $user
+     */
+    $user = $event->getUser();
+    $uid = $user->getUID();
+    $session = $this->session;
+    $this->logger->debug("MFA: setting session variable for user: " . (string) $uid);
+    $session->set('two_factor_event_passed', $uid);
   }
 }
