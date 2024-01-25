@@ -42,7 +42,7 @@ project_dir=$(CURDIR)/$(app_name)
 build_dir=$(project_dir)/build/artifacts
 build_tools_dir=$(project_dir)/build/tools
 sign_dir=$(build_dir)/sign
-version+=0.0.1
+version+=0.0.2
 
 all: appstore
 release: appstore
