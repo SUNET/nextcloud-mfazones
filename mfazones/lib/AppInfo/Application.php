@@ -9,19 +9,13 @@ namespace OCA\mfazones\AppInfo;
 
 use Doctrine\DBAL\Exception;
 use OCA\WorkflowEngine\Helper\ScopeContext;
-use OCA\WorkflowEngine\Manager;
 use OCP\WorkflowEngine\IManager;
 use OCA\mfazones\MFAPlugin;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
-use OCP\EventDispatcher\IEventDispatcher;
-use OCP\ICacheFactory;
-use OCP\IConfig;
 use OCP\IDBConnection;
-use OCP\IL10N;
-use OCP\IServerContainer;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
 use Psr\Log\LoggerInterface;
@@ -61,26 +55,12 @@ class Application extends App implements IBootstrap
   /** @var IDBConnection */
   protected $connection;
 
-  /** @var IServerContainer */
-  protected $serverContainer;
 
-  /** @var Manager */
+  /** @var IManager */
   protected $manager;
-
-  /** @var IL10N */
-  protected $l;
 
   /** @var IUserSession */
   protected $userSession;
-
-  /** @var IConfig */
-  protected $config;
-
-  /** @var IEventDispatcher */
-  protected $dispatcher;
-
-  /** @var ICacheFactory */
-  protected $cacheFactory;
 
   public function __construct()
   {
@@ -89,22 +69,15 @@ class Application extends App implements IBootstrap
     $this->logger = $this->getContainer()->get(LoggerInterface::class);
     /* @var ISystemTagManager */
     $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
+
     /* @var Manager */
     $this->connection = $this->getContainer()->get(IDBConnection::class);
 
-    $this->serverContainer = $this->getContainer()->get(IServerContainer::class);
 
     $this->userSession = $this->getContainer()->get(\OCP\IUserSession::class);
 
-    $this->l = $this->getContainer()->get(IL10N::class);
-
-    $this->dispatcher = $this->getContainer()->get(IEventDispatcher::class);
-
-    $this->config = $this->getContainer()->get(IConfig::class);
-
-    $this->cacheFactory = $this->getContainer()->get(ICacheFactory::class);
-
-    $this->manager = new Manager($this->connection, $this->serverContainer, $this->l, $this->logger, $this->userSession, $this->dispatcher, $this->config, $this->cacheFactory);
+    /* @var IManager */
+    $this->manager = $this->getContainer()->get(IManager::class);
   }
 
   /**
