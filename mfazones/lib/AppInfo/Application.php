@@ -9,16 +9,23 @@ namespace OCA\mfazones\AppInfo;
 
 use Doctrine\DBAL\Exception;
 use OCA\WorkflowEngine\Helper\ScopeContext;
+use OCA\WorkflowEngine\Manager;
+use OCP\WorkflowEngine\IManager;
 use OCA\mfazones\MFAPlugin;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\EventDispatcher\IEventDispatcher;
+use OCP\ICacheFactory;
+use OCP\IConfig;
 use OCP\IDBConnection;
+use OCP\IL10N;
+use OCP\IServerContainer;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
-use OCP\WorkflowEngine\IManager;
 use Psr\Log\LoggerInterface;
+
 // Our listeners
 use OCP\mfazones\Listeners\RegisterFlowOperationsListener;
 use OCA\mfazones\Listeners\TwoFactorProviderChallengePassedListener;
@@ -54,6 +61,27 @@ class Application extends App implements IBootstrap
   /** @var IDBConnection */
   protected $connection;
 
+  /** @var IServerContainer */
+  protected $serverContainer;
+
+  /** @var Manager */
+  protected $manager;
+
+  /** @var IL10N */
+  protected $l;
+
+  /** @var IUserSession */
+  protected $userSession;
+
+  /** @var IConfig */
+  protected $config;
+
+  /** @var IEventDispatcher */
+  protected $dispatcher;
+
+  /** @var ICacheFactory */
+  protected $cacheFactory;
+
   public function __construct()
   {
     parent::__construct(self::APP_ID);
@@ -61,9 +89,22 @@ class Application extends App implements IBootstrap
     $this->logger = $this->getContainer()->get(LoggerInterface::class);
     /* @var ISystemTagManager */
     $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
-    /* @var IManager */
-    $this->manager = $this->getContainer()->get(IManager::class);
+    /* @var Manager */
     $this->connection = $this->getContainer()->get(IDBConnection::class);
+
+    $this->serverContainer = $this->getContainer()->get(IServerContainer::class);
+
+    $this->userSession = $this->getContainer()->get(\OCP\IUserSession::class);
+
+    $this->l = $this->getContainer()->get(IL10N::class);
+
+    $this->dispatcher = $this->getContainer()->get(IEventDispatcher::class);
+
+    $this->config = $this->getContainer()->get(IConfig::class);
+
+    $this->cacheFactory = $this->getContainer()->get(ICacheFactory::class);
+
+    $this->manager = new Manager($this->connection, $this->serverContainer, $this->l, $this->logger, $this->userSession, $this->dispatcher, $this->config, $this->cacheFactory);
   }
 
   /**
@@ -71,10 +112,10 @@ class Application extends App implements IBootstrap
    */
   public function register(IRegistrationContext $context): void
   {
-    $this->logger->debug("MFA: regestering service");
+    $this->logger->debug("MFA: registering service");
     $context->registerService(MFAPlugin::class, function ($c) {
-      $systemTagManager = $c->query(ISystemTagManager::class);
-      $tagMapper = $c->query(ISystemTagObjectMapper::class);
+      $systemTagManager = $c->get(ISystemTagManager::class);
+      $tagMapper = $c->get(ISystemTagObjectMapper::class);
       $x = new MFAPlugin($systemTagManager, $tagMapper);
       return $x;
     });
@@ -85,7 +126,6 @@ class Application extends App implements IBootstrap
     } else {
       $this->logger->warning("MFA: detection class is deprecated class TwoFactorProviderForUserEnabled");
       $context->registerEventListener(TwoFactorProviderForUserEnabled::class, TwoFactorProviderForUserEnabledListener::class);
-          $context->registerEventListener(TwoFactorProviderForUserEnabled::class, TwoFactorProviderForUserEnabledListener::class);
     }
     $this->logger->debug("MFA: register operations listner");
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsListener::class);
@@ -95,8 +135,7 @@ class Application extends App implements IBootstrap
     $this->logger->debug("MFA: done with listners");
 
     $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
-    $userSession = \OC::$server->get(\OCP\IUserSession::class);
-    $user = $userSession->getUser();
+    $user = $this->userSession->getUser();
     // The first time an admin logs in to the server, this will create the tag and flow
     if ($user !== null && $groupManager->isAdmin($user->getUID())) {
       $this->addFlows();
@@ -160,7 +199,6 @@ class Application extends App implements IBootstrap
       $entity = "OCA\\WorkflowEngine\\Entity\\File";
       $events = [];
 
-      // FIXME: There is no addOperation method in the manager, it is called registerOperation
       $this->manager->addOperation($class, $name, $checks, $operation, $scope, $entity, $events);
     } catch (Exception $e) {
       $this->logger->error('Error when inserting flow on enabling mfazones app', ['exception' => $e]);
