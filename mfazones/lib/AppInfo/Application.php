@@ -9,37 +9,30 @@ namespace OCA\mfazones\AppInfo;
 
 use Doctrine\DBAL\Exception;
 use OCA\WorkflowEngine\Helper\ScopeContext;
-use OCA\WorkflowEngine\Manager;
-use OCA\mfazones\Check\MfaVerified;
 use OCA\mfazones\MFAPlugin;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
-use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IDBConnection;
-use OCP\IL10N;
-use OCP\ISession;
-use OCP\SystemTag\ISystemTag;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
-use OCP\Util;
 use OCP\WorkflowEngine\IManager;
 use Psr\Log\LoggerInterface;
 // Our listeners
 use OCP\mfazones\Listeners\RegisterFlowOperationsListener;
 use OCA\mfazones\Listeners\TwoFactorProviderChallengePassedListener;
 use OCA\mfazones\Listeners\TwoFactorProviderForUserEnabledListener;
+use OCA\mfazones\Listeners\RegisterChecksEventListener;
 
 // Events we listen to
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
-use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 use OCP\WorkflowEngine\Events\RegisterOperationsEvent;
+use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 
 use OCA\mfazones\Utils\MFAZonesUtils;
-
 use Throwable;
 
 /**
@@ -55,55 +48,22 @@ class Application extends App implements IBootstrap
   /** @var ISystemTagManager */
   protected ISystemTagManager $systemTagManager;
 
-  /** @var IManager */
-  protected $manager;
-
   /** @var LoggerInterface */
   private $logger;
 
   /** @var IDBConnection */
   protected $connection;
 
-  /** @var IL10N */
-  protected $l;
-
-  /** @var ISession */
-  protected $session;
-
-  /** @var MfaVerified */
-  protected $mfaVerifiedCheck;
-
   public function __construct()
   {
     parent::__construct(self::APP_ID);
 
-    $this->l = $this->getContainer()->get(IL10N::class);
-    $this->session = $this->getContainer()->get(ISession::class);
     $this->logger = $this->getContainer()->get(LoggerInterface::class);
-    $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session, $this->logger);
+    /* @var ISystemTagManager */
     $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
+    /* @var IManager */
     $this->manager = $this->getContainer()->get(IManager::class);
     $this->connection = $this->getContainer()->get(IDBConnection::class);
-
-    /* @var IEventDispatcher $dispatcher */
-    $dispatcher = $this->getContainer()->get(IEventDispatcher::class);
-    $dispatcher->addListener(RegisterChecksEvent::class, function (RegisterChecksEvent $event) {
-      // copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/lib/Listener/RegisterChecksListener.php
-      if (!($event instanceof RegisterChecksEvent)) {
-        return;
-      }
-      $event->registerCheck($this->mfaVerifiedCheck);
-      Util::addScript(Application::APP_ID, 'mfazones-main');
-    });
-
-
-    $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
-    $userSession = \OC::$server->get(\OCP\IUserSession::class);
-    $user = $userSession->getUser();
-    // The first time an admin logs in to the server, this will create the tag and flow
-    if ($user !== null && $groupManager->isAdmin($user->getUID())) {
-      $this->addFlows();
-    }
   }
 
   /**
@@ -130,7 +90,17 @@ class Application extends App implements IBootstrap
     $this->logger->debug("MFA: register operations listner");
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsListener::class);
     $context->registerEventListener(LoadAdditionalScriptsEvent::class, RegisterFlowOperationsListener::class);
+    $this->logger->debug("MFA: register check listner");
+    $context->registerEventListener(RegisterChecksEvent::class, RegisterChecksEventListener::class);
     $this->logger->debug("MFA: done with listners");
+
+    $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
+    $userSession = \OC::$server->get(\OCP\IUserSession::class);
+    $user = $userSession->getUser();
+    // The first time an admin logs in to the server, this will create the tag and flow
+    if ($user !== null && $groupManager->isAdmin($user->getUID())) {
+      $this->addFlows();
+    }
   }
 
   /**
