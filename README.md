@@ -19,7 +19,6 @@ see [our research repo](https://github.com/pondersource/nextcloud-mfa-awareness#
 1. Download the MFA Zones app from the [Nextcloud app store](https://apps.nextcloud.com/apps/mfazones)
 2. Extract the downloaded archive to your Nextcloud apps directory.
 3. Enable the app in the Nextcloud apps settings.
-4. Login as admin and add a Flow: `Administration setting -> Flow -> Block access to a file -> Add new flow ->  When File is accessed and multi-factor authentication is not verified`
 
 
 ## Usage
