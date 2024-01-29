@@ -10,7 +10,6 @@ use Doctrine\DBAL\Exception;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\mfazones\MFAPlugin;
 use OCA\mfazones\Check\MfaVerified;
-use OCA\WorkflowEngine\Helper\ScopeContext;
 use OCP\IDBConnection;
 use OCP\IL10N;
 use OCP\ISession;
@@ -22,12 +21,13 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
 use OCP\Util;
-use OCP\WorkflowEngine\IManager;
 use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 use Psr\Log\LoggerInterface;
-use OCP\mfazones\Listeners\RegisterFlowOperationsListener;
+use OCA\mfazones\Listeners\AppEnableEventListener;
+use OCA\mfazones\Listeners\RegisterFlowOperationsListener;
 use OCA\mfazones\Listeners\TwoFactorProviderChallengePassedListener;
 use OCA\mfazones\Listeners\TwoFactorProviderForUserEnabledListener;
+use OCP\App\Events\AppEnableEvent;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
 
@@ -43,9 +43,6 @@ class Application extends App implements IBootstrap
 
   /** @var ISystemTagManager */
   protected ISystemTagManager $systemTagManager;
-
-  /** @var IManager */
- // protected $manager;
 
   /** @var LoggerInterface */
   private $logger;
@@ -91,7 +88,7 @@ class Application extends App implements IBootstrap
     });
 
     $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
-   // $this->manager = $this->getContainer()->get(IManager::class);
+    // $this->manager = $this->getContainer()->get(IManager::class);
     $this->connection = $this->getContainer()->get(IDBConnection::class);
 
     $dispatcher->addListener(RegisterOperationsEvent::class, function () {
@@ -118,6 +115,8 @@ class Application extends App implements IBootstrap
     }
     $this->logger->debug("MFA: register operations listner");
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsListener::class);
+    $this->logger->debug("MFA: register app enable listner");
+    $context->registerEventListener(AppEnableEvent::class, AppEnableEventListener::class);
     $this->logger->debug("MFA: done with listners");
   }
 
@@ -168,5 +167,4 @@ class Application extends App implements IBootstrap
     }
     return false;
   }
-
 }

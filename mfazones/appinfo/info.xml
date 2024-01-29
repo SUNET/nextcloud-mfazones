@@ -11,7 +11,7 @@
     <description><![CDATA[A plugin to restrict access to files with mfazone tag
 
 See the [README](https://github.com/pondersource/mfazones/blob/main/README.md) for usage.]]></description>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <licence>agpl</licence>
     <author mail="michiel@pondersource.com" homepage="https://github.com/pondersource/mfazones">Pondersource</author>
     <namespace>mfazones</namespace>
