@@ -24,6 +24,7 @@ use OCP\Util;
 use OCP\WorkflowEngine\Events\RegisterChecksEvent;
 use Psr\Log\LoggerInterface;
 use OCA\mfazones\Listeners\AppEnableEventListener;
+use OCA\mfazones\Listeners\AppDisableEventListener;
 use OCA\mfazones\Listeners\RegisterFlowOperationsListener;
 use OCA\mfazones\Listeners\TwoFactorProviderChallengePassedListener;
 use OCA\mfazones\Listeners\TwoFactorProviderForUserEnabledListener;
@@ -117,6 +118,8 @@ class Application extends App implements IBootstrap
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsListener::class);
     $this->logger->debug("MFA: register app enable listner");
     $context->registerEventListener(AppEnableEvent::class, AppEnableEventListener::class);
+    $this->logger->debug("MFA: register app disable listner");
+    $context->registerEventListener(AppEnableEvent::class, AppDisableEventListener::class);
     $this->logger->debug("MFA: done with listners");
   }
 
