@@ -1,11 +1,11 @@
 {
   "name": "mfazones",
-  "description": "https://github.com/pondersource/mfa-verified-zone",
-  "version": "0.0.1",
-  "author": "Pondersource <michiel@pondersource.com>",
+  "description": "https://github.com/SUNET/nextcloud-mfazones",
+  "version": "0.0.4",
+  "author": "SUNET <kano@sunet.se>",
   "contributors": [],
   "bugs": {
-    "url": "https://github.com/pondersource/mfa-verified-zone/issues"
+    "url": "https://github.com/SUNET/nextcloud-mfazones/issues"
   },
   "license": "agpl",
   "private": true,
