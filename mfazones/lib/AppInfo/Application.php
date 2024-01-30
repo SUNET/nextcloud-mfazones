@@ -29,6 +29,7 @@ use OCA\mfazones\Listeners\RegisterFlowOperationsListener;
 use OCA\mfazones\Listeners\TwoFactorProviderChallengePassedListener;
 use OCA\mfazones\Listeners\TwoFactorProviderForUserEnabledListener;
 use OCP\App\Events\AppEnableEvent;
+use OCP\App\Events\AppDisableEvent;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
 
@@ -119,7 +120,7 @@ class Application extends App implements IBootstrap
     $this->logger->debug("MFA: register app enable listner");
     $context->registerEventListener(AppEnableEvent::class, AppEnableEventListener::class);
     $this->logger->debug("MFA: register app disable listner");
-    $context->registerEventListener(AppEnableEvent::class, AppDisableEventListener::class);
+    $context->registerEventListener(AppDisableEvent::class, AppDisableEventListener::class);
     $this->logger->debug("MFA: done with listners");
   }
 

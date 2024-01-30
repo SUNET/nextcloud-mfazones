@@ -26,27 +26,31 @@ declare(strict_types=1);
 
 namespace OCA\mfazones\Listeners;
 
+use Doctrine\DBAL\Exception;
 use OCA\WorkflowEngine\Helper\ScopeContext;
 use OCA\WorkflowEngine\Manager;
 use OCA\mfazones\AppInfo\Application;
 use OCP\App\Events\AppDisableEvent;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
+use OCP\IDBConnection;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\WorkflowEngine\IManager;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class AppEnableEventListener
+ * Class AppDisableEventListener
  *
  * @package OCA\mfazones\Listeners
  */
 class AppDisableEventListener implements IEventListener
 {
   public function __construct(
-    private Manager $manager,
+    private IDBConnection $connection,
     private ISystemTagManager $systemTagManager,
-    private LoggerInterface $logger
+    private LoggerInterface $logger,
+    private Manager $manager
   ) {
   }
 
@@ -69,7 +73,51 @@ class AppDisableEventListener implements IEventListener
 
     $tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
 
-    $context = new ScopeContext(IManager::SCOPE_ADMIN);
-    $this->manager->deleteOperation($tagId, $context);
+    try {
+      $mfaVerifiedId = $this->getCheckByHash(md5('OCA\mfazones\Check\MfaVerified::!is::'));
+      $fileSystemTagsId = $this->getCheckByHash(md5('OCA\WorkflowEngine\Check\FileSystemTags::is:' . $tagId . ':'));
+
+      // select id from oc_flow_operations where class = 'OCA\\FilesAccessControl\\Operation' and operation = 'deny' and checks = '[10,5]';
+      $query = $this->connection->getQueryBuilder();
+      $query->select('id')
+        ->from('flow_operations')
+        ->where($query->expr()->eq('class', $query->createNamedParameter('OCA\\FilesAccessControl\\Operation')))
+        ->where($query->expr()->eq('operation', $query->createNamedParameter('deny')))
+        ->where($query->expr()->eq('checks', $query->createNamedParameter('[' . $mfaVerifiedId . ',' . $fileSystemTagsId . ']')));
+      $result = $query->executeQuery();
+      $context = new ScopeContext(IManager::SCOPE_ADMIN);
+      $operationId = $result->fetch();
+      $result->closeCursor();
+      $this->manager->deleteOperation($operationId, $context);
+      $this->deleteCheckById($mfaVerifiedId);
+      $this->deleteCheckById($fileSystemTagsId);
+    } catch (Exception $e) {
+      $this->logger->error('Error when deleting flow on disabling mfazones app', ['exception' => $e]);
+    }
+  }
+
+  private function deleteCheckById($id)
+  {
+
+    /** @var IQueryBuilder $query */
+    $query = $this->connection->getQueryBuilder();
+    $query->delete()
+      ->from('flow_checks')
+      ->where($query->expr()->eq('id', $query->createNamedParameter($id)));
+    $query->executeStatement();
+  }
+  private function getCheckByHash($hash)
+  {
+
+    /** @var IQueryBuilder $query */
+    $query = $this->connection->getQueryBuilder();
+    $query->select('id')
+      ->from('flow_checks')
+      ->where($query->expr()->eq('hash', $query->createNamedParameter($hash)));
+    $result = $query->executeQuery();
+
+    $id = $result->fetch();
+    $result->closeCursor();
+    return $id;
   }
 }
