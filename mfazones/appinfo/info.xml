@@ -1,38 +1,35 @@
 <?xml version="1.0"?>
-<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
-      xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
-    <!--
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+  <!--
     SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
+    SPDX-FileCopyrightText: SUNET <kano@sunet.se>
     SPDX-License-Identifier: CC0-1.0
     -->
-    <id>mfazones</id>
-    <name>MFA Zones</name>
-    <summary>https://github.com/pondersource/mfazones</summary>
-    <description><![CDATA[A plugin to restrict access to files with mfazone tag
+  <id>mfazones</id>
+  <name>MFA Zones</name>
+  <summary>https://github.com/pondersource/mfazones</summary>
+  <description><![CDATA[A plugin to restrict access to files with mfazone tag
 
-See the [README](https://github.com/pondersource/mfazones/blob/main/README.md) for usage.]]></description>
-    <version>0.0.3</version>
-    <licence>agpl</licence>
-    <author mail="michiel@pondersource.com" homepage="https://github.com/pondersource/mfazones">Pondersource</author>
-    <namespace>mfazones</namespace>
-    <category>files</category>
-    <category>security</category>
-    <bugs>https://github.com/pondersource/mfazones/issues</bugs>
-    <dependencies>
-        <nextcloud min-version="20" max-version="28"/>
-    </dependencies>
-    <settings>
-		<admin>OCA\WorkflowEngine\Settings\Admin</admin>
-		<admin-section>OCA\WorkflowEngine\Settings\Section</admin-section>
-		<personal>OCA\WorkflowEngine\Settings\Personal</personal>
-		<personal-section>OCA\WorkflowEngine\Settings\Section</personal-section>
-	</settings>
-    <types>
-        <dav/>
-    </types>
-    <!-- <sabre>
-        <plugins>
-            <plugin>OCA\mfazones\MFAPlugin</plugin>
-        </plugins>
-    </sabre> -->
+This app will make it possible to designate certain directories as `mfazones` and only users who have a valid MFA token will be able to access them.
+
+The app uses the workflow engine to enforce the restriction.
+
+See the [README](https://github.com/SUNET/nextcloud-mfazones/blob/main/README.md) for more information.]]></description>
+  <version>0.0.4</version>
+  <licence>agpl</licence>
+  <author mail="kano@sunet.se" homepage="https://github.com/SUNET/nextcloud-mfazones">SUNET</author>
+  <namespace>mfazones</namespace>
+  <category>files</category>
+  <category>security</category>
+  <bugs>https://github.com/SUNET/nextcloud-mfazones/issues</bugs>
+  <dependencies>
+    <nextcloud min-version="27" max-version="28" />
+  </dependencies>
+  <settings>
+    <admin>OCA\WorkflowEngine\Settings\Admin</admin>
+    <admin-section>OCA\WorkflowEngine\Settings\Section</admin-section>
+    <personal>OCA\WorkflowEngine\Settings\Personal</personal>
+    <personal-section>OCA\WorkflowEngine\Settings\Section</personal-section>
+  </settings>
 </info>
