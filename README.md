@@ -9,7 +9,7 @@ see [our research repo](https://github.com/pondersource/nextcloud-mfa-awareness#
 
 ## Requirements
 
-- Nextcloud 20 or later
+- Nextcloud 27 or later
 - PHP 7.2 or later
 - `File Access Control` (Nextcloud app)
 - More [optional external dependencies](https://github.com/pondersource/nextcloud-mfa-awareness#nextcloud-mfa-awareness), depending on your deployment (using SAML? using Global Site Selector?)
