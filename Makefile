@@ -36,13 +36,15 @@
 #        "prebuild": "npm install && node_modules/bower/bin/bower install && node_modules/bower/bin/bower update",
 #        "build": "node node_modules/gulp-cli/bin/gulp.js"
 #    },
+
 app_name=mfazones
+get_version = $(shell  grep /version $(app_name)/appinfo/info.xml | sed 's/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/')
 cert_dir=$(HOME)/.nextcloud/certificates
 project_dir=$(CURDIR)/$(app_name)
 build_dir=$(project_dir)/build/artifacts
 build_tools_dir=$(project_dir)/build/tools
 sign_dir=$(build_dir)/sign
-version+=0.0.3
+version := $(call get_version)
 
 all: appstore
 release: appstore
