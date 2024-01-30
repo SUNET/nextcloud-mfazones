@@ -70,12 +70,13 @@ class AppDisableEventListener implements IEventListener
 
     $this->logger->debug("MFA: removing flow.");
 
-
     $tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
 
     try {
-      $mfaVerifiedId = $this->getCheckByHash(md5('OCA\mfazones\Check\MfaVerified::!is::'));
-      $fileSystemTagsId = $this->getCheckByHash(md5('OCA\WorkflowEngine\Check\FileSystemTags::is:' . $tagId . ':'));
+
+      $mfaVerifiedId = $this->getCheckId('OCA\mfazones\Check\MfaVerified', '!is');
+      $fileSystemTagsId = $this->getCheckId('OCA\WorkflowEngine\Check\FileSystemTags', 'is', $tagId);
+      $this->logger->debug("MFA: removing flow for $mfaVerifiedId and $fileSystemTagsId");
 
       // select id from oc_flow_operations where class = 'OCA\\FilesAccessControl\\Operation' and operation = 'deny' and checks = '[10,5]';
       $query = $this->connection->getQueryBuilder();
@@ -86,13 +87,18 @@ class AppDisableEventListener implements IEventListener
         ->where($query->expr()->eq('checks', $query->createNamedParameter('[' . $mfaVerifiedId . ',' . $fileSystemTagsId . ']')));
       $result = $query->executeQuery();
       $context = new ScopeContext(IManager::SCOPE_ADMIN);
-      $operationId = $result->fetch();
+      $operationId = $result->fetchOne();
       $result->closeCursor();
+      if (!$operationId) {
+        $this->logger->debug("MFA: removing flow for $mfaVerifiedId and $fileSystemTagsId unsuccessfull");
+        return;
+      }
+      $this->logger->debug("MFA: removing flow with operationId: $operationId");
       $this->manager->deleteOperation($operationId, $context);
       $this->deleteCheckById($mfaVerifiedId);
       $this->deleteCheckById($fileSystemTagsId);
     } catch (Exception $e) {
-      $this->logger->error('Error when deleting flow on disabling mfazones app', ['exception' => $e]);
+      $this->logger->error('MFA: Error when removing flow on disabling mfazones app', ['exception' => $e]);
     }
   }
 
@@ -101,22 +107,23 @@ class AppDisableEventListener implements IEventListener
 
     /** @var IQueryBuilder $query */
     $query = $this->connection->getQueryBuilder();
-    $query->delete()
-      ->from('flow_checks')
+    $query->delete('flow_checks')
       ->where($query->expr()->eq('id', $query->createNamedParameter($id)));
     $query->executeStatement();
   }
-  private function getCheckByHash($hash)
+  private function getCheckId($class, $operator, $value = "")
   {
 
     /** @var IQueryBuilder $query */
     $query = $this->connection->getQueryBuilder();
     $query->select('id')
       ->from('flow_checks')
-      ->where($query->expr()->eq('hash', $query->createNamedParameter($hash)));
+      ->where($query->expr()->eq('class', $query->createNamedParameter($class)))
+      ->where($query->expr()->eq('operator', $query->createNamedParameter($operator)))
+      ->where($query->expr()->eq('value', $query->createNamedParameter($value)));
     $result = $query->executeQuery();
 
-    $id = $result->fetch();
+    $id = $result->fetchOne();
     $result->closeCursor();
     return $id;
   }
