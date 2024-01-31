@@ -6,27 +6,20 @@ namespace OCA\mfazones\Controller;
 
 
 use OCA\mfazones\AppInfo\Application;
-use OCP\Activity\IManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\TemplateResponse;
 use OCP\Files\IRootFolder;
 use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\ISession;
-use OCP\IUserManager;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
-use OCP\Util;
 use Psr\Log\LoggerInterface;
 
 class MfazonesController extends Controller
 {
-  /** @var IUserManager */
-  private $userManager;
-
   /** @var IRootFolder */
   private $rootFolder;
 
@@ -42,9 +35,6 @@ class MfazonesController extends Controller
   /** @var IGroupManager */
   private $groupManager;
 
-  /** @var \OCP\ITagManager */
-  private $tagManager;
-
   /** @var ISystemTagObjectMapper */
   private $tagMapper;
 
@@ -53,10 +43,8 @@ class MfazonesController extends Controller
 
   public function __construct(
     IRequest $request,
-    IUserManager $userManager,
     IRootFolder $rootFolder,
     IGroupManager $groupManager,
-    \OCP\ITagManager $tagManager,
     string $userId,
     ISession $session,
     ISystemTagObjectMapper $tagMapper,
@@ -64,15 +52,24 @@ class MfazonesController extends Controller
     LoggerInterface $logger
   ) {
     parent::__construct(Application::APP_ID, $request);
-    $this->userManager = $userManager;
     $this->rootFolder = $rootFolder;
     $this->userId = $userId;
     $this->groupManager = $groupManager;
-    $this->tagManager = $tagManager;
     $this->tagMapper = $tagMapper;
     $this->session = $session;
     $this->systemTagManager = $systemTagManager;
     $this->logger = $logger;
+  }
+
+  private function castObjectType($type)
+  {
+    if ($type === 'file') {
+      return "files";
+    }
+    if ($type === "dir") {
+      return "files";
+    }
+    return $type;
   }
 
   private function isMfaVerified()
@@ -103,12 +100,12 @@ class MfazonesController extends Controller
         $node = $userRoot->get($source);
         $hasAccess = ($isAdmin || $node->getOwner()->getUID() === $this->userId) && $mfaVerified;
       } catch (\Exception $e) {
-        \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
+        $this->logger->critical($e, ['app' => 'mfazones']);
         $hasAccess = false;
       }
       return $hasAccess;
     } catch (\Exception $e) {
-      \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
+      $this->logger->critical($e, ['app' => 'mfazones']);
 
       return false;
     }
@@ -136,14 +133,14 @@ class MfazonesController extends Controller
       $node = $userRoot->get($source);
       $tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager);
       if ($tagId === false) {
-        $this->logger->error('A server admin should log in so the MFA Zone tag and flow can be created.');
+        $this->logger->error('The MFA Zone tag and flow has not been created, which should happen on app enable.');
         return new JSONResponse(
           array(
-            'error' => 'A server admin should log in so the MFA Zone tag and flow can be created'
+            'error' => 'The MFA Zone tag and flow has not been created, which should happen on app enable.'
           )
         );
       }
-      $type = Application::castObjectType($node->getType());
+      $type = $this->castObjectType($node->getType());
       $result = $this->tagMapper->haveTag($node->getId(), $type, $tagId);
 
       return new JSONResponse(
@@ -153,7 +150,7 @@ class MfazonesController extends Controller
         )
       );
     } catch (\Exception $e) {
-      \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
+      $this->logger->critical($e, ['app' => 'mfazones']);
 
       return new JSONResponse(
         array(
@@ -178,10 +175,10 @@ class MfazonesController extends Controller
       );
       $tag = current($tags);
       if ($tag === false) {
-        $this->logger->error('A server admin should log in so the MFA Zone tag and flow can be created.');
+        $this->logger->error('The MFA Zone tag and flow has not been created, which should happen on app enable.');
         return new JSONResponse(
           array(
-            'error' => 'A server admin should log in so the MFA Zone tag and flow can be created'
+            'error' => 'The MFA Zone tag and flow has not been created, which should happen on app enable.'
           )
         );
       }
@@ -189,7 +186,7 @@ class MfazonesController extends Controller
       $results = [];
       foreach ($nodeIds as $nodeId) {
         $node = $userRoot->getById($nodeId);
-        $type = Application::castObjectType($node->getType());
+        $type = $this->castObjectType($node->getType());
         $results[$nodeId] = $this->tagMapper->haveTag($nodeId, $type, $tagId);
       }
 
@@ -200,7 +197,7 @@ class MfazonesController extends Controller
         )
       );
     } catch (\Exception $e) {
-      \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
+      $this->logger->critical($e, ['app' => 'mfazones']);
 
       return new JSONResponse(
         array(
@@ -228,14 +225,14 @@ class MfazonesController extends Controller
       }
       $tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager);
       if ($tagId === false) {
-        $this->logger->error('A server admin should log in so the MFA Zone tag and flow can be created.');
+        $this->logger->error('The MFA Zone tag and flow has not been created, which should happen on app enable.');
         return new JSONResponse(
           array(
-            'error' => 'A server admin should log in so the MFA Zone tag and flow can be created'
+            'error' => 'The MFA Zone tag and flow has not been created, which should happen on app enable.'
           )
         );
       }
-      $type = Application::castObjectType($node->getType());
+      $type = $this->castObjectType($node->getType());
 
       if ($protect === "true") {
         $this->tagMapper->assignTags($node->getId(), $type, $tagId);
@@ -245,7 +242,7 @@ class MfazonesController extends Controller
 
       return new DataResponse([], Http::STATUS_OK);
     } catch (\Exception $e) {
-      \OC::$server->getLogger()->logException($e, ['app' => 'mfazones']);
+      $this->logger->critical($e, ['app' => 'mfazones']);
 
       return new DataResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
     }

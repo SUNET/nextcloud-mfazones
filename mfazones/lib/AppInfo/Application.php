@@ -131,17 +131,6 @@ class Application extends App implements IBootstrap
   {
   }
 
-  public static function castObjectType($type)
-  {
-    if ($type === 'file') {
-      return "files";
-    }
-    if ($type === "dir") {
-      return "files";
-    }
-    return $type;
-  }
-
   public static function getOurTagIdFromSystemTagManager($systemTagManager)
   {
     try {
