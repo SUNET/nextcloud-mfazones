@@ -1,4 +1,5 @@
 <!-- SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com> -->
+<!-- SPDX-FileCopyrightText: SUNET <kano@sunet.se> -->
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # MFA Zones Nextcloud App
 
