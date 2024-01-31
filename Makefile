@@ -52,6 +52,7 @@ release: appstore
 sign: package
 	docker run --rm --volume $(cert_dir):/certificates --detach --name nextcloud nextcloud:latest
 	sleep 5
+	docker exec -u www-data nextcloud /bin/bash -c "mkdir -p /var/www/html/custom_apps"
 	docker cp $(build_dir)/$(app_name)-$(version).tar.gz nextcloud:/var/www/html/custom_apps
 	docker exec -u www-data nextcloud /bin/bash -c "cd /var/www/html/custom_apps && tar -xzf $(app_name)-$(version).tar.gz && rm $(app_name)-$(version).tar.gz"
 	docker exec -u www-data nextcloud /bin/bash -c "php /var/www/html/occ integrity:sign-app --certificate /certificates/$(app_name).crt --privateKey /certificates/$(app_name).key --path /var/www/html/custom_apps/$(app_name)"
