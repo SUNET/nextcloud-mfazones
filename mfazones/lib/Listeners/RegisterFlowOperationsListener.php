@@ -23,6 +23,7 @@ declare(strict_types=1);
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 namespace OCA\mfazones\Listeners;
 
 use OCA\mfazones\AppInfo\Application;
@@ -31,15 +32,18 @@ use OCP\EventDispatcher\IEventListener;
 use OCP\Util;
 use OCP\WorkflowEngine\Events\RegisterOperationsEvent;
 
-class RegisterFlowOperationsListener implements IEventListener {
+class RegisterFlowOperationsListener implements IEventListener
+{
 
-	public function __construct() {
-	}
+  public function __construct()
+  {
+  }
 
-	public function handle(Event $event): void {
-		if (!$event instanceof RegisterOperationsEvent) {
-			return;
-		}
-		Util::addScript(Application::APP_ID, 'mfazones-main');
-	}
+  public function handle(Event $event): void
+  {
+    if (!$event instanceof RegisterOperationsEvent) {
+      return;
+    }
+    Util::addScript(Application::APP_ID, 'mfazones-main');
+  }
 }

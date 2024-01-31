@@ -70,11 +70,11 @@ class MfaVerified implements ICheck
     if (!empty($this->session->get("two_factor_auth_passed"))) {
       $uid = $this->session->get('user_id');
       $event_passed = $this->session->get('two_factor_event_passed');
-      if (!empty($uid) && !empty($event_passed) && ($uid === $event_passed))  {
-        $this->logger->debug("MFA: 2fa passed for user " . (String) $uid);
+      if (!empty($uid) && !empty($event_passed) && ($uid === $event_passed)) {
+        $this->logger->debug("MFA: 2fa passed for user " . (string) $uid);
         $mfaVerified = '1';
       } else {
-        $this->logger->debug("MFA: 2fa not passed for user " . (String) $uid . " and event setting " . (String) $event_passed);
+        $this->logger->debug("MFA: 2fa not passed for user " . (string) $uid . " and event setting " . (string) $event_passed);
       }
     }
     if ($operator === 'is') {
@@ -106,4 +106,3 @@ class MfaVerified implements ICheck
     return true;
   }
 }
-
