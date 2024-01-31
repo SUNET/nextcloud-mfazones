@@ -6,6 +6,7 @@ namespace OCA\mfazones\Controller;
 
 
 use OCA\mfazones\AppInfo\Application;
+use OCA\mfazones\Utils;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
@@ -131,7 +132,7 @@ class MfazonesController extends Controller
     try {
       $userRoot = $this->rootFolder->getUserFolder($this->userId);
       $node = $userRoot->get($source);
-      $tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager);
+      $tagId = Utils::getOurTagIdFromSystemTagManager($this->systemTagManager);
       if ($tagId === false) {
         $this->logger->error('The MFA Zone tag and flow has not been created, which should happen on app enable.');
         return new JSONResponse(
@@ -171,7 +172,7 @@ class MfazonesController extends Controller
       $userRoot = $this->rootFolder->getUserFolder($this->userId);
       $tags = $this->systemTagManager->getAllTags(
         null,
-        Application::TAG_NAME
+        Utils::TAG_NAME
       );
       $tag = current($tags);
       if ($tag === false) {
@@ -223,7 +224,7 @@ class MfazonesController extends Controller
       if ($node->getType() !== 'dir') {
         return new DataResponse(['not a directory'], Http::STATUS_FORBIDDEN);
       }
-      $tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager);
+      $tagId = Utils::getOurTagIdFromSystemTagManager($this->systemTagManager);
       if ($tagId === false) {
         $this->logger->error('The MFA Zone tag and flow has not been created, which should happen on app enable.');
         return new JSONResponse(

@@ -28,7 +28,7 @@ namespace OCA\mfazones\Listeners;
 
 use OCA\WorkflowEngine\Helper\ScopeContext;
 use OCA\WorkflowEngine\Manager;
-use OCA\mfazones\AppInfo\Application;
+use OCA\mfazones\Utils;
 use OCP\App\Events\AppEnableEvent;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -67,7 +67,7 @@ class AppEnableEventListener implements IEventListener
     $this->logger->debug("MFA: setting up flow.");
 
 
-    $tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
+    $tagId = Utils::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
 
     $context = new ScopeContext(IManager::SCOPE_ADMIN);
     $class = "OCA\\FilesAccessControl\\Operation";

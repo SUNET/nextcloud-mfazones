@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCA\mfazones;
 
 use OCA\DAV\Connector\Sabre\Node;
-use OCA\mfazones\AppInfo\Application;
+use OCA\mfazones\Utils;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
 use Sabre\DAV\PropFind;
@@ -40,7 +40,7 @@ class MFAPlugin extends ServerPlugin
   {
     $propFind->handle(self::ATTR_NAME, function () use (&$node) {
       $systemTagManager = $this->systemTagManager;
-      $tagId = Application::getOurTagIdFromSystemTagManager($systemTagManager);
+      $tagId = Utils::getOurTagIdFromSystemTagManager($systemTagManager);
       if ($tagId === false) {
         return false;
       }

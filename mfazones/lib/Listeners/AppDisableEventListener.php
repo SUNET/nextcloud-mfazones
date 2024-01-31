@@ -29,7 +29,7 @@ namespace OCA\mfazones\Listeners;
 use Doctrine\DBAL\Exception;
 use OCA\WorkflowEngine\Helper\ScopeContext;
 use OCA\WorkflowEngine\Manager;
-use OCA\mfazones\AppInfo\Application;
+use OCA\mfazones\Utils;
 use OCP\App\Events\AppDisableEvent;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\EventDispatcher\Event;
@@ -70,7 +70,7 @@ class AppDisableEventListener implements IEventListener
 
     $this->logger->debug("MFA: removing flow.");
 
-    $tagId = Application::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
+    $tagId = Utils::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
 
     try {
 

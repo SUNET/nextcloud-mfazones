@@ -6,7 +6,6 @@ declare(strict_types=1);
 
 namespace OCA\mfazones\AppInfo;
 
-use Doctrine\DBAL\Exception;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\mfazones\MFAPlugin;
 use OCA\mfazones\Check\MfaVerified;
@@ -41,7 +40,6 @@ use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
 class Application extends App implements IBootstrap
 {
   public const APP_ID = 'mfazones';
-  public const TAG_NAME = 'mfazone';
 
   /** @var ISystemTagManager */
   protected ISystemTagManager $systemTagManager;
@@ -131,22 +129,4 @@ class Application extends App implements IBootstrap
   {
   }
 
-  public static function getOurTagIdFromSystemTagManager($systemTagManager)
-  {
-    try {
-      $tags = $systemTagManager->getAllTags(
-        null,
-        self::TAG_NAME
-      );
-
-      if (count($tags) < 1) {
-        $tag = $systemTagManager->createTag(self::TAG_NAME, false, false);
-      } else {
-        $tag = current($tags);
-      }
-      return $tag->getId();
-    } catch (Exception $e) {
-      return false;
-    }
-  }
 }
