@@ -149,15 +149,4 @@ class Application extends App implements IBootstrap
       return false;
     }
   }
-
-  public function nodeHasTag($node, $tagId)
-  {
-    $tags = $this->systemTagManager->getTagsByIds([$node->getId()]);
-    foreach ($tags as $tag) {
-      if ($tag->getId() === $tagId) {
-        return true;
-      }
-    }
-    return false;
-  }
 }
