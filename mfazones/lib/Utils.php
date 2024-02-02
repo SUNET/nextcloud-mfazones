@@ -24,7 +24,12 @@ class Utils {
       );
 
       if (count($tags) < 1) {
-        $tag = $systemTagManager->createTag(self::TAG_NAME, false, false);
+        // https://github.com/nextcloud/server/blob/5a8cc42eb26cf9a31187ca8efc91405cc15d8e6d/lib/private/SystemTag/SystemTagManager.php#L180
+        // We want the user to se the tag.
+        $uservisible = true;
+        // But we want it to be restricted so the user can not escape it.
+        $userassignable = false;
+        $tag = $systemTagManager->createTag(self::TAG_NAME, $uservisible, $userassignable);
       } else {
         $tag = current($tags);
       }
