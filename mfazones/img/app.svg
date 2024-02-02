@@ -48,7 +48,7 @@
      id="layer1"
      transform="translate(-47.691799,-117.23034)">
     <rect
-       style="fill:#999999;stroke-width:0.264583"
+       style="fill:#666666;stroke-width:0.264583"
        id="rect111"
        width="39.124493"
        height="27.964617"
@@ -56,7 +56,7 @@
        y="135.57222"
        ry="9.5094404" />
     <ellipse
-       style="fill:none;stroke:#999999;stroke-width:3.865;stroke-dasharray:none;stroke-opacity:1;fill-opacity:1"
+       style="fill:none;stroke:#666666;stroke-width:3.865;stroke-dasharray:none;stroke-opacity:1;fill-opacity:1"
        id="path212"
        cx="67.514992"
        cy="133.64445"
