@@ -6,4 +6,4 @@ mfazones/vendor/
 mfazones/build/
 mfazones/node_modules/
 mfazones/.php_cs.cache
-mfazones/js/*hot-update.*
+mfazones/js/
