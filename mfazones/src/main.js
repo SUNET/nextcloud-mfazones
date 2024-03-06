@@ -22,7 +22,7 @@
 import { getRequestToken } from '@nextcloud/auth'
 import Vue from 'vue'
 import { translate as t} from '@nextcloud/l10n'
-import MfaVerifiedValue from './Checks/MfaVerifiedValue'
+import MFATabEmpty from './views/MFATabEmpty.vue'
 import MFATab from './views/MFATab.vue'
 
 Vue.prototype.t = t
@@ -42,7 +42,7 @@ if ((typeof window.OCA !== 'undefined') && typeof window.OCA.WorkflowEngine !== 
       { operator: 'is', name: t(appId, 'is verified') },
       { operator: '!is', name: t(appId, 'is not verified') },
     ],
-    component: MfaVerifiedValue,
+    component: MFATabEmpty,
   });
 }
 
