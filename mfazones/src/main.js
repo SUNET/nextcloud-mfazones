@@ -1,7 +1,9 @@
 /**
  * @copyright Copyright (c) 2024 Michiel de Jong <michiel@unhosted.org>
+ * @copyright Copyright (c) 2024 Micke Nordin <kano@sunet.se>
  *
  * @author Michiel de Jong <michiel@unhosted.org>
+ * @author 2024 Micke Nordin <kano@sunet.se>
  *
  * @license GNU AGPL version 3 or any later version
  *
@@ -19,15 +21,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import { getRequestToken } from '@nextcloud/auth'
 import Vue from 'vue'
-import { translate as t } from '@nextcloud/l10n'
 import MFATabEmpty from './views/MFATabEmpty.vue'
 import MFATab from './views/MFATab.vue'
+import { getRequestToken } from '@nextcloud/auth'
+import { translate as t } from '@nextcloud/l10n'
 
 Vue.prototype.t = t
 const appId = 'mfazones'
-
 
 // Script nonce required for webpack loading additional scripts
 __webpack_nonce__ = btoa(getRequestToken())
@@ -45,8 +46,6 @@ if ((typeof window.OCA !== 'undefined') && typeof window.OCA.WorkflowEngine !== 
     component: MFATabEmpty,
   });
 }
-
-
 
 window.addEventListener('DOMContentLoaded', function() {
   if (OCA.Files && OCA.Files.Sidebar) {
