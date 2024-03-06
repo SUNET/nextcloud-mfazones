@@ -16,7 +16,7 @@ This app will make it possible to designate certain directories as `mfazones` an
 The app uses the workflow engine to enforce the restriction.
 
 See the [README](https://github.com/SUNET/nextcloud-mfazones/blob/main/README.md) for more information.]]></description>
-  <version>0.0.6</version>
+  <version>0.0.7</version
   <licence>agpl</licence>
   <author mail="kano@sunet.se" homepage="https://github.com/SUNET/nextcloud-mfazones">SUNET</author>
   <namespace>mfazones</namespace>
@@ -24,7 +24,7 @@ See the [README](https://github.com/SUNET/nextcloud-mfazones/blob/main/README.md
   <category>security</category>
   <bugs>https://github.com/SUNET/nextcloud-mfazones/issues</bugs>
   <dependencies>
-    <nextcloud min-version="27" max-version="28" />
+    <nextcloud min-version="28" max-version="28" />
   </dependencies>
   <settings>
     <admin>OCA\WorkflowEngine\Settings\Admin</admin>
