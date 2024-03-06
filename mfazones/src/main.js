@@ -21,7 +21,7 @@
  */
 import { getRequestToken } from '@nextcloud/auth'
 import Vue from 'vue'
-import { translate as t} from '@nextcloud/l10n'
+import { translate as t } from '@nextcloud/l10n'
 import MFATabEmpty from './views/MFATabEmpty.vue'
 import MFATab from './views/MFATab.vue'
 
@@ -47,6 +47,7 @@ if ((typeof window.OCA !== 'undefined') && typeof window.OCA.WorkflowEngine !== 
 }
 
 
+
 window.addEventListener('DOMContentLoaded', function() {
   if (OCA.Files && OCA.Files.Sidebar) {
     const mfaTab = new OCA.Files.Sidebar.Tab({
@@ -54,7 +55,7 @@ window.addEventListener('DOMContentLoaded', function() {
       name: t('mfazone', 'MFA Zone'),
       icon: 'icon-category-security',
 
-      mount(el, fileInfo, context) {
+      async mount(el, fileInfo, context) {
         if (MFATabInstance) {
           MFATabInstance.$destroy()
         }
@@ -65,6 +66,7 @@ window.addEventListener('DOMContentLoaded', function() {
         // Only mount after we have all the info we need
         MFATabInstance.update(fileInfo)
         MFATabInstance.$mount(el)
+
       },
       update(fileInfo) {
         MFATabInstance.update(fileInfo)
