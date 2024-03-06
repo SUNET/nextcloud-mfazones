@@ -30,8 +30,6 @@ import { translate as t } from '@nextcloud/l10n'
 Vue.prototype.t = t
 const appId = 'mfazones'
 
-// Script nonce required for webpack loading additional scripts
-__webpack_nonce__ = btoa(getRequestToken())
 const View = Vue.extend(MFATab)
 let MFATabInstance = null
 
