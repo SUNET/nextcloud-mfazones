@@ -63,7 +63,7 @@ class MfazonesController extends Controller
     $this->logger = $logger;
   }
 
-  private function castObjectType($type)
+  private function castObjectType($type): string
   {
     if ($type === 'file') {
       return "files";
@@ -74,7 +74,7 @@ class MfazonesController extends Controller
     return $type;
   }
 
-  private function isMfaVerified()
+  private function isMfaVerified(): bool
   {
     $mfaVerified = '0';
     if (!empty($this->session->get('globalScale.userData'))) {
@@ -91,7 +91,7 @@ class MfazonesController extends Controller
     return $mfaVerified === '1';
   }
 
-  public function hasAccess($source)
+  public function hasAccess($source): bool
   {
     try {
       $mfaVerified = $this->isMfaVerified();
@@ -115,8 +115,10 @@ class MfazonesController extends Controller
 
   /**
    * @NoAdminRequired
+   * 		['name' => 'mfazones#getMfaStatus', 'url' => '/getMfaStatus', 'verb' => 'GET'],
+   * 		This function is used to check if the user has passed the MFA challenge.
    */
-  public function getMfaStatus()
+  public function getMfaStatus(): JSONResponse
   {
     return new JSONResponse(
       array(
@@ -127,8 +129,11 @@ class MfazonesController extends Controller
 
   /**
    * @NoAdminRequired
+   * 		['name' => 'mfazones#get', 'url' => '/get', 'verb' => 'GET'],
+   * 		This function is used to check if the user has passed the MFA challenge
+   * 		and also if the current file has the MFA Zone tag.
    */
-  public function get($source)
+  public function get($source): JSONResponse
   {
     try {
       $userRoot = $this->rootFolder->getUserFolder($this->userId);
@@ -166,8 +171,10 @@ class MfazonesController extends Controller
 
   /**
    * @NoAdminRequired
+   * 		['name' => 'mfazones#getList', 'url' => '/getList', 'verb' => 'GET'],
+   *    This function returns a list of all the MFA Zones.
    */
-  public function getList($nodeIds)
+  public function getList($nodeIds): JSONResponse
   {
     try {
       $userRoot = $this->rootFolder->getUserFolder($this->userId);
@@ -212,6 +219,8 @@ class MfazonesController extends Controller
 
   /**
    * @NoAdminRequired
+   * 		['name' => 'mfazones#set', 'url' => '/set', 'verb' => 'POST'],
+   *
    */
   public function set($source, $protect)
   {
@@ -252,6 +261,7 @@ class MfazonesController extends Controller
 
   /**
    * @NoAdminRequired
+   * 		['name' => 'mfazones#access', 'url' => '/access', 'verb' => 'GET'],
    */
   public function access($source)
   {
