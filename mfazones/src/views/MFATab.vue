@@ -26,17 +26,17 @@ import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 
 function go_to_settings() {
-  const url = generateUrl('/settings/user/security')
-  window.location.href = url
+  const url = generateUrl('/settings/user/security');
+  window.location.href = url;
 }
 
 async function get_mfa_state(fileInfo) {
   if (!fileInfo) {
     return
   }
-  var path = '/'
+  var path = '/';
   if (fileInfo.path != path) {
-    path = fileInfo.path + '/'
+    path = fileInfo.path + '/';
   }
   let payload = {
     params: { source: path + fileInfo.name }
@@ -50,44 +50,58 @@ export default {
     NcActions,
   },
   methods: {
-    async toggleMFAZone() {
+    toggleMFAZone() {
       const url = generateUrl('/apps/mfazones/set');
       if (!this.fileInfo) {
+        console.log('fileInfo is null');
         return
       }
-      var path = '/'
+      console.log('fileInfo', this.fileInfo);
+      var path = '/';
       if (this.fileInfo.path !== path) {
-        path = this.fileInfo.path + '/'
+        path = this.fileInfo.path + '/';
       }
-      var status = document.getElementById('checkbox-radio-switch-mfa').checked
-      console.log('status', status)
+      var element = document.getElementById('checkbox-radio-switch-mfa');
+      var status = element.checked;
+      console.log('status', status);
       let payload = {
         source: path + this.fileInfo.name, protect: String(status)
       }
-      await axios.post(url, payload).then(response => { console.log(response.data) }).catch(error => { console.log(error) });
+      axios.post(url, payload).then(response => {
+        console.log("INFO: In toggleMFAZone");
+        console.log(response.data);
+      }).catch(error => {
+        console.log("ERROR: In toggleMFAZone");
+        element.checked = !status;
+        console.log(error);
+      });
+      console.log('result', result);
     },
     async update(fileInfo) {
-      this.fileInfo = fileInfo
+      this.fileInfo = fileInfo;
+      console.log('fileInfo', this.fileInfo);
       let state = await get_mfa_state(fileInfo).then(response => { return response.data }).catch(error => {
-        console.log(error)
+        console.log("ERROR: In update");
+        console.log(error);
       })
-      let mfa_passed = state.mfa_passed
-      let status = state.status
+      let mfa_passed = state.mfa_passed;
+      let status = state.status;
+      console.log('mfa state', state);
       if (mfa_passed) {
-        var needMFA = document.getElementById('need-mfa')
-        needMFA.hidden = true
-        var haveMFA = document.getElementById('have-mfa')
-        haveMFA.hidden = false
+        var needMFA = document.getElementById('need-mfa');
+        needMFA.hidden = true;
+        var haveMFA = document.getElementById('have-mfa');
+        haveMFA.hidden = false;
       } else {
-        var needMFA = document.getElementById('need-mfa')
-        needMFA.hidden = false
-        var haveMFA = document.getElementById('have-mfa')
-        haveMFA.hidden = true
+        var needMFA = document.getElementById('need-mfa');
+        needMFA.hidden = false;
+        var haveMFA = document.getElementById('have-mfa');
+        haveMFA.hidden = true;
       }
-      document.getElementById('checkbox-radio-switch-mfa').checked = status
+      document.getElementById('checkbox-radio-switch-mfa').checked = status;
     },
     async resetState(fileInfo) {
-      this.update(fileInfo)
+      this.update(fileInfo);
     },
   },
 }
