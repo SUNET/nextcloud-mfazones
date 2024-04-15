@@ -79,7 +79,7 @@ docker: selfsignedcert docker_kill package
 	docker exec -u www-data nextcloud /bin/bash -c "env OC_PASS=nomfauserpassword /var/www/html/occ user:add --password-from-env --display-name='Ordinary User' nomfauser"
 	firefox -new-tab https://localhost:8443/
 
-sign: package
+sign: package docker_kill
 	docker run --rm --volume $(cert_dir):/certificates --detach --name nextcloud nextcloud:latest
 	sleep 5
 	docker exec -u www-data nextcloud /bin/bash -c "mkdir -p /var/www/html/custom_apps"
