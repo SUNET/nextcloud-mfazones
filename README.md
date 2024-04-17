@@ -12,14 +12,16 @@ see [our research repo](https://github.com/pondersource/nextcloud-mfa-awareness#
 
 - Nextcloud 27 or later
 - PHP 7.2 or later
-- `File Access Control` (Nextcloud app)
+- `Files Access Control` (Nextcloud app)
+- `Files Automated Tagging` (Nextcloud app)
 - More [optional external dependencies](https://github.com/pondersource/nextcloud-mfa-awareness#nextcloud-mfa-awareness), depending on your deployment (using SAML? using Global Site Selector?)
 
 ## Installation
 
 1. Download the MFA Zones app from the [Nextcloud app store](https://apps.nextcloud.com/apps/mfazones)
 2. Extract the downloaded archive to your Nextcloud apps directory.
-3. Enable the app in the Nextcloud apps settings.
+3. Enable the app in the Nextcloud GUI apps settings.
+WARNING: This app requires the `Files Access Control` and `Files Automated Tagging` apps to be enabled. You must also enable these apps before mfazones AND mfazones must be enabled from the GUI settings, not from the commandline due to issue #16.
 
 
 ## Usage
