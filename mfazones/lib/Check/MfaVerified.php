@@ -65,7 +65,10 @@ class MfaVerified implements ICheck
     }
     if (!empty($this->session->get('user_saml.samlUserData'))) {
       $attr = $this->session->get('user_saml.samlUserData');
-      $mfaVerified = $attr["mfa_verified"][0];
+      if (isset($attr["mfa_verified"])) {
+        $mfaVerified = $attr["mfa_verified"][0];
+        $this->logger->debug("MFA: mfa_verified from samlUserData: " . $mfaVerified);
+      }
     }
     if (!empty($this->session->get("two_factor_auth_passed"))) {
       $uid = $this->session->get('user_id');
