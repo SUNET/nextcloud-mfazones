@@ -65,7 +65,7 @@ docker: selfsignedcert docker_kill package
 		--mount type=bind,source=/tmp/nextcloud-8443.conf,target=/etc/apache2/sites-enabled/nextcloud.conf \
 		--mount type=bind,source=/tmp/localhost.pem,target=/etc/ssl/private/localhost.pem \
 		--name nextcloud nextcloud:latest
-	sleep 5
+	sleep 10
 	docker cp $(build_dir)/$(app_name)-$(version).tar.gz nextcloud:/var/www/html/custom_apps
 	docker exec -u www-data nextcloud /bin/bash -c "cd /var/www/html/custom_apps && tar -xzf $(app_name)-$(version).tar.gz && rm $(app_name)-$(version).tar.gz"
 	docker exec nextcloud /bin/bash -c "chown -R www-data:www-data /var/www/html/custom_apps/$(app_name)"
@@ -75,6 +75,7 @@ docker: selfsignedcert docker_kill package
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:install	twofactor_webauthn"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ group:add mfa"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ twofactorauth:enforce --on --group mfa"
+	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ group:adduser mfa admin"
 	docker exec -u www-data nextcloud /bin/bash -c "env OC_PASS=mfauserpassword /var/www/html/occ user:add --password-from-env --display-name='MFA User' --group='mfa' mfauser"
 	docker exec -u www-data nextcloud /bin/bash -c "env OC_PASS=nomfauserpassword /var/www/html/occ user:add --password-from-env --display-name='Ordinary User' nomfauser"
 	firefox -new-tab https://localhost:8443/
