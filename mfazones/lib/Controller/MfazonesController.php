@@ -8,6 +8,7 @@ namespace OCA\mfazones\Controller;
 
 use OCA\mfazones\AppInfo\Application;
 use OCA\mfazones\Utils;
+use OCA\mfazones\Check\MfaVerified;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
@@ -40,6 +41,9 @@ class MfazonesController extends Controller
   /** @var ISystemTagObjectMapper */
   private $tagMapper;
 
+  /** @var MfaVerified */
+  private $mfaVerified;
+
   /** @var LoggerInterface */
   private $logger;
 
@@ -51,6 +55,7 @@ class MfazonesController extends Controller
     ISession $session,
     ISystemTagObjectMapper $tagMapper,
     ISystemTagManager $systemTagManager,
+    MfaVerified $mfaVerified,
     LoggerInterface $logger
   ) {
     parent::__construct(Application::APP_ID, $request);
@@ -60,6 +65,7 @@ class MfazonesController extends Controller
     $this->tagMapper = $tagMapper;
     $this->session = $session;
     $this->systemTagManager = $systemTagManager;
+    $this->mfaVerified = $mfaVerified;
     $this->logger = $logger;
   }
 
@@ -76,19 +82,7 @@ class MfazonesController extends Controller
 
   private function isMfaVerified(): bool
   {
-    $mfaVerified = '0';
-    if (!empty($this->session->get('globalScale.userData'))) {
-      $attr = $this->session->get('globalScale.userData')["userData"];
-      $mfaVerified = $attr["mfaVerified"];
-    }
-    if (!empty($this->session->get('user_saml.samlUserData'))) {
-      $attr = $this->session->get('user_saml.samlUserData');
-      $mfaVerified = $attr["mfa_verified"][0];
-    }
-    if (!empty($this->session->get("two_factor_auth_passed"))) {
-      $mfaVerified = '1';
-    }
-    return $mfaVerified === '1';
+    return $this->mfaVerified->executeCheck('is', NULL);
   }
 
   public function hasAccess($source): bool
@@ -133,8 +127,9 @@ class MfazonesController extends Controller
    * 		This function is used to check if the user has passed the MFA challenge
    * 		and also if the current file has the MFA Zone tag.
    */
-  public function get($source): JSONResponse
+  public function get(): JSONResponse
   {
+    $source = $this->request->getParam('source');
     try {
       $userRoot = $this->rootFolder->getUserFolder($this->userId);
       $node = $userRoot->get($source);

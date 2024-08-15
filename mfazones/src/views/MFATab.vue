@@ -15,8 +15,7 @@
     <br />
     <br />
     <div id="need-mfa" style="--icon-size:36px;" hidden>
-      <label for="enable-2fa-button">You need to login with two factor authentication to use this feature.</label><br><br>
-      <button id="enable-2fa-button" @click="go_to_settings()">Enable 2FA</button>
+      <label for="enable-2fa-button">You need to login with two factor authentication to use this feature. First you must enable 2FA in the <a class="setting-link" :href="settingsLink">settings↗ </a> and then you need to log out and in again. If you have already taken these steps, and still see this message, you must log out and in again.</label><br><br>
     </div>
   </NcActions>
 </template>
@@ -24,11 +23,6 @@
 import { NcActions } from '@nextcloud/vue'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
-
-function go_to_settings() {
-  const url = generateUrl('/settings/user/security');
-  window.location.href = url;
-}
 
 async function get_mfa_state(fileInfo) {
   if (!fileInfo) {
@@ -39,7 +33,7 @@ async function get_mfa_state(fileInfo) {
     path = fileInfo.path + '/';
   }
   let payload = {
-    params: { source: path + fileInfo.name }
+    params: { 'source': path + fileInfo.name }
   }
   const url = generateUrl('/apps/mfazones/get');
   return axios.get(url, payload)
@@ -48,6 +42,11 @@ async function get_mfa_state(fileInfo) {
 export default {
   components: {
     NcActions,
+  },
+  data() {
+    return {
+      settingsLink: generateUrl('/settings/user/security#two-factor-auth'),
+    }
   },
   methods: {
     toggleMFAZone() {
@@ -106,3 +105,8 @@ export default {
   },
 }
 </script>
+<style lang="scss" scoped>
+.setting-link:hover {
+	text-decoration: underline;
+}
+</style>
