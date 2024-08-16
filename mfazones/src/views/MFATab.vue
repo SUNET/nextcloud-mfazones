@@ -3,7 +3,7 @@
 <template>
   <NcActions>
     <span id="mfa-current-file-path" hidden></span>
-    <div id="have-mfa">
+    <div id="have-mfa" hidden>
       <span style="--icon-size:36px;">
         <label class="switch">
           <input id="checkbox-radio-switch-mfa" type="checkbox" @change="toggleMFAZone()">
@@ -16,6 +16,9 @@
     <br />
     <div id="need-mfa" style="--icon-size:36px;" hidden>
       <label for="enable-2fa-button">You need to login with two factor authentication to use this feature. First you must enable 2FA in the <a class="setting-link" :href="settingsLink">settings↗ </a> and then you need to log out and in again. If you have already taken these steps, and still see this message, you must log out and in again.</label><br><br>
+    </div>
+    <div id="not-owner" style="--icon-size:36px;" hidden>
+      <label for="enable-2fa-button">This is a mfazone that has been shared with you, so you can not change any settings for it.</label><br><br>
     </div>
   </NcActions>
 </template>
@@ -85,16 +88,24 @@ export default {
       })
       let mfa_passed = state.mfa_passed;
       let status = state.status;
+      let has_access = status.has_access;
+      var needMFA = document.getElementById('need-mfa');
+      var haveMFA = document.getElementById('have-mfa');
+      var notOwner = document.getElementById('not-owner');
       console.log('mfa state', state);
       if (mfa_passed) {
-        var needMFA = document.getElementById('need-mfa');
-        needMFA.hidden = true;
-        var haveMFA = document.getElementById('have-mfa');
-        haveMFA.hidden = false;
+        if(has_access) {
+          needMFA.hidden = true;
+          notOwner.hidden = true;
+          haveMFA.hidden = false;
+        } else {
+          needMFA.hidden = true;
+          notOwner.hidden = false;
+          haveMFA.hidden = true;
+        }
       } else {
-        var needMFA = document.getElementById('need-mfa');
         needMFA.hidden = false;
-        var haveMFA = document.getElementById('have-mfa');
+        notOwner.hidden = true;
         haveMFA.hidden = true;
       }
       document.getElementById('checkbox-radio-switch-mfa').checked = status;

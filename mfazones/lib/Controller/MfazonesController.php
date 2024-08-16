@@ -148,7 +148,8 @@ class MfazonesController extends Controller
       return new JSONResponse(
         array(
           'status' => $result,
-          'mfa_passed' => $this->isMfaVerified()
+          'mfa_passed' => $this->isMfaVerified(),
+          'has_access' => $this->hasAccess($source)
         )
       );
     } catch (\Exception $e) {
