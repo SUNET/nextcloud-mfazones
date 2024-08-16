@@ -11,11 +11,15 @@
         </label>
       </span>
     </div>
-    <br />
-    <br />
-    <br />
     <div id="need-mfa" style="--icon-size:36px;" hidden>
-      <label for="enable-2fa-button">You need to login with two factor authentication to use this feature. First you must enable 2FA in the <a class="setting-link" :href="settingsLink">settings↗ </a> and then you need to log out and in again. If you have already taken these steps, and still see this message, you must log out and in again.</label><br><br>
+      <label for="enable-2fa-button">You need to login with two factor authentication to use this feature. First you
+        must enable 2FA in the <a class="setting-link" :href="settingsLink">settings↗ </a> and then you need to log out
+        and in again. If you have already taken these steps, and still see this message, you must log out and in
+        again.</label><br><br>
+    </div>
+    <div id="not-owner" style="--icon-size:36px;" hidden>
+      <label for="enable-2fa-button">This is a mfazone that has been shared with you, so you can not change any settings
+        for it.</label><br><br>
     </div>
     <div id="not-owner" style="--icon-size:36px;" hidden>
       <label for="enable-2fa-button">This is a mfazone that has been shared with you, so you can not change any settings for it.</label><br><br>
@@ -70,7 +74,6 @@ export default {
         source: path + this.fileInfo.name, protect: String(status)
       }
       axios.post(url, payload).then(response => {
-        console.log("INFO: In toggleMFAZone");
         console.log(response.data);
       }).catch(error => {
         console.log("ERROR: In toggleMFAZone");
@@ -81,32 +84,28 @@ export default {
     },
     async update(fileInfo) {
       this.fileInfo = fileInfo;
-      console.log('fileInfo', this.fileInfo);
       let state = await get_mfa_state(fileInfo).then(response => { return response.data }).catch(error => {
         console.log("ERROR: In update");
         console.log(error);
       })
-      let mfa_passed = state.mfa_passed;
-      let status = state.status;
-      let has_access = status.has_access;
+      console.log('mfa state', state);
       var needMFA = document.getElementById('need-mfa');
       var haveMFA = document.getElementById('have-mfa');
       var notOwner = document.getElementById('not-owner');
-      console.log('mfa state', state);
+      needMFA.hidden = true;
+      notOwner.hidden = true;
+      haveMFA.hidden = true;
+      let mfa_passed = state.mfa_passed;
+      let status = state.status;
+      let has_access = state.has_access;
       if (mfa_passed) {
-        if(has_access) {
-          needMFA.hidden = true;
-          notOwner.hidden = true;
+        if (has_access) {
           haveMFA.hidden = false;
         } else {
-          needMFA.hidden = true;
           notOwner.hidden = false;
-          haveMFA.hidden = true;
         }
       } else {
         needMFA.hidden = false;
-        notOwner.hidden = true;
-        haveMFA.hidden = true;
       }
       document.getElementById('checkbox-radio-switch-mfa').checked = status;
     },
@@ -118,6 +117,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .setting-link:hover {
-	text-decoration: underline;
+  text-decoration: underline;
 }
 </style>
