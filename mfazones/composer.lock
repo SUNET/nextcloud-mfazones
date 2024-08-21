@@ -13,12 +13,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ChristophWurst/nextcloud_composer.git",
-                "reference": "977b8675ced561b97d234fcc54893f1e21149a40"
+                "reference": "e2c78a6e14ef9cd94a9a60237f0dc20d59b52a83"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ChristophWurst/nextcloud_composer/zipball/977b8675ced561b97d234fcc54893f1e21149a40",
-                "reference": "977b8675ced561b97d234fcc54893f1e21149a40",
+                "url": "https://api.github.com/repos/ChristophWurst/nextcloud_composer/zipball/e2c78a6e14ef9cd94a9a60237f0dc20d59b52a83",
+                "reference": "e2c78a6e14ef9cd94a9a60237f0dc20d59b52a83",
                 "shasum": ""
             },
             "require": {
@@ -50,7 +50,7 @@
                 "source": "https://github.com/ChristophWurst/nextcloud_composer/tree/master"
             },
             "abandoned": "nextcloud/ocp",
-            "time": "2024-07-27T01:25:00+00:00"
+            "time": "2024-08-14T01:34:57+00:00"
         },
         {
             "name": "doctrine/instantiator",
@@ -401,16 +401,16 @@
         },
         {
             "name": "php-cs-fixer/shim",
-            "version": "v3.60.0",
+            "version": "v3.62.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-CS-Fixer/shim.git",
-                "reference": "11f328afa9768eed89bacffab02f56263185058c"
+                "reference": "7a91d5ce45c486f5b445d95901228507a02f60ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-CS-Fixer/shim/zipball/11f328afa9768eed89bacffab02f56263185058c",
-                "reference": "11f328afa9768eed89bacffab02f56263185058c",
+                "url": "https://api.github.com/repos/PHP-CS-Fixer/shim/zipball/7a91d5ce45c486f5b445d95901228507a02f60ae",
+                "reference": "7a91d5ce45c486f5b445d95901228507a02f60ae",
                 "shasum": ""
             },
             "require": {
@@ -447,9 +447,9 @@
             "description": "A tool to automatically fix PHP code style",
             "support": {
                 "issues": "https://github.com/PHP-CS-Fixer/shim/issues",
-                "source": "https://github.com/PHP-CS-Fixer/shim/tree/v3.60.0"
+                "source": "https://github.com/PHP-CS-Fixer/shim/tree/v3.62.0"
             },
-            "time": "2024-07-25T09:27:32+00:00"
+            "time": "2024-08-07T17:03:46+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",

@@ -11,9 +11,10 @@ use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\mfazones\Check\MfaVerified;
 use OCA\mfazones\Listeners\AppDisableEventListener;
 use OCA\mfazones\Listeners\AppEnableEventListener;
+use OCA\mfazones\Listeners\LoadAdditionalScriptsListener;
+use OCA\mfazones\Listeners\RegisterChecksListener;
 use OCA\mfazones\Listeners\RegisterFlowOperationsListener;
 use OCA\mfazones\Listeners\TwoFactorProviderChallengePassedListener;
-use OCA\mfazones\Listeners\TwoFactorProviderForUserEnabledListener;
 use OCA\mfazones\MFAPlugin;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -22,15 +23,13 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\App\Events\AppDisableEvent;
 use OCP\App\Events\AppEnableEvent;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
-use OCP\Authentication\TwoFactorAuth\TwoFactorProviderForUserEnabled;
-use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IDBConnection;
 use OCP\IL10N;
 use OCP\ISession;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
-use OCP\Util;
 use OCP\WorkflowEngine\Events\RegisterChecksEvent;
+use OCP\WorkflowEngine\Events\RegisterOperationsEvent;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -68,29 +67,10 @@ class Application extends App implements IBootstrap
     $this->l = $this->getContainer()->get(IL10N::class);
     $this->session = $this->getContainer()->get(ISession::class);
     $this->logger = $this->getContainer()->get(LoggerInterface::class);
-    $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session, $this->logger);
-
-    /* @var IEventDispatcher $dispatcher */
-    $dispatcher = $this->getContainer()->get(IEventDispatcher::class);
-    $dispatcher->addListener(RegisterChecksEvent::class, function (RegisterChecksEvent $event) {
-      // copied from https://github.com/nextcloud/flow_webhooks/blob/d06203fa3cc6a5dc83b6f08ab7dd82d61585d334/lib/Listener/RegisterChecksListener.php
-      if (!($event instanceof RegisterChecksEvent)) {
-        return;
-      }
-      $event->registerCheck($this->mfaVerifiedCheck);
-      Util::addScript(Application::APP_ID, 'mfazones-main');
-    });
 
     $this->systemTagManager = $this->getContainer()->get(ISystemTagManager::class);
     $this->connection = $this->getContainer()->get(IDBConnection::class);
 
-    $dispatcher->addListener(RegisterOperationsEvent::class, function () {
-      \OCP\Util::addScript(self::APP_ID, 'mfazones-main');
-    });
-    $dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
-      \OCP\Util::addStyle(self::APP_ID, 'tabview');
-      \OCP\Util::addScript(self::APP_ID, 'mfazones-main');
-    });
   }
 
   /**
@@ -98,6 +78,8 @@ class Application extends App implements IBootstrap
    */
   public function register(IRegistrationContext $context): void
   {
+    $this->logger->debug("MFA: register app enable listner");
+    $context->registerEventListener(AppEnableEvent::class, AppEnableEventListener::class);
     $context->registerService(MFAPlugin::class, function (ContainerInterface $c) {
       $systemTagManager = $c->get(ISystemTagManager::class);
       $tagMapper = $c->get(ISystemTagObjectMapper::class);
@@ -105,18 +87,14 @@ class Application extends App implements IBootstrap
       return $x;
     });
 
-    // TODO: Remove this when we drop support for NC < 28
-    if (class_exists(TwoFactorProviderChallengePassed::class)) {
-      $this->logger->debug("MFA: detection class is TwoFactorProviderChallengePassed");
-      $context->registerEventListener(TwoFactorProviderChallengePassed::class, TwoFactorProviderChallengePassedListener::class);
-    } else {
-      $this->logger->warning("MFA: detection class is deprecated class TwoFactorProviderForUserEnabled");
-      $context->registerEventListener(TwoFactorProviderForUserEnabled::class, TwoFactorProviderForUserEnabledListener::class);
-    }
+    $this->logger->debug("MFA: detection class is TwoFactorProviderChallengePassed");
+    $context->registerEventListener(TwoFactorProviderChallengePassed::class, TwoFactorProviderChallengePassedListener::class);
+    $this->logger->debug("MFA: load additonal scripst listner");
+    $context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadAdditionalScriptsListener::class);
+    $this->logger->debug("MFA: register checks listner");
+    $context->registerEventListener(RegisterChecksEvent::class, RegisterChecksListener::class);
     $this->logger->debug("MFA: register operations listner");
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterFlowOperationsListener::class);
-    $this->logger->debug("MFA: register app enable listner");
-    $context->registerEventListener(AppEnableEvent::class, AppEnableEventListener::class);
     $this->logger->debug("MFA: register app disable listner");
     $context->registerEventListener(AppDisableEvent::class, AppDisableEventListener::class);
     $this->logger->debug("MFA: done with listners");

@@ -50,7 +50,7 @@ all: appstore
 release: appstore
 .PHONY: selfsignedcert
 selfsignedcert:
-	openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=localhost"  -keyout /tmp/localhost.key  -out /tmp/localhost.crt
+	test -f /tmp/localhost.crt || openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=localhost"  -keyout /tmp/localhost.key  -out /tmp/localhost.crt; \
 	cat /tmp/localhost.key /tmp/localhost.crt > /tmp/localhost.pem
 
 .PHONY: docker_kill
