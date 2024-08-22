@@ -41,11 +41,11 @@ class MFAPlugin extends ServerPlugin
     $propFind->handle(self::ATTR_NAME, function () use (&$node) {
       $systemTagManager = $this->systemTagManager;
       $tagId = Utils::getOurTagIdFromSystemTagManager($systemTagManager);
-      if ($tagId === false) {
+      if ($tagId === '') {
         return false;
       }
       // FIXME: check parents too
-      return $this->tagMapper->haveTag($node->getId(), 'files', $tagId);
+      return $this->tagMapper->haveTag([$node->getId()], 'files', (string) $tagId);
     });
   }
 }

@@ -32,7 +32,7 @@ use OCP\EventDispatcher\IEventListener;
 use OCP\Util;
 use OCP\WorkflowEngine\Events\RegisterOperationsEvent;
 
-class RegisterFlowOperationsListener implements IEventListener
+class RegisterOperationsListener implements IEventListener
 {
 
   public function __construct()

@@ -5,7 +5,6 @@ declare(strict_types=1);
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 namespace OCA\mfazones;
-use Doctrine\DBAL\Exception;
 use OCP\SystemTag\ISystemTagManager;
 
 class Utils {
@@ -13,30 +12,28 @@ class Utils {
 
   /**
   * @param ISystemTagManager $systemTagManager
-  * @return int|false
+  * @return string
   */
   public static function getOurTagIdFromSystemTagManager($systemTagManager)
   {
     try {
-      $tags = $systemTagManager->getAllTags(
-        null,
-        self::TAG_NAME
-      );
-
-      if (count($tags) < 1) {
-        // https://github.com/nextcloud/server/blob/5a8cc42eb26cf9a31187ca8efc91405cc15d8e6d/lib/private/SystemTag/SystemTagManager.php#L180
-        // Since NC 28 we don't want the user to see the tag. Previously it showed a cool tag, but no settings for it.
-        // Now we get settings that does not work.
-        $uservisible = false;
-        // But we want it to be restricted so the user can not escape it.
-        $userassignable = false;
-        $tag = $systemTagManager->createTag(self::TAG_NAME, $uservisible, $userassignable);
-      } else {
-        $tag = current($tags);
+      $tags = $systemTagManager->getAllTags();
+      foreach ($tags as $tag) {
+        if ($tag->getName() === self::TAG_NAME) {
+          return (string) $tag->getId();
+        }
       }
-      return $tag->getId();
-    } catch (Exception $e) {
-      return false;
+
+      // https://github.com/nextcloud/server/blob/5a8cc42eb26cf9a31187ca8efc91405cc15d8e6d/lib/private/SystemTag/SystemTagManager.php#L180
+      // Since NC 28 we don't want the user to see the tag. Previously it showed a cool tag, but no settings for it.
+      // Now we get settings that does not work.
+      $uservisible = false;
+      // But we want it to be restricted so the user can not escape it.
+      $userassignable = false;
+      $tag = $systemTagManager->createTag(self::TAG_NAME, $uservisible, $userassignable);
+      return (string) $tag->getId();
+    } catch (\Exception) {
+      return '';
     }
   }
 }

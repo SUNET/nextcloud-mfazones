@@ -134,7 +134,7 @@ class MfazonesController extends Controller
       $userRoot = $this->rootFolder->getUserFolder($this->userId);
       $node = $userRoot->get($source);
       $tagId = Utils::getOurTagIdFromSystemTagManager($this->systemTagManager);
-      if ($tagId === false) {
+      if ($tagId === '') {
         $this->logger->error('The MFA Zone tag and flow has not been created, which should happen on app enable.');
         return new JSONResponse(
           array(
@@ -231,7 +231,7 @@ class MfazonesController extends Controller
         return new DataResponse(['not a directory'], Http::STATUS_FORBIDDEN);
       }
       $tagId = Utils::getOurTagIdFromSystemTagManager($this->systemTagManager);
-      if ($tagId === false) {
+      if ($tagId === '') {
         $this->logger->error('The MFA Zone tag and flow has not been created, which should happen on app enable.');
         return new JSONResponse(
           array(
