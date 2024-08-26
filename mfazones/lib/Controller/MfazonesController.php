@@ -17,56 +17,23 @@ use OCP\Files\IRootFolder;
 use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\ISession;
-use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
 use Psr\Log\LoggerInterface;
 
 class MfazonesController extends Controller
 {
-  /** @var IRootFolder */
-  private $rootFolder;
-
-  /** @var string */
-  private $userId;
-
-  /** @var ISession */
-  protected $session;
-
-  /** @var ISystemTagManager */
-  protected ISystemTagManager $systemTagManager;
-
-  /** @var IGroupManager */
-  private $groupManager;
-
-  /** @var ISystemTagObjectMapper */
-  private $tagMapper;
-
-  /** @var MfaVerified */
-  private $mfaVerified;
-
-  /** @var LoggerInterface */
-  private $logger;
-
   public function __construct(
-    IRequest $request,
-    IRootFolder $rootFolder,
-    IGroupManager $groupManager,
-    string $userId,
-    ISession $session,
-    ISystemTagObjectMapper $tagMapper,
-    ISystemTagManager $systemTagManager,
-    MfaVerified $mfaVerified,
-    LoggerInterface $logger
+    private IRequest $request,
+    private IRootFolder $rootFolder,
+    private IGroupManager $groupManager,
+    private string $userId,
+    private ISession $session,
+    private Utils $utils,
+    private ISystemTagObjectMapper $tagMapper,
+    private MfaVerified $mfaVerified,
+    private LoggerInterface $logger
   ) {
     parent::__construct(Application::APP_ID, $request);
-    $this->rootFolder = $rootFolder;
-    $this->userId = $userId;
-    $this->groupManager = $groupManager;
-    $this->tagMapper = $tagMapper;
-    $this->session = $session;
-    $this->systemTagManager = $systemTagManager;
-    $this->mfaVerified = $mfaVerified;
-    $this->logger = $logger;
   }
 
   private function castObjectType($type): string
@@ -133,7 +100,7 @@ class MfazonesController extends Controller
     try {
       $userRoot = $this->rootFolder->getUserFolder($this->userId);
       $node = $userRoot->get($source);
-      $tagId = Utils::getOurTagIdFromSystemTagManager($this->systemTagManager);
+      $tagId = $this->utils->getTagId();
       if ($tagId === '') {
         $this->logger->error('The MFA Zone tag and flow has not been created, which should happen on app enable.');
         return new JSONResponse(
@@ -174,12 +141,8 @@ class MfazonesController extends Controller
   {
     try {
       $userRoot = $this->rootFolder->getUserFolder($this->userId);
-      $tags = $this->systemTagManager->getAllTags(
-        null,
-        Utils::TAG_NAME
-      );
-      $tag = current($tags);
-      if ($tag === false) {
+      $tagId = $this->utils->getTagId();
+      if ($tagId === '') {
         $this->logger->error('The MFA Zone tag and flow has not been created, which should happen on app enable.');
         return new JSONResponse(
           array(
@@ -187,7 +150,6 @@ class MfazonesController extends Controller
           )
         );
       }
-      $tagId = $tag->getId();
       $results = [];
       foreach ($nodeIds as $nodeId) {
         $node = $userRoot->getById($nodeId);
@@ -230,7 +192,7 @@ class MfazonesController extends Controller
       if ($node->getType() !== 'dir') {
         return new DataResponse(['not a directory'], Http::STATUS_FORBIDDEN);
       }
-      $tagId = Utils::getOurTagIdFromSystemTagManager($this->systemTagManager);
+      $tagId = $this->utils->getTagId();
       if ($tagId === '') {
         $this->logger->error('The MFA Zone tag and flow has not been created, which should happen on app enable.');
         return new JSONResponse(

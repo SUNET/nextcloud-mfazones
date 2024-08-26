@@ -6,7 +6,6 @@ namespace OCA\mfazones;
 
 use OCA\DAV\Connector\Sabre\Node;
 use OCA\mfazones\Utils;
-use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
 use Sabre\DAV\PropFind;
 use Sabre\DAV\Server;
@@ -14,17 +13,12 @@ use Sabre\DAV\ServerPlugin;
 
 class MFAPlugin extends ServerPlugin
 {
-  private ISystemTagManager $systemTagManager;
-  private ISystemTagObjectMapper $tagMapper;
-
   public const ATTR_NAME = '{http://nextcloud.org/ns}requires-mfa';
 
   public function __construct(
-    ISystemTagManager $systemTagManager,
-    ISystemTagObjectMapper $tagMapper
+    private Utils $utils,
+    private ISystemTagObjectMapper $tagMapper
   ) {
-    $this->systemTagManager = $systemTagManager;
-    $this->tagMapper = $tagMapper;
   }
 
   public function initialize(Server $server)
@@ -39,8 +33,7 @@ class MFAPlugin extends ServerPlugin
   public function propFind(PropFind $propFind, Node $node): void
   {
     $propFind->handle(self::ATTR_NAME, function () use (&$node) {
-      $systemTagManager = $this->systemTagManager;
-      $tagId = Utils::getOurTagIdFromSystemTagManager($systemTagManager);
+      $tagId = $this->utils->getTagId();
       if ($tagId === '') {
         return false;
       }

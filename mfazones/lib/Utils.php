@@ -5,19 +5,23 @@ declare(strict_types=1);
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 namespace OCA\mfazones;
+
 use OCP\SystemTag\ISystemTagManager;
 
-class Utils {
+class Utils
+{
   public const TAG_NAME = 'mfazone';
 
+  public function __construct(
+    private ISystemTagManager $systemTagManager
+  ) {}
   /**
-  * @param ISystemTagManager $systemTagManager
-  * @return string
-  */
-  public static function getOurTagIdFromSystemTagManager($systemTagManager)
+   * @return string
+   */
+  public function getTagId()
   {
     try {
-      $tags = $systemTagManager->getAllTags();
+      $tags = $$this->systemTagManager->getAllTags();
       foreach ($tags as $tag) {
         if ($tag->getName() === self::TAG_NAME) {
           return (string) $tag->getId();
@@ -30,8 +34,8 @@ class Utils {
       $uservisible = false;
       // But we want it to be restricted so the user can not escape it.
       $userassignable = false;
-      $tag = $systemTagManager->createTag(self::TAG_NAME, $uservisible, $userassignable);
-      return (string) $tag->getId();
+      $tag = $this->systemTagManager->createTag(self::TAG_NAME, $uservisible, $userassignable);
+      return $tag->getId();
     } catch (\Exception) {
       return '';
     }

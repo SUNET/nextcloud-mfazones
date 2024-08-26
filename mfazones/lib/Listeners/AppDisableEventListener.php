@@ -48,7 +48,7 @@ class AppDisableEventListener implements IEventListener
 {
   public function __construct(
     private IDBConnection $connection,
-    private ISystemTagManager $systemTagManager,
+    private Utils $utils,
     private LoggerInterface $logger,
     private Manager $manager
   ) {
@@ -70,7 +70,7 @@ class AppDisableEventListener implements IEventListener
 
     $this->logger->debug("MFA: removing flow.");
 
-    $tagId = Utils::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
+    $tagId = $this->utils->getTagId(); // will create the tag if necessary
 
     try {
 
@@ -97,7 +97,7 @@ class AppDisableEventListener implements IEventListener
       $this->manager->deleteOperation($operationId, $context);
       $this->deleteCheckById($mfaVerifiedId);
       $this->deleteCheckById($fileSystemTagsId);
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       $this->logger->error('MFA: Error when removing flow on disabling mfazones app', ['exception' => $e]);
     }
   }

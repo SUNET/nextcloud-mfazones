@@ -32,7 +32,6 @@ use OCA\mfazones\Utils;
 use OCP\App\Events\AppEnableEvent;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
-use OCP\SystemTag\ISystemTagManager;
 use OCP\WorkflowEngine\IManager;
 use Psr\Log\LoggerInterface;
 
@@ -45,7 +44,7 @@ class AppEnableEventListener implements IEventListener
 {
   public function __construct(
     private Manager $manager,
-    private ISystemTagManager $systemTagManager,
+    private Utils $utils,
     private LoggerInterface $logger
   ) {
   }
@@ -67,7 +66,7 @@ class AppEnableEventListener implements IEventListener
     $this->logger->debug("MFA: setting up flow.");
 
 
-    $tagId = Utils::getOurTagIdFromSystemTagManager($this->systemTagManager); // will create the tag if necessary
+    $tagId = $this->utils->getTagId(); // will create the tag if necessary
 
     $context = new ScopeContext(IManager::SCOPE_ADMIN);
     $class = "OCA\\FilesAccessControl\\Operation";
