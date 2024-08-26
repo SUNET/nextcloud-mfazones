@@ -21,7 +21,7 @@ class Utils
   public function getTagId()
   {
     try {
-      $tags = $$this->systemTagManager->getAllTags();
+      $tags = $this->systemTagManager->getAllTags();
       foreach ($tags as $tag) {
         if ($tag->getName() === self::TAG_NAME) {
           return (string) $tag->getId();

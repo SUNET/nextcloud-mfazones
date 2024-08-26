@@ -9,7 +9,6 @@ namespace OCA\mfazones\AppInfo;
 
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\mfazones\Listeners\AppDisableEventListener;
-use OCA\mfazones\Listeners\AppEnableEventListener;
 use OCA\mfazones\Listeners\LoadAdditionalScriptsListener;
 use OCA\mfazones\Listeners\RegisterChecksListener;
 use OCA\mfazones\Listeners\RegisterOperationsListener;
@@ -20,7 +19,6 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\App\Events\AppDisableEvent;
-use OCP\App\Events\AppEnableEvent;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
@@ -47,10 +45,9 @@ class Application extends App implements IBootstrap
    */
   public function register(IRegistrationContext $context): void
   {
-    $context->registerEventListener(AppEnableEvent::class, AppEnableEventListener::class);
+    $context->registerEventListener(RegisterChecksEvent::class, RegisterChecksListener::class);
     $context->registerEventListener(TwoFactorProviderChallengePassed::class, TwoFactorProviderChallengePassedListener::class);
     $context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadAdditionalScriptsListener::class);
-    $context->registerEventListener(RegisterChecksEvent::class, RegisterChecksListener::class);
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterOperationsListener::class);
     $context->registerEventListener(AppDisableEvent::class, AppDisableEventListener::class);
     $context->registerService(

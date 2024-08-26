@@ -73,11 +73,13 @@ docker: selfsignedcert docker_kill package
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:install files_accesscontrol"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:install files_automatedtagging"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:install	twofactor_webauthn"
+	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:enable mfazones"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ group:add mfa"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ twofactorauth:enforce --on --group mfa"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ group:adduser mfa admin"
 	docker exec -u www-data nextcloud /bin/bash -c "env OC_PASS=mfauserpassword /var/www/html/occ user:add --password-from-env --display-name='MFA User' --group='mfa' mfauser"
 	docker exec -u www-data nextcloud /bin/bash -c "env OC_PASS=nomfauserpassword /var/www/html/occ user:add --password-from-env --display-name='Ordinary User' nomfauser"
+	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:disable firstrunwizard"
 	firefox -new-tab https://localhost:8443/
 
 sign: package docker_kill
