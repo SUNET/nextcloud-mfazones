@@ -26,37 +26,26 @@ declare(strict_types=1);
 
 namespace OCA\mfazones\Listeners;
 
-use OCA\WorkflowEngine\Helper\ScopeContext;
-use OCA\WorkflowEngine\Manager;
 use OCA\mfazones\AppInfo\Application;
 use OCA\mfazones\Check\MfaVerified;
-use OCA\mfazones\Utils;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\IL10N;
 use OCP\ISession;
 use OCP\Util;
 use OCP\WorkflowEngine\Events\RegisterChecksEvent;
-use OCP\WorkflowEngine\IManager;
 use Psr\Log\LoggerInterface;
 
 class RegisterChecksListener implements IEventListener
 {
   private MfaVerified $mfaVerifiedCheck;
-  private ISession $session;
-  private LoggerInterface $logger;
-  private string $tagId;
-  private Manager $manager;
-  private IL10N $l;
 
-  public function __construct(Utils $utils, IL10N $l, ISession $session, LoggerInterface $logger, Manager $manager)
-  {
-    $this->l = $l;
-    $this->session = $session;
-    $this->logger = $logger;
-    $this->manager = $manager;
+  public function __construct(
+    private ISession $session,
+    private LoggerInterface $logger,
+    private IL10N $l
+  ) {
     $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session, $this->logger);
-    $this->tagId = $utils->getTagId(); // will create the tag if necessary
   }
 
   public function handle(Event $event): void
@@ -64,26 +53,7 @@ class RegisterChecksListener implements IEventListener
     if (!$event instanceof RegisterChecksEvent) {
       return;
     }
-    Util::addScript(Application::APP_ID, 'mfazones-main');
     $event->registerCheck($this->mfaVerifiedCheck);
-    $context = new ScopeContext(IManager::SCOPE_ADMIN);
-    $class = "OCA\\FilesAccessControl\\Operation";
-    $name = "";
-    $checks =  [
-      [
-        "class" => "OCA\mfazones\Check\MfaVerified",
-        "operator" => "!is",
-        "value" => ""
-      ],
-      [
-        "class" => "OCA\WorkflowEngine\Check\FileSystemTags",
-        "operator" => "is",
-        "value" => $this->tagId
-      ]
-    ];
-    $operation = "deny";
-    $entity = "OCA\\WorkflowEngine\\Entity\\File";
-    $events = [];
-    $this->manager->addOperation($class, $name, $checks, $operation, $context, $entity, $events);
+    Util::addScript(Application::APP_ID, 'mfazones-main');
   }
 }

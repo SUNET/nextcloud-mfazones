@@ -95,7 +95,6 @@ class AppDisableEventListener implements IEventListener
       $this->manager->deleteOperation($operationId, $context);
       $this->deleteCheckById($mfaVerifiedId);
       $this->deleteCheckById($fileSystemTagsId);
-      $this->deleteCheckById($tagId, "systemtag");
     } catch (\Exception $e) {
       $this->logger->error('MFA: Error when removing flow on disabling mfazones app', ['exception' => $e]);
     }

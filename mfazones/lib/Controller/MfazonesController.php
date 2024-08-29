@@ -16,37 +16,23 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\IRootFolder;
 use OCP\IGroupManager;
 use OCP\IRequest;
+use OCP\ISession;
 use OCP\SystemTag\ISystemTagObjectMapper;
 use Psr\Log\LoggerInterface;
 
 class MfazonesController extends Controller
 {
-  private IGroupManager $groupManager;
-  private IRootFolder $rootFolder;
-  private ISystemTagObjectMapper $tagMapper;
-  private LoggerInterface $logger;
-  private MfaVerified $mfaVerified;
-  private Utils $utils;
-  private string $userId;
   public function __construct(
     IRequest $request,
-    IRootFolder $rootFolder,
-    IGroupManager $groupManager,
-    string $userId,
-    Utils $utils,
-    ISystemTagObjectMapper $tagMapper,
-    MfaVerified $mfaVerified,
-    LoggerInterface $logger
+    private IRootFolder $rootFolder,
+    private IGroupManager $groupManager,
+    private string $userId,
+    private ISession $session,
+    private Utils $utils,
+    private ISystemTagObjectMapper $tagMapper,
+    private MfaVerified $mfaVerified,
+    private LoggerInterface $logger
   ) {
-    // NOTE: The request is only passed to the parent class
-    // and is not instantiated by us here.
-    $this->groupManager = $groupManager;
-    $this->logger = $logger;
-    $this->mfaVerified = $mfaVerified;
-    $this->rootFolder = $rootFolder;
-    $this->tagMapper = $tagMapper;
-    $this->userId = $userId;
-    $this->utils = $utils;
     parent::__construct(Application::APP_ID, $request);
   }
 
