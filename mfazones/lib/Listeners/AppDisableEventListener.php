@@ -26,7 +26,6 @@ declare(strict_types=1);
 
 namespace OCA\mfazones\Listeners;
 
-use Doctrine\DBAL\Exception;
 use OCA\WorkflowEngine\Helper\ScopeContext;
 use OCA\WorkflowEngine\Manager;
 use OCA\mfazones\Utils;
@@ -35,7 +34,6 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\IDBConnection;
-use OCP\SystemTag\ISystemTagManager;
 use OCP\WorkflowEngine\IManager;
 use Psr\Log\LoggerInterface;
 
@@ -97,17 +95,18 @@ class AppDisableEventListener implements IEventListener
       $this->manager->deleteOperation($operationId, $context);
       $this->deleteCheckById($mfaVerifiedId);
       $this->deleteCheckById($fileSystemTagsId);
+      $this->deleteCheckById($tagId, "systemtag");
     } catch (\Exception $e) {
       $this->logger->error('MFA: Error when removing flow on disabling mfazones app', ['exception' => $e]);
     }
   }
 
-  private function deleteCheckById($id)
+  private function deleteCheckById($id, $table='flow_checks')
   {
 
     /** @var IQueryBuilder $query */
     $query = $this->connection->getQueryBuilder();
-    $query->delete('flow_checks')
+    $query->delete($table)
       ->where($query->expr()->eq('id', $query->createNamedParameter($id)));
     $query->executeStatement();
   }
