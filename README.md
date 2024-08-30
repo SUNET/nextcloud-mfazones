@@ -17,11 +17,15 @@ see [our research repo](https://github.com/pondersource/nextcloud-mfa-awareness#
 - More [optional external dependencies](https://github.com/pondersource/nextcloud-mfa-awareness#nextcloud-mfa-awareness), depending on your deployment (using SAML? using Global Site Selector?)
 
 ## Installation
+WARNING: This app requires the `Files Access Control` and `Files Automated Tagging` apps to be enabled. You must also enable these apps before mfazones.
 
+### Through appstore
+1. Run `occ app:install mfazones`
+
+### Manually
 1. Download the MFA Zones app from the [Nextcloud app store](https://apps.nextcloud.com/apps/mfazones)
 2. Extract the downloaded archive to your Nextcloud apps directory.
-3. Enable the app in the Nextcloud GUI apps settings. DO NOT ENABLE WITH `occ` command as it currently does not work.
-WARNING: This app requires the `Files Access Control` and `Files Automated Tagging` apps to be enabled. You must also enable these apps before mfazones AND mfazones must be enabled from the GUI settings, not from the commandline due to issue #16.
+3. Enable the app in the Nextcloud GUI apps settings or use `occ app:enable mfazones`.
 
 
 ## Usage
