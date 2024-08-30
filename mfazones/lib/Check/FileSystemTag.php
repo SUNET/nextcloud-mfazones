@@ -17,15 +17,9 @@ use OCP\SystemTag\ISystemTagObjectMapper;
 
 class FileSystemTag extends FileSystemTags
 {
-  private Utils $utils;
-  protected IL10N $l;
-  protected ISystemTagManager $systemTagManager;
-  protected ISystemTagObjectMapper $systemTagObjectMapper;
-  protected IUserSession $userSession;
-  protected IGroupManager $groupManager;
 
   public function __construct(
-    Utils $utils,
+    private Utils $utils,
     IL10N $l,
     ISystemTagManager $systemTagManager,
     ISystemTagObjectMapper $systemTagObjectMapper,
