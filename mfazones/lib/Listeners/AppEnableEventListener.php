@@ -78,7 +78,7 @@ class AppEnableEventListener implements IEventListener
         "value" => ""
       ],
       [
-        "class" => "OCA\WorkflowEngine\Check\FileSystemTags",
+        "class" => "OCA\mfazones\Check\FileSystemTag",
         "operator" => "is",
         "value" => $tagId
       ]
