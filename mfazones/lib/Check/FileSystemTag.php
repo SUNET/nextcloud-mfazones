@@ -17,17 +17,24 @@ use OCP\SystemTag\ISystemTagObjectMapper;
 
 class FileSystemTag extends FileSystemTags
 {
+  private Utils $utils;
 
   public function __construct(
-    private Utils $utils,
     IL10N $l,
     ISystemTagManager $systemTagManager,
     ISystemTagObjectMapper $systemTagObjectMapper,
     IUserSession $userSession,
-    IGroupManager $groupManager
+    IGroupManager $groupManager,
+    Utils $utils,
   ) {
+    parent::__construct(
+      $l,
+      $systemTagManager,
+      $systemTagObjectMapper,
+      $userSession,
+      $groupManager
+    );
     $this->utils = $utils;
-    parent::__construct($l, $systemTagManager, $systemTagObjectMapper, $userSession, $groupManager);
   }
   /**
    * @param string $operator
@@ -45,9 +52,9 @@ class FileSystemTag extends FileSystemTags
 
     try {
       $this->systemTagManager->getTagsByIds($value);
-    } catch (TagNotFoundException $e) {
+    } catch (TagNotFoundException) {
       throw new \UnexpectedValueException($this->l->t('The given tag id is invalid'), 3);
-    } catch (\InvalidArgumentException $e) {
+    } catch (\InvalidArgumentException) {
       throw new \UnexpectedValueException($this->l->t('The given tag id is invalid'), 4);
     }
   }

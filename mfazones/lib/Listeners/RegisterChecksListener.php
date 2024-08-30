@@ -27,26 +27,20 @@ declare(strict_types=1);
 namespace OCA\mfazones\Listeners;
 
 use OCA\mfazones\AppInfo\Application;
+use OCA\mfazones\Check\FileSystemTag;
 use OCA\mfazones\Check\MfaVerified;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
-use OCP\IL10N;
-use OCP\ISession;
 use OCP\Util;
 use OCP\WorkflowEngine\Events\RegisterChecksEvent;
-use Psr\Log\LoggerInterface;
 
 class RegisterChecksListener implements IEventListener
 {
-  private MfaVerified $mfaVerifiedCheck;
 
   public function __construct(
-    private ISession $session,
-    private LoggerInterface $logger,
-    private IL10N $l
-  ) {
-    $this->mfaVerifiedCheck = new MfaVerified($this->l, $this->session, $this->logger);
-  }
+    private FileSystemTag $fileSystemTagCheck,
+    private MfaVerified $mfaVerifiedCheck
+  ) {}
 
   public function handle(Event $event): void
   {
@@ -54,6 +48,7 @@ class RegisterChecksListener implements IEventListener
       return;
     }
     $event->registerCheck($this->mfaVerifiedCheck);
+    $event->registerCheck($this->fileSystemTagCheck);
     Util::addScript(Application::APP_ID, 'mfazones-main');
   }
 }

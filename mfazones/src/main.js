@@ -47,6 +47,15 @@ if ((typeof window.OCA !== 'undefined') && typeof window.OCA.WorkflowEngine !== 
     ],
     component: MFATabEmpty,
   });
+  window.OCA.WorkflowEngine.registerCheck({
+    class: 'OCA\\mfazones\\Check\\FileSystemTag',
+    name: t(appId, 'Folder'),
+    operators: [
+      { operator: 'is', name: t(appId, 'is MFA Zone') },
+      { operator: '!is', name: t(appId, 'is not MFA Zone') },
+    ],
+    component: MFATabEmpty,
+  });
 }
 
 window.addEventListener('DOMContentLoaded', function() {

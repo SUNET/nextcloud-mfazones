@@ -73,7 +73,7 @@ class AppDisableEventListener implements IEventListener
     try {
 
       $mfaVerifiedId = $this->getCheckId('OCA\mfazones\Check\MfaVerified', '!is');
-      $fileSystemTagsId = $this->getCheckId('OCA\WorkflowEngine\Check\FileSystemTags', 'is', $tagId);
+      $fileSystemTagsId = $this->getCheckId('OCA\mfazones\Check\FileSystemTag', 'is', $tagId);
       $this->logger->debug("MFA: removing flow for $mfaVerifiedId and $fileSystemTagsId");
 
       // select id from oc_flow_operations where class = 'OCA\\FilesAccessControl\\Operation' and operation = 'deny' and checks = '[10,5]';

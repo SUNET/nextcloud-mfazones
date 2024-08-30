@@ -73,12 +73,12 @@ class AppEnableEventListener implements IEventListener
     $name = "";
     $checks =  [
       [
-        "class" => "OCA\mfazones\Check\MfaVerified",
+        "class" => "OCA\\mfazones\\Check\\MfaVerified",
         "operator" => "!is",
         "value" => ""
       ],
       [
-        "class" => "OCA\mfazones\Check\FileSystemTag",
+        "class" => "OCA\\mfazones\\Check\\FileSystemTag",
         "operator" => "is",
         "value" => $tagId
       ]
