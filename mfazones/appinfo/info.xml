@@ -26,6 +26,11 @@ See the [README](https://github.com/SUNET/nextcloud-mfazones/blob/main/README.md
   <dependencies>
     <nextcloud min-version="29" max-version="29" />
   </dependencies>
+  	<repair-steps>
+		<post-migration>
+			<step>OCA\mfazones\Migration\ChangeCheckClass</step>
+		</post-migration>
+	</repair-steps>
   <settings>
     <admin>OCA\WorkflowEngine\Settings\Admin</admin>
     <admin-section>OCA\WorkflowEngine\Settings\Section</admin-section>

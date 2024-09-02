@@ -73,6 +73,8 @@ docker: selfsignedcert docker_kill package
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:install files_accesscontrol"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:install files_automatedtagging"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:install twofactor_webauthn"
+	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:install twofactor_totp"
+	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:disable firstrunwizard"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ app:enable mfazones"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ group:add mfa"
 	docker exec -u www-data nextcloud /bin/bash -c "/var/www/html/occ twofactorauth:enforce --on --group mfa"
