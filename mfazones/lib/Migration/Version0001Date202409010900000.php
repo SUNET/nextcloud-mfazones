@@ -1,5 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
+/**
+ * SPDX-FileCopyrightText: 2024 Micke Nordin <kano@sunet.se>
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 namespace OCA\mfazone\Migration;
 
 use OCP\Migration\SimpleMigrationStep;

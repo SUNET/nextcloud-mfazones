@@ -1,9 +1,10 @@
 <?php
 
 declare(strict_types=1);
-// SPDX-FileCopyrightText: Pondersource <michiel@pondersource.com>
-// SPDX-FileCopyrightText: SUNET <kano@sunet.se>
-// SPDX-License-Identifier: AGPL-3.0-or-later
+/** SPDX-FileCopyrightText: 2024 Pondersource <michiel@pondersource.com>
+ *  SPDX-FileCopyrightText: 2024 Micke Nordin <kano@sunet.se>
+ *  SPDX-License-Identifier: AGPL-3.0-or-later
+ */
 
 namespace OCA\mfazones\AppInfo;
 
@@ -54,18 +55,18 @@ class Application extends App implements IBootstrap
     $context->registerEventListener(RegisterOperationsEvent::class, RegisterOperationsListener::class);
     $context->registerEventListener(AppDisableEvent::class, AppDisableEventListener::class);
     $context->registerService(
-      MFAPlugin::class, function (ContainerInterface $c) {
-      $systemTagManager = $c->get(ISystemTagManager::class);
-      $tagMapper = $c->get(ISystemTagObjectMapper::class);
-      $x = new MFAPlugin($systemTagManager, $tagMapper);
-      return $x;
-    });
+      MFAPlugin::class,
+      function (ContainerInterface $c) {
+        $systemTagManager = $c->get(ISystemTagManager::class);
+        $tagMapper = $c->get(ISystemTagObjectMapper::class);
+        $x = new MFAPlugin($systemTagManager, $tagMapper);
+        return $x;
+      }
+    );
   }
 
   /**
    * @inheritdoc
    */
-  public function boot(IBootContext $context): void
-  {
-  }
+  public function boot(IBootContext $context): void {}
 }

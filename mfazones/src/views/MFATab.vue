@@ -1,5 +1,5 @@
-<!-- SPDX-FileCopyrightText: SUNET <kano@sunet.se> -->
-<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<!-- SPDX-FileCopyrightText: 2024 Micke Nordin <kano@sunet.se> 
+     SPDX-License-Identifier: AGPL-3.0-or-later -->
 <template>
   <NcActions>
     <span id="mfa-current-file-path" hidden></span>
