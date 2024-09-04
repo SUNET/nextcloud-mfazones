@@ -41,7 +41,7 @@ class MfazonesController extends Controller
     parent::__construct(Application::APP_ID, $request);
   }
 
-  private function castObjectType($type): string
+  private function castObjectType(string $type): string
   {
     if ($type === 'file') {
       return "files";
@@ -157,8 +157,10 @@ class MfazonesController extends Controller
       }
       $results = [];
       foreach ($nodeIds as $nodeId) {
+        /** @var \OCP\Files\FileInfo $node */
         $node = $userRoot->getById($nodeId);
-        $type = $this->castObjectType($node->getType());
+        $beforetype = $node->getType();
+        $type = $this->castObjectType($beforetype);
         $results[$nodeId] = $this->tagMapper->haveTag($nodeId, $type, $tagId);
       }
 
@@ -209,9 +211,9 @@ class MfazonesController extends Controller
       $type = $this->castObjectType($node->getType());
 
       if ($protect === "true") {
-        $this->tagMapper->assignTags( (string) $node->getId(), $type, $tagId);
+        $this->tagMapper->assignTags((string) $node->getId(), $type, $tagId);
       } else {
-        $this->tagMapper->unassignTags( (string) $node->getId(), $type, $tagId);
+        $this->tagMapper->unassignTags((string) $node->getId(), $type, $tagId);
       }
 
       return new DataResponse([], Http::STATUS_OK);
