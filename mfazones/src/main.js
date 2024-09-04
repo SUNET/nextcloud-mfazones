@@ -21,7 +21,7 @@ let MFATabInstance = null
 if ((typeof window.OCA !== 'undefined') && typeof window.OCA.WorkflowEngine !== 'undefined') {
   window.OCA.WorkflowEngine.registerCheck({
     class: 'OCA\\mfazones\\Check\\MfaVerified',
-    name: t(appId, 'multi-factor authentication'),
+    name: t(appId, 'MFA Status'),
     operators: [
       { operator: 'is', name: t(appId, 'is verified') },
       { operator: '!is', name: t(appId, 'is not verified') },
@@ -30,10 +30,10 @@ if ((typeof window.OCA !== 'undefined') && typeof window.OCA.WorkflowEngine !== 
   });
   window.OCA.WorkflowEngine.registerCheck({
     class: 'OCA\\mfazones\\Check\\FileSystemTag',
-    name: t(appId, 'Folder'),
+    name: t(appId, 'MFA Zone'),
     operators: [
-      { operator: 'is', name: t(appId, 'is MFA Zone') },
-      { operator: '!is', name: t(appId, 'is not MFA Zone') },
+      { operator: 'is', name: t(appId, 'is enabled') },
+      { operator: '!is', name: t(appId, 'is not enabled') },
     ],
     component: MFATabEmpty,
   });

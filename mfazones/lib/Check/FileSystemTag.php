@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 /**
@@ -12,23 +11,23 @@ namespace OCA\mfazones\Check;
 use OCA\WorkflowEngine\Check\FileSystemTags;
 use OCP\SystemTag\TagNotFoundException;
 use OCA\mfazones\Utils;
+use OCP\IGroupManager;
+use OCP\IL10N;
+use OCP\IUserSession;
+use OCP\SystemTag\ISystemTagManager;
+use OCP\SystemTag\ISystemTagObjectMapper;
 
 class FileSystemTag extends FileSystemTags
 {
   private Utils $utils;
 
   public function __construct(
-    /** @var IL10N */
-    $l,
-    /** @var ISystemTagManager */
-    $systemTagManager,
-    /** @var ISystemTagObjectMapper */
-    $systemTagObjectMapper,
-    /** @var IUserSession */
-    $userSession,
-    /** @var IGroupManager */
-    $groupManager,
-    Utils $utils
+    IL10N $l,
+    ISystemTagManager $systemTagManager,
+    ISystemTagObjectMapper $systemTagObjectMapper,
+    IUserSession $userSession,
+    IGroupManager $groupManager,
+    Utils $utils,
   ) {
     parent::__construct(
       $l,
