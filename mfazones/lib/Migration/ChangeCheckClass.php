@@ -47,22 +47,26 @@ class ChangeCheckClass implements IRepairStep
     
     $query = $this->db->getQueryBuilder();
 
-    $query->select('id', 'operator')
+    $query->select('id')
       ->from('flow_checks')
       ->where($query->expr()->eq('class', $query->createNamedParameter($old_class)))
       ->andWhere($query->expr()->eq('value', $query->createNamedParameter($value)));
     $result = $query->executeQuery();
-    $rows = $result->fetchOne();
+    $id = $result->fetchOne();
+    $result->closeCursor();
+    $query->select('operator')
+      ->from('flow_checks')
+      ->where($query->expr()->eq('id', $query->createNamedParameter($id)));
+    $result = $query->executeQuery();
+    $operator = $result->fetchOne();
     $result->closeCursor();
     
-    if (!$rows) {
-      $output->advance(3, 'No FileSystemTag found');
+    if (!$id || !$operator) {
+      $output->advance(3, 'No FileSystemTag found, id:' . (string) $id . " operator: " . (string) $operator);
       $output->finishProgress();
       return;
     }
     
-    $operator = $rows->operator;
-    $id = $rows->id;
     $hash = md5($new_class . '::' . $operator . '::' . (string) $value);
     
     $output->advance(2, 'Old FileSystemTag is: ' . $old_class . " old id is: " . $id);
