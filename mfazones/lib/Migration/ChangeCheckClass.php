@@ -62,7 +62,7 @@ class ChangeCheckClass implements IRepairStep
     $result->closeCursor();
     
     if (!$id || !$operator) {
-      $output->advance(3, 'No FileSystemTag found, id:' . (string) $id . " operator: " . (string) $operator);
+      $output->advance(3, 'No FileSystemTag found.');
       $output->finishProgress();
       return;
     }

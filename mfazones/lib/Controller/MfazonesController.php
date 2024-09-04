@@ -209,9 +209,9 @@ class MfazonesController extends Controller
       $type = $this->castObjectType($node->getType());
 
       if ($protect === "true") {
-        $this->tagMapper->assignTags($node->getId(), $type, $tagId);
+        $this->tagMapper->assignTags( (string) $node->getId(), $type, $tagId);
       } else {
-        $this->tagMapper->unassignTags($node->getId(), $type, $tagId);
+        $this->tagMapper->unassignTags( (string) $node->getId(), $type, $tagId);
       }
 
       return new DataResponse([], Http::STATUS_OK);
