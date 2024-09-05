@@ -11,10 +11,13 @@ see [our research repo](https://github.com/pondersource/nextcloud-mfa-awareness#
 ## Requirements
 
 - Nextcloud 27 or later
+- Two-factor authentication (2FA) enabled [see here for more info](https://docs.nextcloud.com/server/latest/admin_manual/configuration_user/two_factor-auth.html)
 - PHP 7.2 or later
 - `Files Access Control` (Nextcloud app)
 - `Files Automated Tagging` (Nextcloud app)
 - More [optional external dependencies](https://github.com/pondersource/nextcloud-mfa-awareness#nextcloud-mfa-awareness), depending on your deployment (using SAML? using Global Site Selector?)
+
+If you are using any single signon (SSO) solution, you will need to enable the `Step Up Auth` app. You can find it in the [Nextcloud app store](https://apps.nextcloud.com/apps/stepupauth).
 
 ## Installation
 WARNING: This app requires the `Files Access Control` and `Files Automated Tagging` apps to be enabled. You must also enable these apps before mfazones.
