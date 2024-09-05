@@ -84,6 +84,7 @@ class Utils
     } catch (NotFoundException) {
       return false;
     }
+    return false;
   }
 
   // Recursively set the tag on all children.
