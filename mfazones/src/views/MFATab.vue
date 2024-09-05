@@ -21,8 +21,9 @@
       <label for="enable-2fa-button">This is a mfazone that has been shared with you, so you can not change any settings
         for it.</label><br><br>
     </div>
-    <div id="not-owner" style="--icon-size:36px;" hidden>
-      <label for="enable-2fa-button">This is a mfazone that has been shared with you, so you can not change any settings for it.</label><br><br>
+    <div id="not-top" style="--icon-size:36px;" hidden>
+      <label for="enable-2fa-button">This is a mfazone that has been set further up in the file tree, you must go there
+        to change settings for it. But take this ⚔, it is dangerous to go alone.</label><br><br>
     </div>
   </NcActions>
 </template>
@@ -92,15 +93,22 @@ export default {
       var needMFA = document.getElementById('need-mfa');
       var haveMFA = document.getElementById('have-mfa');
       var notOwner = document.getElementById('not-owner');
+      var notTop = document.getElementById('not-top');
       needMFA.hidden = true;
       notOwner.hidden = true;
       haveMFA.hidden = true;
+      notTop.hidden = true;
       let mfa_passed = state.mfa_passed;
       let status = state.status;
       let has_access = state.has_access;
+      let mfa_on_parent = state.mfa_on_parent;
       if (mfa_passed) {
         if (has_access) {
-          haveMFA.hidden = false;
+          if (mfa_on_parent) {
+            notTop.hidden = false;
+          } else {
+            haveMFA.hidden = false;
+          }
         } else {
           notOwner.hidden = false;
         }

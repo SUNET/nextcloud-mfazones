@@ -122,11 +122,18 @@ class MfazonesController extends Controller
       $type = $this->castObjectType($node->getType());
       $result = $this->tagMapper->haveTag($node->getId(), $type, $tagId);
 
+      try {
+        $mfa_on_parent = $this->utils->nodeOrParentHasTag($node->getParent());
+      } catch (NotFoundException) {
+        $mfa_on_parent = false;
+      }
+
       return new JSONResponse(
         array(
           'status' => $result,
           'mfa_passed' => $this->isMfaVerified(),
-          'has_access' => $this->hasAccess($source)
+          'has_access' => $this->hasAccess($source),
+          'mfa_on_parent' => $mfa_on_parent
         )
       );
     } catch (\Exception $e) {
