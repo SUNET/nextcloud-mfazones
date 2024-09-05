@@ -12,6 +12,8 @@ namespace OCA\mfazones;
 use OCA\DAV\Connector\Sabre\Node;
 use OCA\mfazones\Utils;
 use OCP\SystemTag\ISystemTagObjectMapper;
+use OCP\Files\Folder;
+use OCP\Files\NotFoundException;
 use Sabre\DAV\PropFind;
 use Sabre\DAV\Server;
 use Sabre\DAV\ServerPlugin;
@@ -23,8 +25,7 @@ class MFAPlugin extends ServerPlugin
   public function __construct(
     private Utils $utils,
     private ISystemTagObjectMapper $tagMapper
-  ) {
-  }
+  ) {}
 
   public function initialize(Server $server)
   {
@@ -38,12 +39,23 @@ class MFAPlugin extends ServerPlugin
   public function propFind(PropFind $propFind, Node $node): void
   {
     $propFind->handle(self::ATTR_NAME, function () use (&$node) {
+      $node = $node->getNode();
       $tagId = $this->utils->getTagId();
       if ($tagId === '') {
         return false;
       }
-      // FIXME: check parents too
-      return $this->tagMapper->haveTag([$node->getId()], 'files', (string) $tagId);
+      do {
+        $have_tag = $this->tagMapper->haveTag([$node->getId()], 'files', (string) $tagId);
+        if ($have_tag) {
+          return true;
+        }
+        try {
+          $node = $node->getParent();
+        } catch (NotFoundException) {
+          return false;
+        }
+      } while ($node instanceof Folder);
+      return false;
     });
   }
 }

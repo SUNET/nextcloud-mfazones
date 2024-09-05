@@ -14,11 +14,15 @@ namespace OCA\mfazones\Controller;
 use OCA\mfazones\AppInfo\Application;
 use OCA\mfazones\Utils;
 use OCA\mfazones\Check\MfaVerified;
+use OCA\mfazones\Events\MFAZoneDisabledEvent;
+use OCA\mfazones\Events\MFAZoneEnabledEvent;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\IRootFolder;
+use OCP\Files\NotFoundException;
 use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\ISession;
@@ -36,7 +40,8 @@ class MfazonesController extends Controller
     private Utils $utils,
     private ISystemTagObjectMapper $tagMapper,
     private MfaVerified $mfaVerified,
-    private LoggerInterface $logger
+    private LoggerInterface $logger,
+    private IEventDispatcher $dispatcher,
   ) {
     parent::__construct(Application::APP_ID, $request);
   }
@@ -212,8 +217,17 @@ class MfazonesController extends Controller
 
       if ($protect === "true") {
         $this->tagMapper->assignTags((string) $node->getId(), $type, $tagId);
+        $this->dispatcher->dispatchTyped(new MFAZoneEnabledEvent($node));
       } else {
+        try {
+          if ($this->utils->nodeOrParentHasTag($node->getParent())) {
+            return new DataResponse(['Parent has tag'], Http::STATUS_FORBIDDEN);
+          }
+        } catch (NotFoundException) {
+          //do nothing
+        }
         $this->tagMapper->unassignTags((string) $node->getId(), $type, $tagId);
+        $this->dispatcher->dispatchTyped(new MFAZoneDisabledEvent($node));
       }
 
       return new DataResponse([], Http::STATUS_OK);
