@@ -32,11 +32,11 @@ class MFAZoneDisabledListener implements IEventListener
     $this->logger->debug('MFAZoneDisabledListener');
     $node = $event->getNode();
     if ($this->utils->nodeOrChildHasTag($node)) {
-      // A parent has the tag but not this node, so add the tag to this node.
-      if (!$this->utils->hasTag($node)) {
+      // This node has the tag, so remove the tag on this node.
+      if ($this->utils->hasTag($node)) {
         $this->utils->removeTag($node);
       }
-      // We are a folder, so we need to set the tag on all children.
+      // We are a folder, so we need to remove the tag on all children.
       if ($node instanceof Folder) {
         $this->utils->removeTagOnChildren($node);
       }
