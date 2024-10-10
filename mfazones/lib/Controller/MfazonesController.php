@@ -73,12 +73,12 @@ class MfazonesController extends Controller
         $node = $userRoot->get($source);
         $hasAccess = ($isAdmin || $node->getOwner()->getUID() === $this->userId) && $mfaVerified;
       } catch (\Exception $e) {
-        $this->logger->critical($e, ['app' => 'mfazones']);
+        $this->logger->critical($e->getMessage(), ['app' => 'mfazones']);
         $hasAccess = false;
       }
       return $hasAccess;
     } catch (\Exception $e) {
-      $this->logger->critical($e, ['app' => 'mfazones']);
+      $this->logger->critical($e->getMessage(), ['app' => 'mfazones']);
 
       return false;
     }
@@ -137,7 +137,7 @@ class MfazonesController extends Controller
         )
       );
     } catch (\Exception $e) {
-      $this->logger->critical($e, ['app' => 'mfazones']);
+      $this->logger->critical($e->getMessage(), ['app' => 'mfazones']);
 
       return new JSONResponse(
         array(
@@ -183,7 +183,7 @@ class MfazonesController extends Controller
         )
       );
     } catch (\Exception $e) {
-      $this->logger->critical($e, ['app' => 'mfazones']);
+      $this->logger->critical($e->getMessage(), ['app' => 'mfazones']);
 
       return new JSONResponse(
         array(
@@ -239,7 +239,7 @@ class MfazonesController extends Controller
 
       return new DataResponse([], Http::STATUS_OK);
     } catch (\Exception $e) {
-      $this->logger->critical($e, ['app' => 'mfazones']);
+      $this->logger->critical($e->getMessage(), ['app' => 'mfazones']);
 
       return new DataResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
     }
