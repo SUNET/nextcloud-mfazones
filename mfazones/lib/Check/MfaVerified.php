@@ -13,9 +13,10 @@ declare(strict_types=1);
 namespace OCA\mfazones\Check;
 
 use OCP\IL10N;
-use OCP\WorkflowEngine\ICheck;
 use OCP\ISession;
 use OCP\IUser;
+use OCP\IUserManager;
+use OCP\WorkflowEngine\ICheck;
 use Psr\Log\LoggerInterface;
 
 
@@ -24,24 +25,28 @@ class MfaVerified implements ICheck
   protected IL10N $l;
   protected ISession $session;
   private LoggerInterface $logger;
-  private IUser $user;
+  private IUserManager $userManager;
+  private string $userId;
 
   /**
    * @param IL10N $l
    * @param ISession $session
    * @param LoggerInterface $logger
-   * @param IUser $user
+   * @param IUserManager $usermanager
+   * @param string $userId
    */
   public function __construct(
     IL10N $l,
     ISession $session,
     LoggerInterface $logger,
-    IUser $user
+    IUserManager $userManager,
+    string $userId,
   ) {
     $this->l = $l;
     $this->session = $session;
     $this->logger = $logger;
-    $this->user = $user;
+    $this->userManager = $userManager;
+    $this->userId = $userId;
   }
 
   /**
@@ -56,18 +61,21 @@ class MfaVerified implements ICheck
     /**
      * @var IUser $user
      */
-    $userbackend = $this->user->getBackend();
-    /**
-     * @var IUserBackend $userbackend
-     */
+    $user = $this->userManager->get($this->userId);
     if (!empty($this->session->get('globalScale.userData'))) {
       $attr = $this->session->get('globalScale.userData')["userData"];
       $mfaVerified = $attr["mfaVerified"];
     }
-    if ($userbackend->getBackendName() == 'user_saml') {
-      $formatted = $userbackend->getUserData();
-      $mfaVerified = $formatted['formatted']['mfaVerified'];
-      $this->logger->debug("MFA: mfa_verified from samlUserData: " . $mfaVerified);
+    if ($user !== null ) {
+      /**
+       * @var IUserBackend $userbackend
+       */
+      $userbackend = $user->getBackend();
+      if ($userbackend->getBackendName() == 'user_saml') {
+        $formatted = $userbackend->getUserData();
+        $mfaVerified = $formatted['formatted']['mfaVerified'];
+        $this->logger->debug("MFA: mfa_verified from samlUserData: " . $mfaVerified);
+      }
     }
     if (!empty($this->session->get("two_factor_auth_passed"))) {
       $uid = $this->session->get('user_id');
