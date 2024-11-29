@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 /**
  * SPDX-FileCopyrightText: 2023 MohammadReza Vahedi <mr.vahedi68@gmail.com>
  * SPDX-FileCopyrightText: 2024 Pondersource <michiel@pondersource.com> 
+ * SPDX-FileCopyrightText: 2024 Micke Nordin <kano@sunet.se>
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
@@ -43,15 +45,18 @@ class MfaVerified implements ICheck
    */
   public function executeCheck($operator, $value): bool
   {
+
+
     $mfaVerified = '0';
     if (!empty($this->session->get('globalScale.userData'))) {
       $attr = $this->session->get('globalScale.userData')["userData"];
       $mfaVerified = $attr["mfaVerified"];
     }
     if (!empty($this->session->get('user_saml.samlUserData'))) {
+      $mfa_key = 'urn:oid:2.5.4.2'; // TODO: get from config
       $attr = $this->session->get('user_saml.samlUserData');
-      if (isset($attr["mfa_verified"])) {
-        $mfaVerified = $attr["mfa_verified"][0];
+      if (isset($mfa_key) && isset($attr[$mfa_key])) {
+        $mfaVerified = $attr[$mfa_key][0];
         $this->logger->debug("MFA: mfa_verified from samlUserData: " . $mfaVerified);
       }
     }
