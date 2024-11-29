@@ -58,23 +58,25 @@ class MfaVerified implements ICheck
   {
 
     $mfaVerified = '0';
-    /**
-     * @var IUser $user
-     */
-    $user = $this->userManager->get($this->userId);
     if (!empty($this->session->get('globalScale.userData'))) {
       $attr = $this->session->get('globalScale.userData')["userData"];
       $mfaVerified = $attr["mfaVerified"];
     }
-    if ($user !== null ) {
+    if ($this->userId !== null) {
       /**
-       * @var IUserBackend $userbackend
+       * @var IUser $user
        */
-      $userbackend = $user->getBackend();
-      if ($userbackend->getBackendName() == 'user_saml') {
-        $formatted = $userbackend->getUserData();
-        $mfaVerified = $formatted['formatted']['mfaVerified'];
-        $this->logger->debug("MFA: mfa_verified from samlUserData: " . $mfaVerified);
+      $user = $this->userManager->get($this->userId);
+      if ($user !== null ) {
+        /**
+         * @var IUserBackend $userbackend
+         */
+        $userbackend = $user->getBackend();
+        if ($userbackend->getBackendName() == 'user_saml') {
+          $formatted = $userbackend->getUserData();
+          $mfaVerified = $formatted['formatted']['mfaVerified'];
+          $this->logger->debug("MFA: mfa_verified from samlUserData: " . $mfaVerified);
+        }
       }
     }
     if (!empty($this->session->get("two_factor_auth_passed"))) {
