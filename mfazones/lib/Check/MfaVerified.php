@@ -15,6 +15,7 @@ namespace OCA\mfazones\Check;
 use OCP\IL10N;
 use OCP\WorkflowEngine\ICheck;
 use OCP\ISession;
+use OCP\IUser;
 use Psr\Log\LoggerInterface;
 
 
@@ -23,19 +24,24 @@ class MfaVerified implements ICheck
   protected IL10N $l;
   protected ISession $session;
   private LoggerInterface $logger;
+  private IUser $user;
 
   /**
    * @param IL10N $l
    * @param ISession $session
+   * @param LoggerInterface $logger
+   * @param IUser $user
    */
   public function __construct(
     IL10N $l,
     ISession $session,
     LoggerInterface $logger,
+    IUser $user
   ) {
     $this->l = $l;
     $this->session = $session;
     $this->logger = $logger;
+    $this->user = $user;
   }
 
   /**
@@ -46,19 +52,22 @@ class MfaVerified implements ICheck
   public function executeCheck($operator, $value): bool
   {
 
-
     $mfaVerified = '0';
+    /**
+     * @var IUser $user
+     */
+    $userbackend = $this->user->getBackend();
+    /**
+     * @var IUserBackend $userbackend
+     */
     if (!empty($this->session->get('globalScale.userData'))) {
       $attr = $this->session->get('globalScale.userData')["userData"];
       $mfaVerified = $attr["mfaVerified"];
     }
-    if (!empty($this->session->get('user_saml.samlUserData'))) {
-      $mfa_key = 'urn:oid:2.5.4.2'; // TODO: get from config
-      $attr = $this->session->get('user_saml.samlUserData');
-      if (isset($mfa_key) && isset($attr[$mfa_key])) {
-        $mfaVerified = $attr[$mfa_key][0];
-        $this->logger->debug("MFA: mfa_verified from samlUserData: " . $mfaVerified);
-      }
+    if ($userbackend->getBackendName() == 'user_saml') {
+      $formatted = $userbackend->getUserData();
+      $mfaVerified = $formatted['formatted']['mfaVerified'];
+      $this->logger->debug("MFA: mfa_verified from samlUserData: " . $mfaVerified);
     }
     if (!empty($this->session->get("two_factor_auth_passed"))) {
       $uid = $this->session->get('user_id');
