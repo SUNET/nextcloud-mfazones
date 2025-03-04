@@ -1,11 +1,9 @@
 <?php
-
 declare(strict_types=1);
 
 /**
  * SPDX-FileCopyrightText: 2023 MohammadReza Vahedi <mr.vahedi68@gmail.com>
  * SPDX-FileCopyrightText: 2024 Pondersource <michiel@pondersource.com> 
- * SPDX-FileCopyrightText: 2024 Micke Nordin <kano@sunet.se>
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
@@ -13,10 +11,8 @@ declare(strict_types=1);
 namespace OCA\mfazones\Check;
 
 use OCP\IL10N;
-use OCP\ISession;
-use OCP\IUser;
-use OCP\IUserManager;
 use OCP\WorkflowEngine\ICheck;
+use OCP\ISession;
 use Psr\Log\LoggerInterface;
 
 
@@ -25,28 +21,19 @@ class MfaVerified implements ICheck
   protected IL10N $l;
   protected ISession $session;
   private LoggerInterface $logger;
-  private IUserManager $userManager;
-  private string $userId;
 
   /**
    * @param IL10N $l
    * @param ISession $session
-   * @param LoggerInterface $logger
-   * @param IUserManager $usermanager
-   * @param string $userId
    */
   public function __construct(
     IL10N $l,
     ISession $session,
     LoggerInterface $logger,
-    IUserManager $userManager,
-    string $userId,
   ) {
     $this->l = $l;
     $this->session = $session;
     $this->logger = $logger;
-    $this->userManager = $userManager;
-    $this->userId = $userId;
   }
 
   /**
@@ -56,7 +43,6 @@ class MfaVerified implements ICheck
    */
   public function executeCheck($operator, $value): bool
   {
-
     $mfaVerified = '0';
     if (!empty($this->session->get('globalScale.userData'))) {
       $attr = $this->session->get('globalScale.userData')["userData"];
