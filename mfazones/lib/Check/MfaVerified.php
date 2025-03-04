@@ -11,8 +11,10 @@ declare(strict_types=1);
 namespace OCA\mfazones\Check;
 
 use OCP\IL10N;
-use OCP\WorkflowEngine\ICheck;
 use OCP\ISession;
+use OCP\IUser;
+use OCP\IUserManager;
+use OCP\WorkflowEngine\ICheck;
 use Psr\Log\LoggerInterface;
 
 
@@ -21,6 +23,8 @@ class MfaVerified implements ICheck
   protected IL10N $l;
   protected ISession $session;
   private LoggerInterface $logger;
+  private IUserManager $userManager;
+  private string $userId;
 
   /**
    * @param IL10N $l
@@ -30,10 +34,14 @@ class MfaVerified implements ICheck
     IL10N $l,
     ISession $session,
     LoggerInterface $logger,
+    IUserManager $userManager,
+    string $userId
   ) {
     $this->l = $l;
     $this->session = $session;
     $this->logger = $logger;
+    $this->userManager = $userManager;
+    $this->userId = $userId;
   }
 
   /**
