@@ -24,7 +24,7 @@ class MfaVerified implements ICheck
   protected ISession $session;
   private LoggerInterface $logger;
   private IUserManager $userManager;
-  private string $userId;
+  private ?string $userId;
 
   /**
    * @param IL10N $l
@@ -35,7 +35,7 @@ class MfaVerified implements ICheck
     ISession $session,
     LoggerInterface $logger,
     IUserManager $userManager,
-    string $userId
+    ?string $userId
   ) {
     $this->l = $l;
     $this->session = $session;
