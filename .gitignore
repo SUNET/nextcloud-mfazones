@@ -7,3 +7,4 @@ mfazones/build/
 mfazones/node_modules/
 mfazones/.php_cs.cache
 mfazones/js/
+.php-cs-fixer.cache

@@ -11,16 +11,14 @@ namespace OCA\mfazones\Events;
 use OCP\EventDispatcher\Event;
 use OCP\Files\Node;
 
-class MFAZoneEnabledEvent extends Event
-{
-  public function __construct(
-    private Node $node
-  ) {
-    parent::__construct();
-  }
-  
-  public function getNode(): Node
-  {
-    return $this->node;
-  }
+class MFAZoneEnabledEvent extends Event {
+	public function __construct(
+		private Node $node,
+	) {
+		parent::__construct();
+	}
+
+	public function getNode(): Node {
+		return $this->node;
+	}
 }

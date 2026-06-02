@@ -21,12 +21,12 @@ use OCA\mfazones\Listeners\RegisterChecksListener;
 use OCA\mfazones\Listeners\RegisterOperationsListener;
 use OCA\mfazones\Listeners\TwoFactorProviderChallengePassedListener;
 use OCA\mfazones\MFAPlugin;
+use OCP\App\Events\AppDisableEvent;
+use OCP\App\Events\AppEnableEvent;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
-use OCP\App\Events\AppDisableEvent;
-use OCP\App\Events\AppEnableEvent;
 use OCP\Authentication\TwoFactorAuth\TwoFactorProviderChallengePassed;
 use OCP\Files\Events\Node\NodeCreatedEvent;
 use OCP\SystemTag\ISystemTagManager;
@@ -41,43 +41,41 @@ use Psr\Container\ContainerInterface;
  *
  * @package OCA\mfazones\AppInfo
  */
-class Application extends App implements IBootstrap
-{
-  public const APP_ID = 'mfazones';
+class Application extends App implements IBootstrap {
+	public const APP_ID = 'mfazones';
 
-  public function __construct()
-  {
-    parent::__construct(self::APP_ID);
-  }
+	public function __construct() {
+		parent::__construct(self::APP_ID);
+	}
 
-  /**
-   * @inheritdoc
-   */
-  public function register(IRegistrationContext $context): void
-  {
-    $context->registerEventListener(AppDisableEvent::class, AppDisableEventListener::class);
-    $context->registerEventListener(AppEnableEvent::class, AppEnableEventListener::class);
-    $context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadAdditionalScriptsListener::class);
-    $context->registerEventListener(MFAZoneEnabledEvent::class, MFAZoneEnabledListener::class);
-    $context->registerEventListener(MFAZoneDisabledEvent::class, MFAZoneDisabledListener::class);
-    $context->registerEventListener(MapperEvent::class, MapperListener::class);
-    $context->registerEventListener(NodeCreatedEvent::class, NodeCreatedListener::class);
-    $context->registerEventListener(RegisterChecksEvent::class, RegisterChecksListener::class);
-    $context->registerEventListener(RegisterOperationsEvent::class, RegisterOperationsListener::class);
-    $context->registerEventListener(TwoFactorProviderChallengePassed::class, TwoFactorProviderChallengePassedListener::class);
-    $context->registerService(
-      MFAPlugin::class,
-      function (ContainerInterface $c) {
-        $systemTagManager = $c->get(ISystemTagManager::class);
-        $tagMapper = $c->get(ISystemTagObjectMapper::class);
-        $x = new MFAPlugin($systemTagManager, $tagMapper);
-        return $x;
-      }
-    );
-  }
+	/**
+	 * @inheritdoc
+	 */
+	public function register(IRegistrationContext $context): void {
+		$context->registerEventListener(AppDisableEvent::class, AppDisableEventListener::class);
+		$context->registerEventListener(AppEnableEvent::class, AppEnableEventListener::class);
+		$context->registerEventListener(LoadAdditionalScriptsEvent::class, LoadAdditionalScriptsListener::class);
+		$context->registerEventListener(MFAZoneEnabledEvent::class, MFAZoneEnabledListener::class);
+		$context->registerEventListener(MFAZoneDisabledEvent::class, MFAZoneDisabledListener::class);
+		$context->registerEventListener(MapperEvent::class, MapperListener::class);
+		$context->registerEventListener(NodeCreatedEvent::class, NodeCreatedListener::class);
+		$context->registerEventListener(RegisterChecksEvent::class, RegisterChecksListener::class);
+		$context->registerEventListener(RegisterOperationsEvent::class, RegisterOperationsListener::class);
+		$context->registerEventListener(TwoFactorProviderChallengePassed::class, TwoFactorProviderChallengePassedListener::class);
+		$context->registerService(
+			MFAPlugin::class,
+			function (ContainerInterface $c) {
+				$systemTagManager = $c->get(ISystemTagManager::class);
+				$tagMapper = $c->get(ISystemTagObjectMapper::class);
+				$x = new MFAPlugin($systemTagManager, $tagMapper);
+				return $x;
+			}
+		);
+	}
 
-  /**
-   * @inheritdoc
-   */
-  public function boot(IBootContext $context): void {}
+	/**
+	 * @inheritdoc
+	 */
+	public function boot(IBootContext $context): void {
+	}
 }

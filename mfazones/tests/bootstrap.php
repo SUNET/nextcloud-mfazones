@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /** SPDX-FileCopyrightText: 2024 Pondersource <michiel@pondersource.com>

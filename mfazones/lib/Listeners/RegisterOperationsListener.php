@@ -15,18 +15,15 @@ use OCP\EventDispatcher\IEventListener;
 use OCP\Util;
 use OCP\WorkflowEngine\Events\RegisterOperationsEvent;
 
-class RegisterOperationsListener implements IEventListener
-{
+class RegisterOperationsListener implements IEventListener {
 
-  public function __construct()
-  {
-  }
+	public function __construct() {
+	}
 
-  public function handle(Event $event): void
-  {
-    if (!$event instanceof RegisterOperationsEvent) {
-      return;
-    }
-    Util::addScript(Application::APP_ID, 'mfazones-main');
-  }
+	public function handle(Event $event): void {
+		if (!$event instanceof RegisterOperationsEvent) {
+			return;
+		}
+		Util::addScript(Application::APP_ID, 'mfazones-main');
+	}
 }
